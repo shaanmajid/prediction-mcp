@@ -6,6 +6,13 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
+import {
+  ListMarketsArgsSchema,
+  GetMarketArgsSchema,
+  GetOrderbookArgsSchema,
+  GetTradesArgsSchema,
+  toMCPSchema,
+} from "./src/validation.js";
 
 const server = new Server(
   {
@@ -30,76 +37,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "kalshi_list_markets",
         description:
           "List available markets on Kalshi. Filter by status (open/closed/settled), event, or series.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            status: {
-              type: "string",
-              enum: ["open", "closed", "settled"],
-              description: "Filter by market status",
-            },
-            limit: {
-              type: "number",
-              description: "Maximum number of markets to return (default 100)",
-            },
-            eventTicker: {
-              type: "string",
-              description: "Filter by event ticker",
-            },
-            seriesTicker: {
-              type: "string",
-              description: "Filter by series ticker",
-            },
-          },
-        },
+        inputSchema: toMCPSchema(ListMarketsArgsSchema),
       },
       {
         name: "kalshi_get_market",
         description:
           "Get detailed information about a specific Kalshi market including prices, volume, and settlement terms.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            ticker: {
-              type: "string",
-              description: 'Market ticker symbol (e.g. "PRES-DEM-WIN")',
-            },
-          },
-          required: ["ticker"],
-        },
+        inputSchema: toMCPSchema(GetMarketArgsSchema),
       },
       {
         name: "kalshi_get_orderbook",
         description:
           "Get the current orderbook for a Kalshi market. Note: Only returns bids (no asks) due to binary market reciprocity.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            ticker: {
-              type: "string",
-              description: "Market ticker symbol",
-            },
-          },
-          required: ["ticker"],
-        },
+        inputSchema: toMCPSchema(GetOrderbookArgsSchema),
       },
       {
         name: "kalshi_get_trades",
         description:
           "Get recent trade history for Kalshi markets. Can filter by specific market ticker.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            ticker: {
-              type: "string",
-              description: "Filter trades by market ticker (optional)",
-            },
-            limit: {
-              type: "number",
-              description: "Maximum number of trades to return (default 100)",
-            },
-          },
-        },
+        inputSchema: toMCPSchema(GetTradesArgsSchema),
       },
     ],
   };
@@ -112,50 +68,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case "kalshi_list_markets": {
-        const result = await kalshiClient.listMarkets(args);
+        const params = ListMarketsArgsSchema.parse(args || {});
+        const result = await kalshiClient.listMarkets(params);
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
+          structuredContent: result.data,
         };
       }
 
       case "kalshi_get_market": {
-        const result = await kalshiClient.getMarketDetails(args.ticker);
+        const params = GetMarketArgsSchema.parse(args);
+        const result = await kalshiClient.getMarketDetails(params.ticker);
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
+          structuredContent: result.data,
         };
       }
 
       case "kalshi_get_orderbook": {
-        const result = await kalshiClient.getOrderBook(args.ticker);
+        const params = GetOrderbookArgsSchema.parse(args);
+        const result = await kalshiClient.getOrderBook(params.ticker);
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
+          structuredContent: result.data,
         };
       }
 
       case "kalshi_get_trades": {
-        const result = await kalshiClient.getTrades(args);
+        const params = GetTradesArgsSchema.parse(args || {});
+        const result = await kalshiClient.getTrades(params);
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(result.data, null, 2),
-            },
-          ],
+          structuredContent: result.data,
         };
       }
 
@@ -163,12 +103,51 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Determine error type and code
+    let errorCode = "UnknownError";
+    let errorMessage = "An unknown error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // Classify errors
+      if (error.name === "ZodError") {
+        errorCode = "ValidationError";
+      } else if (
+        errorMessage.includes("API") ||
+        errorMessage.includes("network") ||
+        errorMessage.includes("fetch")
+      ) {
+        errorCode = "APIError";
+      } else if (
+        errorMessage.includes("not found") ||
+        errorMessage.includes("Unknown tool")
+      ) {
+        errorCode = "NotFoundError";
+      } else if (
+        errorMessage.includes("unauthorized") ||
+        errorMessage.includes("forbidden")
+      ) {
+        errorCode = "AuthenticationError";
+      } else if (errorMessage.includes("rate limit")) {
+        errorCode = "RateLimitError";
+      }
+    } else {
+      errorMessage = String(error);
+    }
+
     return {
       content: [
         {
           type: "text",
-          text: `Error: ${errorMessage}`,
+          text: JSON.stringify(
+            {
+              error: errorCode,
+              message: errorMessage,
+            },
+            null,
+            2,
+          ),
         },
       ],
       isError: true,
