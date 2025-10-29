@@ -83,6 +83,9 @@ const trades = await client.getTrades({ ticker: "TICKER", limit: 100 });
 # Run tests
 bun test
 
+# Type check
+bun run typecheck
+
 # Lint code
 bun run lint
 bun run lint:fix
@@ -94,7 +97,7 @@ bun run format:check
 
 ### Pre-commit Hooks
 
-Husky automatically runs linting and formatting on git commits via lint-staged.
+Husky automatically runs type checking, linting, and formatting on git commits via lint-staged.
 
 ## Project Structure
 
@@ -126,11 +129,6 @@ Husky automatically runs linting and formatting on git commits via lint-staged.
 - **Kalshi TypeScript SDK**: https://www.npmjs.com/package/kalshi-typescript
 - **MCP Protocol**: https://modelcontextprotocol.io
 
-## Roadmap
+## Contributing & Roadmap
 
-- [x] Kalshi client implementation
-- [x] Development tooling setup
-- [ ] MCP server implementation
-- [ ] Polymarket integration
-- [ ] Market comparison tools
-- [ ] CI/CD pipeline
+See [TODO.md](./TODO.md) for the full roadmap, planned features, and contribution opportunities.
