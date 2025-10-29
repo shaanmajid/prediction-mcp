@@ -40,6 +40,20 @@ export const GetTradesArgsSchema = z
   })
   .strict();
 
+// Schema for kalshi_get_series
+export const GetSeriesArgsSchema = z
+  .object({
+    seriesTicker: z.string().min(1),
+  })
+  .strict();
+
+// Schema for kalshi_get_event
+export const GetEventArgsSchema = z
+  .object({
+    eventTicker: z.string().min(1),
+  })
+  .strict();
+
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
  */
@@ -57,3 +71,5 @@ export type ListMarketsArgs = z.infer<typeof ListMarketsArgsSchema>;
 export type GetMarketArgs = z.infer<typeof GetMarketArgsSchema>;
 export type GetOrderbookArgs = z.infer<typeof GetOrderbookArgsSchema>;
 export type GetTradesArgs = z.infer<typeof GetTradesArgsSchema>;
+export type GetSeriesArgs = z.infer<typeof GetSeriesArgsSchema>;
+export type GetEventArgs = z.infer<typeof GetEventArgsSchema>;

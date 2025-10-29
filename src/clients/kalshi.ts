@@ -1,4 +1,10 @@
-import { Configuration, MarketsApi, PortfolioApi } from "kalshi-typescript";
+import {
+  Configuration,
+  MarketsApi,
+  PortfolioApi,
+  SeriesApi,
+  EventsApi,
+} from "kalshi-typescript";
 
 export interface KalshiConfig {
   apiKey?: string;
@@ -10,6 +16,8 @@ export interface KalshiConfig {
 export class KalshiClient {
   private marketsApi: MarketsApi;
   private portfolioApi: PortfolioApi;
+  private seriesApi: SeriesApi;
+  private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig = {}) {
     const configuration = new Configuration({
@@ -25,6 +33,8 @@ export class KalshiClient {
 
     this.marketsApi = new MarketsApi(configuration);
     this.portfolioApi = new PortfolioApi(configuration);
+    this.seriesApi = new SeriesApi(configuration);
+    this.eventsApi = new EventsApi(configuration);
   }
 
   /**
@@ -86,6 +96,24 @@ export class KalshiClient {
       params?.minTs,
       params?.maxTs,
     );
+    return response;
+  }
+
+  /**
+   * Get series metadata by ticker
+   * @param seriesTicker - Series ticker symbol
+   */
+  async getSeries(seriesTicker: string) {
+    const response = await this.seriesApi.getSeriesByTicker(seriesTicker);
+    return response;
+  }
+
+  /**
+   * Get event metadata by ticker
+   * @param eventTicker - Event ticker symbol
+   */
+  async getEvent(eventTicker: string) {
+    const response = await this.eventsApi.getEvent(eventTicker);
     return response;
   }
 }

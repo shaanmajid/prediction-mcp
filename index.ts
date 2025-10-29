@@ -11,6 +11,8 @@ import {
   GetMarketArgsSchema,
   GetOrderbookArgsSchema,
   GetTradesArgsSchema,
+  GetSeriesArgsSchema,
+  GetEventArgsSchema,
   toMCPSchema,
 } from "./src/validation.js";
 
@@ -57,6 +59,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           "Get recent trade history for Kalshi markets. Can filter by specific market ticker.",
         inputSchema: toMCPSchema(GetTradesArgsSchema),
       },
+      {
+        name: "kalshi_get_series",
+        description:
+          "Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).",
+        inputSchema: toMCPSchema(GetSeriesArgsSchema),
+      },
+      {
+        name: "kalshi_get_event",
+        description:
+          "Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.",
+        inputSchema: toMCPSchema(GetEventArgsSchema),
+      },
     ],
   };
 });
@@ -94,6 +108,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "kalshi_get_trades": {
         const params = GetTradesArgsSchema.parse(args || {});
         const result = await kalshiClient.getTrades(params);
+        return {
+          structuredContent: result.data,
+        };
+      }
+
+      case "kalshi_get_series": {
+        const params = GetSeriesArgsSchema.parse(args);
+        const result = await kalshiClient.getSeries(params.seriesTicker);
+        return {
+          structuredContent: result.data,
+        };
+      }
+
+      case "kalshi_get_event": {
+        const params = GetEventArgsSchema.parse(args);
+        const result = await kalshiClient.getEvent(params.eventTicker);
         return {
           structuredContent: result.data,
         };
