@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { pino } from "pino";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -6,6 +7,10 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
+
+const logger = pino({
+  level: "info",
+});
 import {
   ListMarketsArgsSchema,
   GetMarketArgsSchema,
@@ -189,10 +194,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Prediction Markets MCP Server running on stdio");
+  logger.info("Prediction Markets MCP Server running on stdio");
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  logger.error({ err: error }, "Fatal error");
   process.exit(1);
 });

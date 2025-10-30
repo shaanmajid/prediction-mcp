@@ -6,4 +6,10 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
+  {
+    rules: {
+      "no-console": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
 ];
