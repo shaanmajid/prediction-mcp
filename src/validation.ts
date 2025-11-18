@@ -112,6 +112,7 @@ export const GetEventArgsSchema = z
 
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
+ * Per MCP spec, inputSchema should only contain: type, properties, required
  */
 export function toMCPSchema(schema: z.ZodType): Record<string, unknown> {
   return zodToJsonSchema(schema, {

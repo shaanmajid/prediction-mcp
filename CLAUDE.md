@@ -121,6 +121,15 @@ Example configuration for Claude Desktop (`claude_desktop_config.json`):
 }
 ```
 
+## MCP Server Best Practices
+
+When implementing or modifying MCP server functionality:
+
+- **Always reference the official specification**: https://modelcontextprotocol.io/specification
+- **Verify against the spec**: Don't assume features are supported without checking
+- **Keep inputSchema minimal**: Only use `type`, `properties`, and `required` fields
+- **Document in descriptions**: Put examples and usage guidance in the `description` field, not as separate schema properties
+
 ## Development Setup
 
 This project uses [mise](https://mise.jdx.dev/) to manage the bun runtime.
