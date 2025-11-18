@@ -1,6 +1,9 @@
 version: 2
 updates:
   # Bun dependencies
+  # Note: Dependabot manages bun.lock (dependencies), while mise manages
+  # the bun runtime version (configured in .mise.toml). Runtime version
+  # updates should be done manually by updating .mise.toml.
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
