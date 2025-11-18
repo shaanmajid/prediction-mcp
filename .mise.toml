@@ -1,11 +1,6 @@
 [tools]
-# Manage bun runtime via mise
-# Pin to stable version 1.3.2 (released November 2025)
 bun = "1.3.2"
 
 [settings]
-# Enable experimental features if needed
 experimental = false
-
-# Use mise for all tool management
 legacy_version_file = false
