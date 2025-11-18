@@ -132,6 +132,9 @@ curl https://mise.run | sh
 # Install bun via mise
 mise install
 
+# Activate mise (adds bun to PATH)
+eval "$(mise activate bash)"  # or zsh, fish, etc.
+
 # Install dependencies
 bun install
 
@@ -141,8 +144,13 @@ bun test
 # Lint and format
 bun run lint
 bun run format
+```
 
-# Pre-commit hooks are automatically set up via Husky
+**Without mise activation**, prefix commands with `mise exec --`:
+
+```bash
+mise exec -- bun install
+mise exec -- bun test
 ```
 
 **Tool Management:**

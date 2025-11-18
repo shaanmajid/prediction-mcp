@@ -20,11 +20,21 @@ This project uses [mise](https://mise.jdx.dev/) to manage the bun runtime versio
 # Install bun via mise (reads from .mise.toml)
 mise install
 
+# Activate mise (adds bun to PATH)
+eval "$(mise activate bash)"  # or zsh, fish, etc.
+
 # Install dependencies
 bun install
 ```
 
-Alternatively, if you have bun installed separately:
+Alternatively, run commands without activating mise:
+
+```bash
+mise install
+mise exec -- bun install
+```
+
+Or if you have bun installed separately:
 
 ```bash
 bun install
@@ -94,30 +104,22 @@ const trades = await client.getTrades({ ticker: "TICKER", limit: 100 });
 
 ## Development
 
+**With mise activated** (recommended):
+
 ```bash
-# Run tests
 bun test
-
-# Type check
 bun run typecheck
-
-# Lint code
 bun run lint
-bun run lint:fix
-
-# Format code
 bun run format
-bun run format:check
 ```
 
-**Note:** If using mise, ensure bun is available in your PATH:
+**Without mise activation:**
 
 ```bash
-# Activate mise in your shell (adds shims to PATH)
-mise activate
-
-# Or run commands with mise exec
 mise exec -- bun test
+mise exec -- bun run typecheck
+mise exec -- bun run lint
+mise exec -- bun run format
 ```
 
 ### Pre-commit Hooks
