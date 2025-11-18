@@ -11,6 +11,31 @@ MCP server for fetching data from prediction markets (Kalshi, Polymarket, and mo
 
 ## Installation
 
+This project uses [mise](https://mise.jdx.dev/) to manage the bun runtime version.
+
+```bash
+# Install mise (if not already installed)
+# See https://mise.jdx.dev/getting-started.html
+
+# Install bun via mise (reads from .mise.toml)
+mise install
+
+# Activate mise (adds bun to PATH)
+eval "$(mise activate bash)"  # or zsh, fish, etc.
+
+# Install dependencies
+bun install
+```
+
+Alternatively, run commands without activating mise:
+
+```bash
+mise install
+mise exec -- bun install
+```
+
+Or if you have bun installed separately:
+
 ```bash
 bun install
 ```
@@ -79,20 +104,22 @@ const trades = await client.getTrades({ ticker: "TICKER", limit: 100 });
 
 ## Development
 
+**With mise activated** (recommended):
+
 ```bash
-# Run tests
 bun test
-
-# Type check
 bun run typecheck
-
-# Lint code
 bun run lint
-bun run lint:fix
-
-# Format code
 bun run format
-bun run format:check
+```
+
+**Without mise activation:**
+
+```bash
+mise exec -- bun test
+mise exec -- bun run typecheck
+mise exec -- bun run lint
+mise exec -- bun run format
 ```
 
 ### Pre-commit Hooks
@@ -116,7 +143,8 @@ Husky automatically runs type checking, linting, and formatting on git commits v
 
 ## Tech Stack
 
-- **Runtime**: Bun (fast TypeScript execution)
+- **Runtime**: Bun (fast TypeScript execution, managed via mise)
+- **Tool Manager**: mise (manages bun version)
 - **Language**: TypeScript
 - **Testing**: Bun's built-in test runner
 - **Linting**: ESLint with TypeScript support

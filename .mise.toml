@@ -1,0 +1,6 @@
+[tools]
+bun = "1.3.2"
+
+[settings]
+experimental = false
+legacy_version_file = false
