@@ -130,6 +130,15 @@ When implementing or modifying MCP server functionality:
 - **Keep inputSchema minimal**: Only use `type`, `properties`, and `required` fields
 - **Document in descriptions**: Put examples and usage guidance in the `description` field, not as separate schema properties
 
+## Code Style
+
+**Comments:**
+
+- Avoid self-explanatory comments that restate what the code does
+- Focus on **normative state** (what the code is and why) not historical state (what it used to be)
+- Omit changelog-style comments explaining past changes - use git history for that
+- Write comments that add context the code alone cannot convey
+
 ## Development Setup
 
 This project uses [mise](https://mise.jdx.dev/) to manage the bun runtime.
