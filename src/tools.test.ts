@@ -91,14 +91,18 @@ describe("Tool Integration Tests", () => {
 
         const tool = TOOLS.kalshi_get_orderbook!;
         const result = (await tool.handler(client, { ticker })) as {
-          orderbook: { yes: unknown[]; no: unknown[] };
+          orderbook: { yes: unknown[] | null; no: unknown[] | null };
         };
 
         expect(result).toBeDefined();
         expect(result.orderbook).toBeDefined();
-        // Orderbook should have yes/no arrays
-        expect(Array.isArray(result.orderbook.yes)).toBe(true);
-        expect(Array.isArray(result.orderbook.no)).toBe(true);
+        // Orderbook can be null if no active orders
+        expect(
+          result.orderbook.yes === null || Array.isArray(result.orderbook.yes),
+        ).toBe(true);
+        expect(
+          result.orderbook.no === null || Array.isArray(result.orderbook.no),
+        ).toBe(true);
       }
     });
   });
@@ -143,20 +147,25 @@ describe("Tool Integration Tests", () => {
       // Get a valid series ticker
       const listTool = TOOLS.kalshi_list_markets!;
       const listResult = (await listTool.handler(client, {
-        limit: 1,
-      })) as { markets: Array<{ series_ticker: string }> };
+        limit: 100,
+      })) as { markets: Array<{ series_ticker?: string }> };
 
-      if (listResult.markets.length > 0) {
-        const seriesTicker = listResult.markets[0]!.series_ticker;
+      // Find a market with series_ticker (not all markets have it)
+      const marketWithSeries = listResult.markets.find(
+        (m) => m.series_ticker !== undefined,
+      );
 
+      if (marketWithSeries?.series_ticker) {
         const tool = TOOLS.kalshi_get_series!;
-        const result = (await tool.handler(client, { seriesTicker })) as {
+        const result = (await tool.handler(client, {
+          seriesTicker: marketWithSeries.series_ticker,
+        })) as {
           series: { ticker: string };
         };
 
         expect(result).toBeDefined();
         expect(result.series).toBeDefined();
-        expect(result.series.ticker).toBe(seriesTicker);
+        expect(result.series.ticker).toBe(marketWithSeries.series_ticker);
       }
     });
   });
