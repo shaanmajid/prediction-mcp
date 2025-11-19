@@ -7,19 +7,11 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
+import { TOOLS, getToolsList } from "./src/tools.js";
 
 const logger = pino({
   level: "info",
 });
-import {
-  ListMarketsArgsSchema,
-  GetMarketArgsSchema,
-  GetOrderbookArgsSchema,
-  GetTradesArgsSchema,
-  GetSeriesArgsSchema,
-  GetEventArgsSchema,
-  toMCPSchema,
-} from "./src/validation.js";
 
 const server = new Server(
   {
@@ -36,107 +28,25 @@ const server = new Server(
 // Initialize Kalshi client
 const kalshiClient = new KalshiClient();
 
-// Tool: List Kalshi markets
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [
-      {
-        name: "kalshi_list_markets",
-        description:
-          "List available markets on Kalshi. Filter by status (open/closed/settled), event, or series.",
-        inputSchema: toMCPSchema(ListMarketsArgsSchema),
-      },
-      {
-        name: "kalshi_get_market",
-        description:
-          "Get detailed information about a specific Kalshi market including prices, volume, and settlement terms.",
-        inputSchema: toMCPSchema(GetMarketArgsSchema),
-      },
-      {
-        name: "kalshi_get_orderbook",
-        description:
-          "Get the current orderbook for a Kalshi market. Note: Only returns bids (no asks) due to binary market reciprocity.",
-        inputSchema: toMCPSchema(GetOrderbookArgsSchema),
-      },
-      {
-        name: "kalshi_get_trades",
-        description:
-          "Get recent trade history for Kalshi markets. Can filter by specific market ticker.",
-        inputSchema: toMCPSchema(GetTradesArgsSchema),
-      },
-      {
-        name: "kalshi_get_series",
-        description:
-          "Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).",
-        inputSchema: toMCPSchema(GetSeriesArgsSchema),
-      },
-      {
-        name: "kalshi_get_event",
-        description:
-          "Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.",
-        inputSchema: toMCPSchema(GetEventArgsSchema),
-      },
-    ],
+    tools: getToolsList(),
   };
 });
 
-// Tool execution handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
-    switch (name) {
-      case "kalshi_list_markets": {
-        const params = ListMarketsArgsSchema.parse(args || {});
-        const result = await kalshiClient.listMarkets(params);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      case "kalshi_get_market": {
-        const params = GetMarketArgsSchema.parse(args);
-        const result = await kalshiClient.getMarketDetails(params.ticker);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      case "kalshi_get_orderbook": {
-        const params = GetOrderbookArgsSchema.parse(args);
-        const result = await kalshiClient.getOrderBook(params.ticker);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      case "kalshi_get_trades": {
-        const params = GetTradesArgsSchema.parse(args || {});
-        const result = await kalshiClient.getTrades(params);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      case "kalshi_get_series": {
-        const params = GetSeriesArgsSchema.parse(args);
-        const result = await kalshiClient.getSeries(params.seriesTicker);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      case "kalshi_get_event": {
-        const params = GetEventArgsSchema.parse(args);
-        const result = await kalshiClient.getEvent(params.eventTicker);
-        return {
-          structuredContent: result.data,
-        };
-      }
-
-      default:
-        throw new Error(`Unknown tool: ${name}`);
+    const tool = TOOLS[name];
+    if (!tool) {
+      throw new Error(`Unknown tool: ${name}`);
     }
+
+    const data = await tool.handler(kalshiClient, args);
+    return {
+      structuredContent: data,
+    };
   } catch (error) {
     // Determine error type and code
     let errorCode = "UnknownError";
