@@ -39,3 +39,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # MCP config (may contain credentials)
 .mcp.json
 .mcp.json.backup
+
+# MkDocs build output
+site/

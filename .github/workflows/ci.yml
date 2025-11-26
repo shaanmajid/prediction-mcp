@@ -102,3 +102,22 @@ jobs:
       - name: Run security audit
         run: bunx audit-ci --config .audit-ci.json || true
         continue-on-error: true
+
+  # Documentation freshness check
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install --frozen-lockfile
+      - name: Check documentation is up-to-date
+        run: bun run docs:check

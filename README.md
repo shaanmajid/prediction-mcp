@@ -93,6 +93,12 @@ bun run lint:fix
 # Format code
 bun run format
 bun run format:check
+
+# Generate documentation (after changing tools or env vars)
+bun run docs:generate
+
+# Preview docs locally
+pip install mkdocs-material && bun run docs:serve
 ```
 
 ### Pre-commit Hooks

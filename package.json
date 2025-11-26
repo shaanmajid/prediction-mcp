@@ -10,7 +10,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:generate": "bun run scripts/generate-docs.ts",
+    "docs:check": "bun run scripts/check-docs.ts",
+    "docs:serve": "mkdocs serve",
+    "docs:build": "mkdocs build"
   },
   "devDependencies": {
     "@types/bun": "latest",
