@@ -87,25 +87,6 @@ KALSHI_BASE_PATH=https://api.elections.kalshi.com/trade-api/v2
 
 Example configuration for Claude Desktop (`claude_desktop_config.json`):
 
-**Option 1: Using mise (recommended if you have mise installed):**
-
-```json
-{
-  "mcpServers": {
-    "prediction-markets": {
-      "command": "mise",
-      "args": ["exec", "--", "bun", "run", "/path/to/prediction-mcp/index.ts"],
-      "env": {
-        "KALSHI_API_KEY": "your-api-key",
-        "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
-      }
-    }
-  }
-}
-```
-
-**Option 2: Using bun directly:**
-
 ```json
 {
   "mcpServers": {
@@ -141,18 +122,7 @@ When implementing or modifying MCP server functionality:
 
 ## Development Setup
 
-This project uses [mise](https://mise.jdx.dev/) to manage the bun runtime.
-
 ```bash
-# Install mise (if not already installed)
-curl https://mise.run | sh
-
-# Install bun via mise
-mise install
-
-# Activate mise (adds bun to PATH)
-eval "$(mise activate bash)"  # or zsh, fish, etc.
-
 # Install dependencies
 bun install
 
@@ -162,17 +132,6 @@ bun test
 # Lint and format
 bun run lint
 bun run format
+
+# Pre-commit hooks are automatically set up via Husky
 ```
-
-**Without mise activation**, prefix commands with `mise exec --`:
-
-```bash
-mise exec -- bun install
-mise exec -- bun test
-```
-
-**Tool Management:**
-
-- Bun runtime version is managed by mise (configured in `.mise.toml`)
-- Dependencies are managed by bun (bun.lock)
-- Dependabot updates dependencies but NOT the bun runtime version
