@@ -32,3 +32,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# git worktrees
+.worktrees/
+
+# MCP config (may contain credentials)
+.mcp.json
+.mcp.json.backup
