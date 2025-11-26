@@ -135,3 +135,25 @@ bun run format
 
 # Pre-commit hooks are automatically set up via Husky
 ```
+
+## Documentation
+
+Documentation in `docs/` is auto-generated from source code. After modifying tools (`src/tools.ts`, `src/validation.ts`) or environment variables, regenerate with:
+
+```bash
+bun run docs:generate
+```
+
+CI validates docs are in sync via `bun run docs:check`.
+
+**Before creating a PR**, always run `bun run docs:generate` if you modified tools or configuration.
+
+### Previewing Docs Locally
+
+```bash
+# Install mkdocs with material theme (one-time)
+uv tool install mkdocs --with mkdocs-material
+
+# Serve locally
+bun run docs:serve
+```
