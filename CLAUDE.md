@@ -26,6 +26,7 @@ Build an MCP server to fetch (and later compare) data across multiple prediction
   - `getMarketCandlesticks()` - Price history
   - `getTrades()` - Trade history
 - **Note**: Orderbook returns only bids (no asks) due to binary market reciprocity
+- **Note**: SDK 3.0 uses `MarketApi` (singular). Multivariate events require separate `getMultivariateEvents()` call.
 - **Base URL**: https://api.elections.kalshi.com/trade-api/v2
 
 ### Polymarket (Priority 2)

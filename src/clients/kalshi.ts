@@ -1,8 +1,7 @@
 import {
   Configuration,
-  MarketsApi,
+  MarketApi,
   PortfolioApi,
-  SeriesApi,
   EventsApi,
 } from "kalshi-typescript";
 
@@ -14,9 +13,8 @@ export interface KalshiConfig {
 }
 
 export class KalshiClient {
-  private marketsApi: MarketsApi;
+  private marketApi: MarketApi;
   private portfolioApi: PortfolioApi;
-  private seriesApi: SeriesApi;
   private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig = {}) {
@@ -31,9 +29,8 @@ export class KalshiClient {
         "https://api.elections.kalshi.com/trade-api/v2",
     });
 
-    this.marketsApi = new MarketsApi(configuration);
+    this.marketApi = new MarketApi(configuration);
     this.portfolioApi = new PortfolioApi(configuration);
-    this.seriesApi = new SeriesApi(configuration);
     this.eventsApi = new EventsApi(configuration);
   }
 
@@ -48,13 +45,17 @@ export class KalshiClient {
     eventTicker?: string;
     seriesTicker?: string;
   }) {
-    const response = await this.marketsApi.getMarkets(
+    const response = await this.marketApi.getMarkets(
       params?.limit,
-      undefined, // cursor
+      params?.cursor,
       params?.eventTicker,
       params?.seriesTicker,
+      undefined, // minCreatedTs
+      undefined, // maxCreatedTs
       undefined, // maxCloseTs
       undefined, // minCloseTs
+      undefined, // minSettledTs
+      undefined, // maxSettledTs
       params?.status,
     );
     return response;
@@ -65,7 +66,7 @@ export class KalshiClient {
    * @param ticker - Market ticker symbol
    */
   async getMarketDetails(ticker: string) {
-    const response = await this.marketsApi.getMarket(ticker);
+    const response = await this.marketApi.getMarket(ticker);
     return response;
   }
 
@@ -74,7 +75,7 @@ export class KalshiClient {
    * @param ticker - Market ticker symbol
    */
   async getOrderBook(ticker: string) {
-    const response = await this.marketsApi.getMarketOrderbook(ticker);
+    const response = await this.marketApi.getMarketOrderbook(ticker);
     return response;
   }
 
@@ -89,7 +90,7 @@ export class KalshiClient {
     minTs?: number;
     maxTs?: number;
   }) {
-    const response = await this.marketsApi.getTrades(
+    const response = await this.marketApi.getTrades(
       params?.limit,
       params?.cursor,
       params?.ticker,
@@ -104,7 +105,7 @@ export class KalshiClient {
    * @param seriesTicker - Series ticker symbol
    */
   async getSeries(seriesTicker: string) {
-    const response = await this.seriesApi.getSeriesByTicker(seriesTicker);
+    const response = await this.marketApi.getSeries(seriesTicker);
     return response;
   }
 

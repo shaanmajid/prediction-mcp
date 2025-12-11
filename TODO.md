@@ -56,6 +56,10 @@
   - [ ] Market & event lifecycle stream
   - [ ] Live price updates
   - [ ] Order fill notifications
+- [ ] Explore SDK 3.0 new APIs
+  - [ ] SearchApi for sports filters and category tags
+  - [ ] LiveDataApi for real-time data
+  - [ ] MultivariateApi for combo events
 
 ## Low Priority
 
@@ -75,6 +79,7 @@
 - [x] Series and event metadata tools for URL construction
 - [x] Zod validation layer
 - [x] Structured content responses (removed text fallbacks)
+- [x] Upgrade to Kalshi SDK 3.0.0 (Dec 2025)
 
 ---
 
