@@ -327,9 +327,10 @@ describe("Polymarket Tool Integration Tests", () => {
   describe("polymarket_list_tags", () => {
     test("should list available tags", async () => {
       const tool = TOOLS.polymarket_list_tags!;
-      const result = await tool.handler(clients, {});
+      const result = (await tool.handler(clients, {})) as { tags: unknown[] };
 
-      expect(Array.isArray(result)).toBe(true);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.tags)).toBe(true);
     });
   });
 
@@ -379,11 +380,12 @@ describe("Polymarket Tool Integration Tests", () => {
       }
 
       const tool = TOOLS.polymarket_get_trades!;
-      const result = await tool.handler(clients, {
+      const result = (await tool.handler(clients, {
         token_id: testTokenId,
-      });
+      })) as { trades: unknown[] };
 
-      expect(Array.isArray(result)).toBe(true);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.trades)).toBe(true);
     });
   });
 
@@ -395,12 +397,13 @@ describe("Polymarket Tool Integration Tests", () => {
       }
 
       const tool = TOOLS.polymarket_get_price_history!;
-      const result = await tool.handler(clients, {
+      const result = (await tool.handler(clients, {
         token_id: testTokenId,
         fidelity: 60,
-      });
+      })) as { history: unknown[] };
 
-      expect(Array.isArray(result)).toBe(true);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.history)).toBe(true);
     });
   });
 });
