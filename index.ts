@@ -7,7 +7,8 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
-import { TOOLS, getToolsList } from "./src/tools.js";
+import { PolymarketClient } from "./src/clients/polymarket.js";
+import { TOOLS, getToolsList, type ToolClients } from "./src/tools.js";
 
 const logger = pino({
   level: "info",
@@ -25,8 +26,12 @@ const server = new Server(
   },
 );
 
-// Initialize Kalshi client
-const kalshiClient = new KalshiClient();
+// Initialize clients
+// Kalshi requires API key; Polymarket works without auth for read operations
+const clients: ToolClients = {
+  kalshi: new KalshiClient(),
+  polymarket: new PolymarketClient(),
+};
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -43,7 +48,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error(`Unknown tool: ${name}`);
     }
 
-    const data = await tool.handler(kalshiClient, args);
+    const data = await tool.handler(clients, args);
     return {
       structuredContent: data,
     };
