@@ -4,6 +4,8 @@ import {
   PortfolioApi,
   EventsApi,
 } from "kalshi-typescript";
+import { backOff } from "exponential-backoff";
+import { isAxiosError } from "axios";
 
 export interface KalshiConfig {
   apiKey?: string;
@@ -11,6 +13,14 @@ export interface KalshiConfig {
   privateKeyPath?: string;
   basePath?: string;
 }
+
+/** Retry options for rate-limited API calls */
+const RETRY_OPTIONS = {
+  numOfAttempts: 4,
+  startingDelay: 100,
+  jitter: "full" as const,
+  retry: (err: unknown) => isAxiosError(err) && err.response?.status === 429,
+};
 
 export class KalshiClient {
   private marketApi: MarketApi;
@@ -45,20 +55,23 @@ export class KalshiClient {
     eventTicker?: string;
     seriesTicker?: string;
   }) {
-    const response = await this.marketApi.getMarkets(
-      params?.limit,
-      params?.cursor,
-      params?.eventTicker,
-      params?.seriesTicker,
-      undefined, // minCreatedTs
-      undefined, // maxCreatedTs
-      undefined, // maxCloseTs
-      undefined, // minCloseTs
-      undefined, // minSettledTs
-      undefined, // maxSettledTs
-      params?.status,
+    return backOff(
+      () =>
+        this.marketApi.getMarkets(
+          params?.limit,
+          params?.cursor,
+          params?.eventTicker,
+          params?.seriesTicker,
+          undefined, // minCreatedTs
+          undefined, // maxCreatedTs
+          undefined, // maxCloseTs
+          undefined, // minCloseTs
+          undefined, // minSettledTs
+          undefined, // maxSettledTs
+          params?.status,
+        ),
+      RETRY_OPTIONS,
     );
-    return response;
   }
 
   /**
@@ -66,8 +79,7 @@ export class KalshiClient {
    * @param ticker - Market ticker symbol
    */
   async getMarketDetails(ticker: string) {
-    const response = await this.marketApi.getMarket(ticker);
-    return response;
+    return backOff(() => this.marketApi.getMarket(ticker), RETRY_OPTIONS);
   }
 
   /**
@@ -75,8 +87,10 @@ export class KalshiClient {
    * @param ticker - Market ticker symbol
    */
   async getOrderBook(ticker: string) {
-    const response = await this.marketApi.getMarketOrderbook(ticker);
-    return response;
+    return backOff(
+      () => this.marketApi.getMarketOrderbook(ticker),
+      RETRY_OPTIONS,
+    );
   }
 
   /**
@@ -90,14 +104,17 @@ export class KalshiClient {
     minTs?: number;
     maxTs?: number;
   }) {
-    const response = await this.marketApi.getTrades(
-      params?.limit,
-      params?.cursor,
-      params?.ticker,
-      params?.minTs,
-      params?.maxTs,
+    return backOff(
+      () =>
+        this.marketApi.getTrades(
+          params?.limit,
+          params?.cursor,
+          params?.ticker,
+          params?.minTs,
+          params?.maxTs,
+        ),
+      RETRY_OPTIONS,
     );
-    return response;
   }
 
   /**
@@ -105,8 +122,7 @@ export class KalshiClient {
    * @param seriesTicker - Series ticker symbol
    */
   async getSeries(seriesTicker: string) {
-    const response = await this.marketApi.getSeries(seriesTicker);
-    return response;
+    return backOff(() => this.marketApi.getSeries(seriesTicker), RETRY_OPTIONS);
   }
 
   /**
@@ -114,7 +130,6 @@ export class KalshiClient {
    * @param eventTicker - Event ticker symbol
    */
   async getEvent(eventTicker: string) {
-    const response = await this.eventsApi.getEvent(eventTicker);
-    return response;
+    return backOff(() => this.eventsApi.getEvent(eventTicker), RETRY_OPTIONS);
   }
 }
