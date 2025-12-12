@@ -1,13 +1,13 @@
 # Prediction Markets MCP Server
 
-MCP server for fetching data from prediction markets (Kalshi, Polymarket, and more).
+MCP server for fetching prediction market data from Kalshi (Polymarket planned).
 
 ## Features
 
-- **Kalshi Integration**: List markets, get prices, orderbook data, and trade history
-- **Type-safe**: Built with TypeScript using official SDKs
-- **MCP Protocol**: Standard Model Context Protocol implementation
-- **Environment-based config**: Easy authentication via environment variables
+- **Kalshi integration** — list markets, prices, orderbooks, and trade history
+- **Type-safe** — TypeScript with official Kalshi SDK
+- **MCP protocol** — standard Model Context Protocol server
+- **Auto-retry** — exponential backoff on rate limits (HTTP 429)
 
 ## Installation
 
@@ -97,8 +97,9 @@ bun run format:check
 # Generate documentation (after changing tools or env vars)
 bun run docs:generate
 
-# Preview docs locally
-pip install mkdocs-material && bun run docs:serve
+# Preview docs locally (requires uv: https://docs.astral.sh/uv/)
+uv tool install mkdocs --with mkdocs-material
+bun run docs:serve
 ```
 
 ### Pre-commit Hooks
@@ -109,15 +110,21 @@ Husky automatically runs type checking, linting, and formatting on git commits v
 
 ```
 .
+├── index.ts                   # MCP server entry point
 ├── src/
-│   └── clients/
-│       └── kalshi.ts          # Kalshi API client wrapper
-├── index.ts                   # MCP server entry point (WIP)
+│   ├── clients/
+│   │   └── kalshi.ts          # Kalshi API client wrapper
+│   ├── tools.ts               # MCP tool definitions
+│   ├── tools.test.ts          # Integration tests
+│   └── validation.ts          # Zod schemas for tool arguments
+├── scripts/
+│   ├── bootstrap.ts           # Claude Desktop registration
+│   ├── generate-docs.ts       # Documentation generator
+│   └── check-docs.ts          # CI doc freshness check
+├── docs/                      # Auto-generated documentation
 ├── package.json
 ├── tsconfig.json
-├── eslint.config.js
-├── .prettierrc.json
-└── README.md
+└── mkdocs.yml
 ```
 
 ## Tech Stack

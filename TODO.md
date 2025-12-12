@@ -5,8 +5,8 @@
 ### Search & Discovery
 
 - [ ] Implement `kalshi_search` MCP tool
-  - [x] Client-side search implementation in KalshiClient
-  - [x] Validation schemas
+  - [ ] Client-side search implementation in KalshiClient
+  - [ ] Validation schemas
   - [ ] MCP tool registration and handler
   - [ ] Add caching layer with WebSocket-based invalidation (see [WebSocket API](https://docs.kalshi.com/websockets/market-&-event-lifecycle))
 
@@ -79,7 +79,7 @@
 - [x] Series and event metadata tools for URL construction
 - [x] Zod validation layer
 - [x] Structured content responses (removed text fallbacks)
-- [x] Upgrade to Kalshi SDK 3.0.0 (Dec 2025)
+- [x] Upgrade to Kalshi SDK 3.0.0
 
 ---
 

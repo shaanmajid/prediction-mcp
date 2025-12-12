@@ -5,7 +5,6 @@
 ## Prerequisites
 
 - [Bun](https://bun.sh/) v1.0+
-- Kalshi account with API access
 
 ## Installation
 
@@ -15,13 +14,17 @@ cd prediction-mcp
 bun install
 ```
 
-## Configuration
+## Configuration (Optional)
+
+All current tools fetch public market data and work without authentication.
+
+To configure credentials for future account-specific features (balances, orders):
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your Kalshi API credentials. See [Configuration](configuration.md).
+See [Configuration](configuration.md) for details.
 
 ## Register with Claude
 

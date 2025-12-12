@@ -24,22 +24,26 @@ interface EnvVar {
 const ENV_VARS: EnvVar[] = [
   {
     name: "KALSHI_API_KEY",
-    description: "Your Kalshi API key ID",
-    required: true,
+    description:
+      "Your Kalshi API key ID. Not required for public market data (current tools)",
+    required: false,
   },
   {
     name: "KALSHI_PRIVATE_KEY_PATH",
-    description: "Path to RSA private key PEM file",
+    description:
+      "Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM`",
     required: false,
   },
   {
     name: "KALSHI_PRIVATE_KEY_PEM",
-    description: "RSA private key as PEM string (alternative to PATH)",
+    description:
+      "RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH`",
     required: false,
   },
   {
     name: "KALSHI_BASE_PATH",
-    description: "API endpoint override",
+    description:
+      "API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing",
     required: false,
     default: "https://api.elections.kalshi.com/trade-api/v2",
   },
@@ -229,7 +233,6 @@ function generateGettingStarted(): string {
 ## Prerequisites
 
 - [Bun](https://bun.sh/) v1.0+
-- Kalshi account with API access
 
 ## Installation
 
@@ -239,13 +242,17 @@ cd prediction-mcp
 bun install
 \`\`\`
 
-## Configuration
+## Configuration (Optional)
+
+All current tools fetch public market data and work without authentication.
+
+To configure credentials for future account-specific features (balances, orders):
 
 \`\`\`bash
 cp .env.example .env
 \`\`\`
 
-Edit \`.env\` with your Kalshi API credentials. See [Configuration](configuration.md).
+See [Configuration](configuration.md) for details.
 
 ## Register with Claude
 

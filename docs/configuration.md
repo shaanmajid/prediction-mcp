@@ -6,19 +6,19 @@
 
 ### KALSHI_API_KEY
 
-Your Kalshi API key ID (**required**)
+Your Kalshi API key ID. Not required for public market data (current tools) (optional)
 
 ### KALSHI_PRIVATE_KEY_PATH
 
-Path to RSA private key PEM file (optional)
+Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM` (optional)
 
 ### KALSHI_PRIVATE_KEY_PEM
 
-RSA private key as PEM string (alternative to PATH) (optional)
+RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH` (optional)
 
 ### KALSHI_BASE_PATH
 
-API endpoint override (optional)
+API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing (optional)
 
 Default: `https://api.elections.kalshi.com/trade-api/v2`
 
