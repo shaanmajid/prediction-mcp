@@ -29,17 +29,24 @@ Build an MCP server to fetch (and later compare) data across multiple prediction
 - **Note**: SDK 3.0 uses `MarketApi` (singular). Multivariate events require separate `getMultivariateEvents()` call.
 - **Base URL**: https://api.elections.kalshi.com/trade-api/v2
 
-### Polymarket (Priority 2)
+### Polymarket (Priority 2) ✅ Implemented
 
 - **Gamma API**: https://gamma-api.polymarket.com (read-only, public)
+- **CLOB API**: https://clob.polymarket.com (orderbook, prices, trades)
 - **Docs**: https://docs.polymarket.com/developers/gamma-markets-api/overview
-- **No official unified SDK** - use REST API directly
-- **Key Endpoints**:
-  - `GET /markets` - List markets
-  - `GET /events` - List events
-  - Market data includes prices, volume, liquidity
-- **CLOB API**: Separate for orderbook/trading data
-- **Auth**: Public read access, no key needed for market data
+- **SDK**: `@polymarket/clob-client@5.0.0` (for CLOB operations)
+- **Auth**: **No authentication required** for all read operations
+- **Key Methods**:
+  - `listMarkets()` - List markets with filtering
+  - `getMarket(slug)` - Get market details by slug
+  - `listEvents()` / `getEvent(slug)` - Event discovery
+  - `listTags()` - Category tags for filtering
+  - `getOrderBook(tokenId)` - Full bid/ask orderbook
+  - `getPrice(tokenId, side)` - Current best price
+  - `getTrades(tokenId)` - Trade history
+  - `getPriceHistory(tokenId)` - Historical price data
+- **Note**: Markets use `slug` for identification. CLOB operations use `token_id` (from market's `clobTokenIds` field)
+- **Note**: Orderbook returns both bids AND asks (unlike Kalshi's bids-only)
 
 ### Future Consideration
 
@@ -69,7 +76,7 @@ Build an MCP server to fetch (and later compare) data across multiple prediction
 
 ### Environment Variables
 
-The server respects the following environment variables for Kalshi API authentication:
+#### Kalshi (Required for Kalshi tools)
 
 ```bash
 # Required for authenticated requests
@@ -82,6 +89,18 @@ KALSHI_PRIVATE_KEY_PEM="-----BEGIN RSA PRIVATE KEY-----\n..."
 KALSHI_BASE_PATH=https://api.elections.kalshi.com/trade-api/v2
 # For demo/testing:
 # KALSHI_BASE_PATH=https://demo-api.kalshi.co/trade-api/v2
+```
+
+#### Polymarket (Optional - works without configuration)
+
+All Polymarket read operations are public and require no authentication.
+Optional overrides:
+
+```bash
+# Optional host overrides (defaults shown)
+POLYMARKET_GAMMA_HOST=https://gamma-api.polymarket.com
+POLYMARKET_CLOB_HOST=https://clob.polymarket.com
+POLYMARKET_CHAIN_ID=137  # Polygon mainnet
 ```
 
 ### MCP Server Configuration
