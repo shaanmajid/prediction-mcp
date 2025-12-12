@@ -12,4 +12,10 @@ export default [
       "@typescript-eslint/no-explicit-any": "error",
     },
   },
+  {
+    files: ["**/*.test.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ];
