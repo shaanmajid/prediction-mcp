@@ -80,7 +80,7 @@ List available markets on Polymarket. Filter by status (open/closed) and categor
 - `limit` (integer (min: 1, max: 1000), optional)
   Maximum number of markets to return per page. Must be between 1 and 1000. Defaults to 100.
 
-- `offset` (integer (min: 0), optional)
+- `offset` (integer (min: 0, max: 9007199254740991), optional)
   Pagination offset. Use with limit for paging through results.
 
 - `tag_id` (string, optional)
@@ -107,7 +107,7 @@ List events on Polymarket. Events group related markets (e.g., '2024 Election' m
 - `limit` (integer (min: 1, max: 1000), optional)
   Maximum number of events to return per page. Must be between 1 and 1000. Defaults to 100.
 
-- `offset` (integer (min: 0), optional)
+- `offset` (integer (min: 0, max: 9007199254740991), optional)
   Pagination offset. Use with limit for paging through results.
 
 - `tag_id` (string, optional)
@@ -149,15 +149,6 @@ Get the current best price for a Polymarket outcome token. Specify BUY or SELL s
 - `side` ("BUY" | "SELL", required)
   Order side to get price for.
 
-## polymarket_get_trades
-
-Get recent trade history for a Polymarket outcome token. Returns array of trades with timestamp, price, and size.
-
-**Parameters:**
-
-- `token_id` (string (minLength: 1), required)
-  Outcome token ID from market's clobTokenIds field.
-
 ## polymarket_get_price_history
 
 Get historical price data for a Polymarket outcome token. Returns time series of price points. Defaults to last 24 hours with hourly resolution.
@@ -167,11 +158,11 @@ Get historical price data for a Polymarket outcome token. Returns time series of
 - `token_id` (string (minLength: 1), required)
   Outcome token ID from market's clobTokenIds field.
 
-- `fidelity` (integer (min: 1), optional)
+- `fidelity` (integer (min: 1, max: 9007199254740991), optional)
   Data resolution in minutes. Defaults to 60 (hourly data).
 
-- `startTs` (integer, optional)
+- `startTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
   Start timestamp in Unix seconds. Defaults to 24 hours ago if not provided.
 
-- `endTs` (integer, optional)
+- `endTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
   End timestamp in Unix seconds. Defaults to now if not provided.

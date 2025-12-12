@@ -29,7 +29,6 @@ MCP server for fetching prediction market data from Kalshi and Polymarket.
 - **polymarket_list_tags** - List available category tags on Polymarket. Tags can be used to filter markets and events by category (e.g., Politics, Sports, Crypto).
 - **polymarket_get_orderbook** - Get the current orderbook for a Polymarket outcome token. Returns both bids and asks with price and size. Use token_id from market's clobTokenIds field.
 - **polymarket_get_price** - Get the current best price for a Polymarket outcome token. Specify BUY or SELL side.
-- **polymarket_get_trades** - Get recent trade history for a Polymarket outcome token. Returns array of trades with timestamp, price, and size.
 - **polymarket_get_price_history** - Get historical price data for a Polymarket outcome token. Returns time series of price points. Defaults to last 24 hours with hourly resolution.
 
 See [Tools Reference](tools/reference.md) for parameters and usage.
