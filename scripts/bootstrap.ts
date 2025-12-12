@@ -100,6 +100,12 @@ function printCredentialStatus(creds: CredentialStatus): void {
   const hasApiKey = !!creds.apiKey;
   const hasPrivateKey = !!creds.privateKeyPath;
 
+  // Polymarket status (always available)
+  console.log(
+    colors.green("✓ Polymarket tools ready (no credentials required)"),
+  );
+
+  // Kalshi status
   if (hasApiKey && hasPrivateKey) {
     console.log(
       colors.green("✓ Kalshi credentials configured from environment"),
@@ -115,11 +121,13 @@ function printCredentialStatus(creds: CredentialStatus): void {
       `  • KALSHI_PRIVATE_KEY_PATH: ${hasPrivateKey ? colors.green("set") : colors.dim("not set")}`,
     );
     console.log(
-      colors.dim("\n  Read-only operations will work without credentials."),
+      colors.dim(
+        "\n  Kalshi tools require credentials for authenticated requests.",
+      ),
     );
     console.log(
       colors.dim(
-        "  Run with --interactive to configure credentials, or set env vars and re-run.",
+        "  Run with --interactive to configure, or set env vars and re-run.",
       ),
     );
   }
