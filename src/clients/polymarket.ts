@@ -73,21 +73,6 @@ export interface PolymarketTag {
 export type { OrderBookSummary } from "@polymarket/clob-client";
 
 /**
- * Trade event from CLOB API
- */
-export interface PolymarketTrade {
-  timestamp?: string;
-  created_at?: string;
-  matchTime?: string;
-  price: string;
-  size?: string;
-  amount?: string;
-  side?: string;
-  outcome?: string;
-  [key: string]: unknown;
-}
-
-/**
  * Price history point from CLOB API
  */
 export interface PriceHistoryPoint {
@@ -357,31 +342,6 @@ export class PolymarketClient {
   async getPrice(tokenId: string, side: "BUY" | "SELL"): Promise<string> {
     const result = await this.clobClient.getPrice(tokenId, side);
     return result.price;
-  }
-
-  /**
-   * Get public trade events for a market token
-   * Uses direct REST call to public trades endpoint
-   * Returns wrapped object for consistency with other list methods
-   */
-  async getTrades(tokenId: string): Promise<{ trades: PolymarketTrade[] }> {
-    // Use direct REST call as getMarketTradesEvents may not be available
-    const url = `${this.clobHost}/trades?asset_id=${encodeURIComponent(tokenId)}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `CLOB API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = await response.json();
-
-    // Normalize response
-    if (Array.isArray(data)) {
-      return { trades: data };
-    }
-    return { trades: [] };
   }
 
   /**

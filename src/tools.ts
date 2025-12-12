@@ -15,7 +15,6 @@ import {
   PolymarketListTagsArgsSchema,
   PolymarketGetOrderbookArgsSchema,
   PolymarketGetPriceArgsSchema,
-  PolymarketGetTradesArgsSchema,
   PolymarketGetPriceHistoryArgsSchema,
   toMCPSchema,
 } from "./validation.js";
@@ -202,18 +201,6 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
       );
       const midpoint = await clients.polymarket.getMidpoint(params.token_id);
       return { price, midpoint, side: params.side };
-    },
-  },
-
-  polymarket_get_trades: {
-    name: "polymarket_get_trades",
-    description:
-      "Get recent trade history for a Polymarket outcome token. Returns array of trades with timestamp, price, and size.",
-    schema: PolymarketGetTradesArgsSchema,
-    handler: async (clients, args) => {
-      const params = PolymarketGetTradesArgsSchema.parse(args);
-      const result = await clients.polymarket.getTrades(params.token_id);
-      return result;
     },
   },
 

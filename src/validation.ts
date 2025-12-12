@@ -233,16 +233,6 @@ export const PolymarketGetPriceArgsSchema = z
   })
   .strict();
 
-// Schema for polymarket_get_trades
-export const PolymarketGetTradesArgsSchema = z
-  .object({
-    token_id: z
-      .string()
-      .min(1)
-      .describe("Outcome token ID from market's clobTokenIds field."),
-  })
-  .strict();
-
 // Schema for polymarket_get_price_history
 export const PolymarketGetPriceHistoryArgsSchema = z
   .object({
@@ -319,9 +309,6 @@ export type PolymarketGetOrderbookArgs = z.infer<
 >;
 export type PolymarketGetPriceArgs = z.infer<
   typeof PolymarketGetPriceArgsSchema
->;
-export type PolymarketGetTradesArgs = z.infer<
-  typeof PolymarketGetTradesArgsSchema
 >;
 export type PolymarketGetPriceHistoryArgs = z.infer<
   typeof PolymarketGetPriceHistoryArgsSchema

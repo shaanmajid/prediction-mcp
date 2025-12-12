@@ -372,23 +372,6 @@ describe("Polymarket Tool Integration Tests", () => {
     });
   });
 
-  describe("polymarket_get_trades", () => {
-    test("should get trades for a token", async () => {
-      if (!testTokenId) {
-        console.log("Skipping: no test token available");
-        return;
-      }
-
-      const tool = TOOLS.polymarket_get_trades!;
-      const result = (await tool.handler(clients, {
-        token_id: testTokenId,
-      })) as { trades: unknown[] };
-
-      expect(result).toBeDefined();
-      expect(Array.isArray(result.trades)).toBe(true);
-    });
-  });
-
   describe("polymarket_get_price_history", () => {
     test("should get price history for a token", async () => {
       if (!testTokenId) {

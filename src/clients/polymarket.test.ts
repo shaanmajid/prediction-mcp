@@ -307,38 +307,6 @@ describe("PolymarketClient - CLOB API", () => {
     });
   });
 
-  describe("CLOB API - getTrades", () => {
-    test("returns wrapped object with trades array", async () => {
-      if (!testTokenId) {
-        console.log("Skipping: no test token available");
-        return;
-      }
-
-      const result = await client.getTrades(testTokenId);
-      expect(result).toBeDefined();
-      expect(Array.isArray(result.trades)).toBe(true);
-    });
-
-    test("trade objects have required fields when trades exist", async () => {
-      if (!testTokenId) {
-        console.log("Skipping: no test token available");
-        return;
-      }
-
-      const result = await client.getTrades(testTokenId);
-      // Trades may be empty for some markets, which is valid
-      if (result.trades.length > 0) {
-        const trade = result.trades[0]!;
-        // Check for common trade fields (API may return different field names)
-        expect(
-          trade.timestamp || trade.created_at || trade.matchTime,
-        ).toBeDefined();
-        expect(trade.price).toBeDefined();
-        expect(trade.size || trade.amount).toBeDefined();
-      }
-    });
-  });
-
   describe("CLOB API - getPriceHistory", () => {
     test("returns wrapped object with history array", async () => {
       if (!testTokenId) {
