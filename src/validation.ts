@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 
 /**
  * Zod schemas for MCP tool arguments
@@ -112,12 +111,15 @@ export const GetEventArgsSchema = z
 
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
+ *
+ * Uses Zod v4's native toJSONSchema() which replaced the deprecated
+ * zod-to-json-schema library.
  */
 export function toMCPSchema(schema: z.ZodType): Record<string, unknown> {
-  return zodToJsonSchema(schema, {
-    target: "jsonSchema7",
-    $refStrategy: "none",
-  });
+  return z.toJSONSchema(schema, {
+    target: "draft-7",
+    reused: "inline",
+  }) as Record<string, unknown>;
 }
 
 /**
