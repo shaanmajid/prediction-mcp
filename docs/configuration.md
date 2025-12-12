@@ -22,6 +22,24 @@ API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing
 
 Default: `https://api.elections.kalshi.com/trade-api/v2`
 
+### POLYMARKET_GAMMA_HOST
+
+Polymarket Gamma API host for market discovery (optional)
+
+Default: `https://gamma-api.polymarket.com`
+
+### POLYMARKET_CLOB_HOST
+
+Polymarket CLOB API host for orderbook/trading data (optional)
+
+Default: `https://clob.polymarket.com`
+
+### POLYMARKET_CHAIN_ID
+
+Polygon chain ID for Polymarket CLOB client (optional)
+
+Default: `137`
+
 ## Setup
 
 1. Get API credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api)

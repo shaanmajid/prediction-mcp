@@ -22,6 +22,7 @@ interface EnvVar {
 }
 
 const ENV_VARS: EnvVar[] = [
+  // Kalshi
   {
     name: "KALSHI_API_KEY",
     description:
@@ -46,6 +47,25 @@ const ENV_VARS: EnvVar[] = [
       "API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing",
     required: false,
     default: "https://api.elections.kalshi.com/trade-api/v2",
+  },
+  // Polymarket
+  {
+    name: "POLYMARKET_GAMMA_HOST",
+    description: "Polymarket Gamma API host for market discovery",
+    required: false,
+    default: "https://gamma-api.polymarket.com",
+  },
+  {
+    name: "POLYMARKET_CLOB_HOST",
+    description: "Polymarket CLOB API host for orderbook/trading data",
+    required: false,
+    default: "https://clob.polymarket.com",
+  },
+  {
+    name: "POLYMARKET_CHAIN_ID",
+    description: "Polygon chain ID for Polymarket CLOB client",
+    required: false,
+    default: "137",
   },
 ];
 
@@ -187,7 +207,14 @@ function generateConfiguration(): string {
 function generateIndex(): string {
   const tools = getToolsList();
 
-  const toolList = tools
+  const kalshiTools = tools.filter((t) => t.name.startsWith("kalshi_"));
+  const polymarketTools = tools.filter((t) => t.name.startsWith("polymarket_"));
+
+  const kalshiToolList = kalshiTools
+    .map((t) => `- **${t.name}** - ${t.description}`)
+    .join("\n");
+
+  const polymarketToolList = polymarketTools
     .map((t) => `- **${t.name}** - ${t.description}`)
     .join("\n");
 
@@ -195,17 +222,22 @@ function generateIndex(): string {
 
 # Prediction Markets MCP Server
 
-MCP server for fetching prediction market data from Kalshi.
+MCP server for fetching prediction market data from Kalshi and Polymarket.
 
 ## Features
 
-- Query markets by status, event, or series
+- Query markets by status, event, category, or series
 - Get market details, orderbooks, and trade history
-- Retrieve series and event metadata
+- Retrieve price history and market metadata
+- Cross-platform market discovery (Kalshi + Polymarket)
 
-## Tools
+## Kalshi Tools
 
-${toolList}
+${kalshiToolList}
+
+## Polymarket Tools
+
+${polymarketToolList}
 
 See [Tools Reference](tools/reference.md) for parameters and usage.
 
@@ -213,7 +245,7 @@ See [Tools Reference](tools/reference.md) for parameters and usage.
 
 \`\`\`bash
 bun install
-cp .env.example .env  # Add your Kalshi credentials
+cp .env.example .env  # Add your Kalshi credentials (Polymarket is public)
 bun run scripts/bootstrap.ts --interactive
 \`\`\`
 
@@ -221,6 +253,7 @@ bun run scripts/bootstrap.ts --interactive
 
 - [Configuration](configuration.md)
 - [Kalshi API Docs](https://docs.kalshi.com)
+- [Polymarket API Docs](https://docs.polymarket.com)
 - [MCP Specification](https://modelcontextprotocol.io)
 `;
 }
