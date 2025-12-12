@@ -10,7 +10,7 @@
  * - Trading requires wallet signing (not implemented)
  */
 
-import { ClobClient } from "@polymarket/clob-client";
+import { ClobClient, type OrderBookSummary } from "@polymarket/clob-client";
 
 /**
  * Configuration for PolymarketClient
@@ -69,25 +69,8 @@ export interface PolymarketTag {
   [key: string]: unknown;
 }
 
-/**
- * Orderbook entry
- */
-export interface OrderbookEntry {
-  price: string;
-  size: string;
-}
-
-/**
- * Orderbook response from CLOB API
- */
-export interface Orderbook {
-  bids: OrderbookEntry[];
-  asks: OrderbookEntry[];
-  market?: string;
-  asset_id?: string;
-  hash?: string;
-  timestamp?: string;
-}
+// Re-export SDK's OrderBookSummary for external consumers
+export type { OrderBookSummary } from "@polymarket/clob-client";
 
 /**
  * Trade event from CLOB API
@@ -332,8 +315,9 @@ export class PolymarketClient {
 
   /**
    * List available tags from Gamma API
+   * Returns wrapped object for consistency with listMarkets/listEvents
    */
-  async listTags(): Promise<PolymarketTag[]> {
+  async listTags(): Promise<{ tags: PolymarketTag[] }> {
     const url = `${this.gammaHost}/tags`;
     const response = await fetch(url);
 
@@ -344,7 +328,7 @@ export class PolymarketClient {
     }
 
     const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    return { tags: Array.isArray(data) ? data : [] };
   }
 
   // ============================================================
@@ -353,10 +337,10 @@ export class PolymarketClient {
 
   /**
    * Get orderbook for a token
+   * Uses SDK's OrderBookSummary which includes bids, asks, and metadata
    */
-  async getOrderBook(tokenId: string): Promise<Orderbook> {
-    const result = await this.clobClient.getOrderBook(tokenId);
-    return result as unknown as Orderbook;
+  async getOrderBook(tokenId: string): Promise<OrderBookSummary> {
+    return this.clobClient.getOrderBook(tokenId);
   }
 
   /**
@@ -378,34 +362,37 @@ export class PolymarketClient {
   /**
    * Get public trade events for a market token
    * Uses direct REST call to public trades endpoint
+   * Returns wrapped object for consistency with other list methods
    */
-  async getTrades(tokenId: string): Promise<PolymarketTrade[]> {
+  async getTrades(tokenId: string): Promise<{ trades: PolymarketTrade[] }> {
     // Use direct REST call as getMarketTradesEvents may not be available
     const url = `${this.clobHost}/trades?asset_id=${encodeURIComponent(tokenId)}`;
     const response = await fetch(url);
 
     if (!response.ok) {
-      // Return empty array on error (no trades available)
-      return [];
+      throw new Error(
+        `CLOB API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     const data = await response.json();
 
     // Normalize response
     if (Array.isArray(data)) {
-      return data;
+      return { trades: data };
     }
-    return [];
+    return { trades: [] };
   }
 
   /**
    * Get price history for a token
+   * Returns wrapped object for consistency with other list methods
    *
    * Note: Either startTs/endTs OR interval must be provided
    */
   async getPriceHistory(
     params: PriceHistoryParams,
-  ): Promise<PriceHistoryPoint[]> {
+  ): Promise<{ history: PriceHistoryPoint[] }> {
     // Ensure time component is provided - default to last 24 hours if not specified
     const now = Math.floor(Date.now() / 1000);
     const startTs =
@@ -440,13 +427,13 @@ export class PolymarketClient {
       | { history: PriceHistoryPoint[] }
       | PriceHistoryPoint[];
 
-    // Response is { history: [...] }
+    // Response may be { history: [...] } or raw array
     if ("history" in data && Array.isArray(data.history)) {
-      return data.history;
+      return { history: data.history };
     }
     if (Array.isArray(data)) {
-      return data;
+      return { history: data };
     }
-    return [];
+    return { history: [] };
   }
 }

@@ -173,8 +173,7 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     schema: PolymarketListTagsArgsSchema,
     handler: async (clients) => {
       const result = await clients.polymarket.listTags();
-      // Wrap array in object for MCP structured content compatibility
-      return { tags: result };
+      return result;
     },
   },
 
@@ -214,8 +213,7 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     handler: async (clients, args) => {
       const params = PolymarketGetTradesArgsSchema.parse(args);
       const result = await clients.polymarket.getTrades(params.token_id);
-      // Wrap array in object for MCP structured content compatibility
-      return { trades: result };
+      return result;
     },
   },
 
@@ -232,8 +230,7 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
         startTs: params.startTs,
         endTs: params.endTs,
       });
-      // Wrap array in object for MCP structured content compatibility
-      return { history: result };
+      return result;
     },
   },
 };

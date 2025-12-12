@@ -187,15 +187,16 @@ describe("PolymarketClient", () => {
   });
 
   describe("Gamma API - listTags", () => {
-    test("returns array of tags", async () => {
-      const tags = await client.listTags();
-      expect(Array.isArray(tags)).toBe(true);
+    test("returns wrapped object with tags array", async () => {
+      const result = await client.listTags();
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.tags)).toBe(true);
     });
 
     test("tag objects have required fields", async () => {
-      const tags = await client.listTags();
-      if (tags.length > 0) {
-        const tag = tags[0]!;
+      const result = await client.listTags();
+      if (result.tags.length > 0) {
+        const tag = result.tags[0]!;
         expect(typeof tag.id).toBe("string");
         expect(typeof tag.label).toBe("string");
       }
@@ -307,14 +308,15 @@ describe("PolymarketClient - CLOB API", () => {
   });
 
   describe("CLOB API - getTrades", () => {
-    test("returns array of trades for token", async () => {
+    test("returns wrapped object with trades array", async () => {
       if (!testTokenId) {
         console.log("Skipping: no test token available");
         return;
       }
 
-      const trades = await client.getTrades(testTokenId);
-      expect(Array.isArray(trades)).toBe(true);
+      const result = await client.getTrades(testTokenId);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.trades)).toBe(true);
     });
 
     test("trade objects have required fields when trades exist", async () => {
@@ -323,10 +325,10 @@ describe("PolymarketClient - CLOB API", () => {
         return;
       }
 
-      const trades = await client.getTrades(testTokenId);
+      const result = await client.getTrades(testTokenId);
       // Trades may be empty for some markets, which is valid
-      if (trades.length > 0) {
-        const trade = trades[0]!;
+      if (result.trades.length > 0) {
+        const trade = result.trades[0]!;
         // Check for common trade fields (API may return different field names)
         expect(
           trade.timestamp || trade.created_at || trade.matchTime,
@@ -338,17 +340,18 @@ describe("PolymarketClient - CLOB API", () => {
   });
 
   describe("CLOB API - getPriceHistory", () => {
-    test("returns array of price points", async () => {
+    test("returns wrapped object with history array", async () => {
       if (!testTokenId) {
         console.log("Skipping: no test token available");
         return;
       }
 
-      const history = await client.getPriceHistory({
+      const result = await client.getPriceHistory({
         tokenId: testTokenId,
         fidelity: 60, // 1 hour intervals
       });
-      expect(Array.isArray(history)).toBe(true);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.history)).toBe(true);
     });
 
     test("price history entries have timestamp and price", async () => {
@@ -357,13 +360,13 @@ describe("PolymarketClient - CLOB API", () => {
         return;
       }
 
-      const history = await client.getPriceHistory({
+      const result = await client.getPriceHistory({
         tokenId: testTokenId,
         fidelity: 60,
       });
 
-      if (history.length > 0) {
-        const point = history[0]!;
+      if (result.history.length > 0) {
+        const point = result.history[0]!;
         expect(point.t).toBeDefined(); // timestamp
         expect(point.p).toBeDefined(); // price
       }
