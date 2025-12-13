@@ -11,6 +11,26 @@
  */
 
 import { ClobClient, type OrderBookSummary } from "@polymarket/clob-client";
+import { backOff } from "exponential-backoff";
+
+/** Custom error class for API errors with status code */
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+/** Retry options for rate-limited API calls */
+const RETRY_OPTIONS = {
+  numOfAttempts: 4,
+  startingDelay: 100,
+  jitter: "full" as const,
+  retry: (err: unknown) => err instanceof ApiError && err.status === 429,
+};
 
 /**
  * Configuration for PolymarketClient
@@ -156,6 +176,27 @@ export class PolymarketClient {
   }
 
   // ============================================================
+  // Private Helpers
+  // ============================================================
+
+  /**
+   * Fetch with retry on rate limit (429)
+   * Throws ApiError for non-ok responses to enable retry logic
+   */
+  private async fetchWithRetry(url: string): Promise<Response> {
+    return backOff(async () => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new ApiError(
+          `API error: ${response.status} ${response.statusText}`,
+          response.status,
+        );
+      }
+      return response;
+    }, RETRY_OPTIONS);
+  }
+
+  // ============================================================
   // Gamma API Methods (Market Discovery)
   // ============================================================
 
@@ -187,14 +228,7 @@ export class PolymarketClient {
     }
 
     const url = `${this.gammaHost}/markets?${queryParams.toString()}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Gamma API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = await response.json();
 
     // Gamma API returns array directly
@@ -207,14 +241,7 @@ export class PolymarketClient {
    */
   async getMarket(slug: string): Promise<PolymarketMarket> {
     const url = `${this.gammaHost}/markets?slug=${encodeURIComponent(slug)}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Gamma API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = (await response.json()) as
       | PolymarketMarket
       | PolymarketMarket[];
@@ -258,14 +285,7 @@ export class PolymarketClient {
     }
 
     const url = `${this.gammaHost}/events?${queryParams.toString()}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Gamma API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = await response.json();
 
     return { events: Array.isArray(data) ? data : [] };
@@ -277,14 +297,7 @@ export class PolymarketClient {
    */
   async getEvent(slug: string): Promise<PolymarketEvent> {
     const url = `${this.gammaHost}/events?slug=${encodeURIComponent(slug)}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Gamma API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = (await response.json()) as PolymarketEvent | PolymarketEvent[];
 
     // Handle array response
@@ -304,14 +317,7 @@ export class PolymarketClient {
    */
   async listTags(): Promise<{ tags: PolymarketTag[] }> {
     const url = `${this.gammaHost}/tags`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `Gamma API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = await response.json();
     return { tags: Array.isArray(data) ? data : [] };
   }
@@ -325,14 +331,17 @@ export class PolymarketClient {
    * Uses SDK's OrderBookSummary which includes bids, asks, and metadata
    */
   async getOrderBook(tokenId: string): Promise<OrderBookSummary> {
-    return this.clobClient.getOrderBook(tokenId);
+    return backOff(() => this.clobClient.getOrderBook(tokenId), RETRY_OPTIONS);
   }
 
   /**
    * Get midpoint price for a token
    */
   async getMidpoint(tokenId: string): Promise<string> {
-    const result = await this.clobClient.getMidpoint(tokenId);
+    const result = await backOff(
+      () => this.clobClient.getMidpoint(tokenId),
+      RETRY_OPTIONS,
+    );
     return result.mid;
   }
 
@@ -340,7 +349,10 @@ export class PolymarketClient {
    * Get price for a token and side
    */
   async getPrice(tokenId: string, side: "BUY" | "SELL"): Promise<string> {
-    const result = await this.clobClient.getPrice(tokenId, side);
+    const result = await backOff(
+      () => this.clobClient.getPrice(tokenId, side),
+      RETRY_OPTIONS,
+    );
     return result.price;
   }
 
@@ -375,14 +387,7 @@ export class PolymarketClient {
     }
 
     const url = `${this.clobHost}/prices-history?${queryParams.toString()}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `CLOB API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
+    const response = await this.fetchWithRetry(url);
     const data = (await response.json()) as
       | { history: PriceHistoryPoint[] }
       | PriceHistoryPoint[];
