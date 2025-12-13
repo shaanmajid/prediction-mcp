@@ -109,6 +109,160 @@ export const GetEventArgsSchema = z
   })
   .strict();
 
+// ============================================================
+// Polymarket Schemas
+// ============================================================
+
+// Schema for polymarket_list_markets
+export const PolymarketListMarketsArgsSchema = z
+  .object({
+    closed: z
+      .boolean()
+      .optional()
+      .describe(
+        "Filter by market status. Set to false for active markets only (default), true for closed markets.",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        "Maximum number of markets to return per page. Must be between 1 and 1000. Defaults to 100.",
+      ),
+    offset: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        "Pagination offset. Use with limit for paging through results.",
+      ),
+    tag_id: z
+      .string()
+      .optional()
+      .describe(
+        "Filter by tag/category ID. Get available tags from polymarket_list_tags.",
+      ),
+  })
+  .strict();
+
+// Schema for polymarket_get_market
+export const PolymarketGetMarketArgsSchema = z
+  .object({
+    slug: z
+      .string()
+      .min(1)
+      .describe(
+        "Market slug (e.g., 'will-trump-win-2024'). Found in market URLs and list results.",
+      ),
+  })
+  .strict();
+
+// Schema for polymarket_list_events
+export const PolymarketListEventsArgsSchema = z
+  .object({
+    closed: z
+      .boolean()
+      .optional()
+      .describe(
+        "Filter by event status. Set to false for active events only (default), true for closed events.",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        "Maximum number of events to return per page. Must be between 1 and 1000. Defaults to 100.",
+      ),
+    offset: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        "Pagination offset. Use with limit for paging through results.",
+      ),
+    tag_id: z
+      .string()
+      .optional()
+      .describe(
+        "Filter by tag/category ID. Get available tags from polymarket_list_tags.",
+      ),
+  })
+  .strict();
+
+// Schema for polymarket_get_event
+export const PolymarketGetEventArgsSchema = z
+  .object({
+    slug: z
+      .string()
+      .min(1)
+      .describe(
+        "Event slug (e.g., '2024-presidential-election'). Found in event URLs and list results.",
+      ),
+  })
+  .strict();
+
+// Schema for polymarket_list_tags
+export const PolymarketListTagsArgsSchema = z.object({}).strict();
+
+// Schema for polymarket_get_orderbook
+export const PolymarketGetOrderbookArgsSchema = z
+  .object({
+    token_id: z
+      .string()
+      .min(1)
+      .describe(
+        "Outcome token ID from market's clobTokenIds field. Each market has separate token IDs for Yes/No outcomes.",
+      ),
+  })
+  .strict();
+
+// Schema for polymarket_get_price
+export const PolymarketGetPriceArgsSchema = z
+  .object({
+    token_id: z
+      .string()
+      .min(1)
+      .describe("Outcome token ID from market's clobTokenIds field."),
+    side: z.enum(["BUY", "SELL"]).describe("Order side to get price for."),
+  })
+  .strict();
+
+// Schema for polymarket_get_price_history
+export const PolymarketGetPriceHistoryArgsSchema = z
+  .object({
+    token_id: z
+      .string()
+      .min(1)
+      .describe("Outcome token ID from market's clobTokenIds field."),
+    fidelity: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe("Data resolution in minutes. Defaults to 60 (hourly data)."),
+    startTs: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "Start timestamp in Unix seconds. Defaults to 24 hours ago if not provided.",
+      ),
+    endTs: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "End timestamp in Unix seconds. Defaults to now if not provided.",
+      ),
+  })
+  .strict();
+
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
  *
@@ -123,7 +277,7 @@ export function toMCPSchema(schema: z.ZodType): Record<string, unknown> {
 }
 
 /**
- * Type inference helpers
+ * Type inference helpers - Kalshi
  */
 export type ListMarketsArgs = z.infer<typeof ListMarketsArgsSchema>;
 export type GetMarketArgs = z.infer<typeof GetMarketArgsSchema>;
@@ -131,3 +285,31 @@ export type GetOrderbookArgs = z.infer<typeof GetOrderbookArgsSchema>;
 export type GetTradesArgs = z.infer<typeof GetTradesArgsSchema>;
 export type GetSeriesArgs = z.infer<typeof GetSeriesArgsSchema>;
 export type GetEventArgs = z.infer<typeof GetEventArgsSchema>;
+
+/**
+ * Type inference helpers - Polymarket
+ */
+export type PolymarketListMarketsArgs = z.infer<
+  typeof PolymarketListMarketsArgsSchema
+>;
+export type PolymarketGetMarketArgs = z.infer<
+  typeof PolymarketGetMarketArgsSchema
+>;
+export type PolymarketListEventsArgs = z.infer<
+  typeof PolymarketListEventsArgsSchema
+>;
+export type PolymarketGetEventArgs = z.infer<
+  typeof PolymarketGetEventArgsSchema
+>;
+export type PolymarketListTagsArgs = z.infer<
+  typeof PolymarketListTagsArgsSchema
+>;
+export type PolymarketGetOrderbookArgs = z.infer<
+  typeof PolymarketGetOrderbookArgsSchema
+>;
+export type PolymarketGetPriceArgs = z.infer<
+  typeof PolymarketGetPriceArgsSchema
+>;
+export type PolymarketGetPriceHistoryArgs = z.infer<
+  typeof PolymarketGetPriceHistoryArgsSchema
+>;

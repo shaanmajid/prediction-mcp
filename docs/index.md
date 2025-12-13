@@ -2,15 +2,16 @@
 
 # Prediction Markets MCP Server
 
-MCP server for fetching prediction market data from Kalshi.
+MCP server for fetching prediction market data from Kalshi and Polymarket.
 
 ## Features
 
-- Query markets by status, event, or series
+- Query markets by status, event, category, or series
 - Get market details, orderbooks, and trade history
-- Retrieve series and event metadata
+- Retrieve price history and market metadata
+- Cross-platform market discovery (Kalshi + Polymarket)
 
-## Tools
+## Kalshi Tools
 
 - **kalshi_list_markets** - List available markets on Kalshi. Filter by status (open/closed/settled), event, or series.
 - **kalshi_get_market** - Get detailed information about a specific Kalshi market including prices, volume, and settlement terms.
@@ -19,13 +20,24 @@ MCP server for fetching prediction market data from Kalshi.
 - **kalshi_get_series** - Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).
 - **kalshi_get_event** - Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.
 
+## Polymarket Tools
+
+- **polymarket_list_markets** - List available markets on Polymarket. Filter by status (open/closed) and category tags. Returns market metadata including question, prices, volume, and token IDs for CLOB operations.
+- **polymarket_get_market** - Get detailed information about a specific Polymarket market by slug. Returns question, description, resolution criteria, current prices, volume, and token IDs.
+- **polymarket_list_events** - List events on Polymarket. Events group related markets (e.g., '2024 Election' may contain multiple market questions).
+- **polymarket_get_event** - Get detailed event information by slug. Events contain metadata and may include nested markets.
+- **polymarket_list_tags** - List available category tags on Polymarket. Tags can be used to filter markets and events by category (e.g., Politics, Sports, Crypto).
+- **polymarket_get_orderbook** - Get the current orderbook for a Polymarket outcome token. Returns both bids and asks with price and size. Use token_id from market's clobTokenIds field.
+- **polymarket_get_price** - Get the current best price for a Polymarket outcome token. Specify BUY or SELL side.
+- **polymarket_get_price_history** - Get historical price data for a Polymarket outcome token. Returns time series of price points. Defaults to last 24 hours with hourly resolution.
+
 See [Tools Reference](tools/reference.md) for parameters and usage.
 
 ## Quick Start
 
 ```bash
 bun install
-cp .env.example .env  # Add your Kalshi credentials
+cp .env.example .env  # Add your Kalshi credentials (Polymarket is public)
 bun run scripts/bootstrap.ts --interactive
 ```
 
@@ -33,4 +45,5 @@ bun run scripts/bootstrap.ts --interactive
 
 - [Configuration](configuration.md)
 - [Kalshi API Docs](https://docs.kalshi.com)
+- [Polymarket API Docs](https://docs.polymarket.com)
 - [MCP Specification](https://modelcontextprotocol.io)

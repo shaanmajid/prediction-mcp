@@ -20,10 +20,15 @@ const SRC_DIR = path.join(import.meta.dir, "../src");
 
 // Env vars that are documented in generate-docs.ts
 const DOCUMENTED_ENV_VARS = [
+  // Kalshi
   "KALSHI_API_KEY",
   "KALSHI_PRIVATE_KEY_PATH",
   "KALSHI_PRIVATE_KEY_PEM",
   "KALSHI_BASE_PATH",
+  // Polymarket
+  "POLYMARKET_GAMMA_HOST",
+  "POLYMARKET_CLOB_HOST",
+  "POLYMARKET_CHAIN_ID",
 ];
 
 function checkToolsInReference(): { valid: boolean; errors: string[] } {
