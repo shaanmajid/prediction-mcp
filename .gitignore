@@ -42,3 +42,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # MkDocs build output
 site/
+
+# Implementation plans (temporary)
+docs/plans/
