@@ -80,6 +80,22 @@ describe("classifyError()", () => {
       const result = classifyError(new Error(""));
       expect(result.code).toBe("UnknownError");
     });
+
+    test("classifies Error subclasses by message content", () => {
+      // TypeError, RangeError, etc. are Error subclasses
+      // They should be classified based on message, not constructor name
+      const typeError = new TypeError(
+        "Cannot read property 'foo' of undefined",
+      );
+      const rangeError = new RangeError("Maximum call stack size exceeded");
+
+      expect(classifyError(typeError).code).toBe("UnknownError");
+      expect(classifyError(rangeError).code).toBe("UnknownError");
+
+      // But if the message contains classification keywords, they should match
+      const networkTypeError = new TypeError("network request failed");
+      expect(classifyError(networkTypeError).code).toBe("APIError");
+    });
   });
 
   describe("non-Error object handling", () => {
