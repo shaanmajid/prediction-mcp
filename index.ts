@@ -10,6 +10,53 @@ import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { TOOLS, getToolsList, type ToolClients } from "./src/tools.js";
 
+/**
+ * Error classification result
+ */
+export interface ClassifiedError {
+  code: string;
+  message: string;
+}
+
+/**
+ * Classify an error into a standardized error code and message.
+ * Used for MCP error responses to provide consistent error handling.
+ */
+export function classifyError(error: unknown): ClassifiedError {
+  let errorCode = "UnknownError";
+  let errorMessage = "An unknown error occurred";
+
+  if (error instanceof Error) {
+    errorMessage = error.message;
+
+    if (error.name === "ZodError") {
+      errorCode = "ValidationError";
+    } else if (
+      errorMessage.includes("API") ||
+      errorMessage.includes("network") ||
+      errorMessage.includes("fetch")
+    ) {
+      errorCode = "APIError";
+    } else if (
+      errorMessage.includes("not found") ||
+      errorMessage.includes("Unknown tool")
+    ) {
+      errorCode = "NotFoundError";
+    } else if (
+      errorMessage.includes("unauthorized") ||
+      errorMessage.includes("forbidden")
+    ) {
+      errorCode = "AuthenticationError";
+    } else if (errorMessage.includes("rate limit")) {
+      errorCode = "RateLimitError";
+    }
+  } else {
+    errorMessage = String(error);
+  }
+
+  return { code: errorCode, message: errorMessage };
+}
+
 const logger = pino({
   level: "info",
 });
@@ -53,38 +100,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       structuredContent: data,
     };
   } catch (error) {
-    // Determine error type and code
-    let errorCode = "UnknownError";
-    let errorMessage = "An unknown error occurred";
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-
-      // Classify errors
-      if (error.name === "ZodError") {
-        errorCode = "ValidationError";
-      } else if (
-        errorMessage.includes("API") ||
-        errorMessage.includes("network") ||
-        errorMessage.includes("fetch")
-      ) {
-        errorCode = "APIError";
-      } else if (
-        errorMessage.includes("not found") ||
-        errorMessage.includes("Unknown tool")
-      ) {
-        errorCode = "NotFoundError";
-      } else if (
-        errorMessage.includes("unauthorized") ||
-        errorMessage.includes("forbidden")
-      ) {
-        errorCode = "AuthenticationError";
-      } else if (errorMessage.includes("rate limit")) {
-        errorCode = "RateLimitError";
-      }
-    } else {
-      errorMessage = String(error);
-    }
+    const classified = classifyError(error);
 
     return {
       content: [
@@ -92,8 +108,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           type: "text",
           text: JSON.stringify(
             {
-              error: errorCode,
-              message: errorMessage,
+              error: classified.code,
+              message: classified.message,
             },
             null,
             2,
