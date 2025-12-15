@@ -103,6 +103,17 @@ jobs:
         run: bunx audit-ci --config .audit-ci.json || true
         continue-on-error: true
 
+  # Secret leak detection
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # Documentation freshness check
   docs:
     runs-on: ubuntu-latest
