@@ -12,7 +12,7 @@ import {
  *
  * Handles:
  * - Initial cache population from Kalshi API
- * - Incremental cache refresh
+ * - Merge-based cache refresh (full fetch, add/update/remove)
  * - Search operations delegated to the cache
  *
  * @note Future: Support for Polymarket search would likely be implemented as a separate
