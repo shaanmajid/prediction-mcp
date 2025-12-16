@@ -1,51 +1,49 @@
 # Prediction Markets MCP Server
 
-MCP server for fetching prediction market data from Kalshi (Polymarket planned).
+An MCP server that fetches prediction market data from Kalshi and Polymarket.
 
 ## Features
 
-- **Kalshi integration** — list markets, prices, orderbooks, and trade history
-- **Type-safe** — TypeScript with official Kalshi SDK
-- **MCP protocol** — standard Model Context Protocol server
-- **Auto-retry** — exponential backoff on rate limits (HTTP 429)
+- **Kalshi and Polymarket** — Query markets, orderbooks, prices, and trade history
+- **Full-text search** — Find Kalshi events and markets by keyword
+- **Rate limit handling** — Automatic retry with exponential backoff
 
-## Installation
+## Quick Start
 
 ```bash
 bun install
+bun run scripts/bootstrap.ts --interactive
 ```
+
+The bootstrap script registers this server with Claude Code or Claude Desktop and prompts for your Kalshi credentials.
 
 ## Configuration
 
-### Environment Variables
+### Kalshi
+
+Kalshi requires API credentials for authenticated requests:
 
 ```bash
-# Kalshi API credentials (required for authenticated requests)
 KALSHI_API_KEY=your-api-key-id
 KALSHI_PRIVATE_KEY_PATH=/path/to/private-key.pem
-# OR provide the key directly as PEM string
-KALSHI_PRIVATE_KEY_PEM="-----BEGIN RSA PRIVATE KEY-----..."
-
-# Optional: Override API endpoint (defaults to production)
-KALSHI_BASE_PATH=https://api.elections.kalshi.com/trade-api/v2
 ```
 
-**Getting Kalshi API credentials:**
+Get credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api).
 
-1. Sign up at https://kalshi.com
-2. Generate API key at https://kalshi.com/profile/api
-3. Download your private key file
+### Polymarket
 
-### MCP Server Setup
+Polymarket tools work without authentication—all read operations are public.
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "prediction-markets": {
       "command": "bun",
-      "args": ["run", "/absolute/path/to/prediction-mcp/index.ts"],
+      "args": ["run", "/path/to/prediction-mcp/index.ts"],
       "env": {
         "KALSHI_API_KEY": "your-api-key",
         "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -55,93 +53,53 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 }
 ```
 
-## Available Methods
+## Available Tools
 
-### Kalshi Client
+See [docs/tools/reference.md](docs/tools/reference.md) for the full tool reference with parameters.
 
-```typescript
-import { KalshiClient } from "./src/clients/kalshi";
-
-const client = new KalshiClient();
-
-// List markets
-const markets = await client.listMarkets({ status: "open", limit: 10 });
-
-// Get market details
-const market = await client.getMarketDetails("TICKER");
-
-// Get orderbook (bids only - binary market reciprocity)
-const orderbook = await client.getOrderBook("TICKER");
-
-// Get trade history
-const trades = await client.getTrades({ ticker: "TICKER", limit: 100 });
-```
+Run `bun run docs:generate` after modifying tools to keep documentation in sync.
 
 ## Development
 
 ```bash
-# Run tests
-bun test
-
-# Type check
-bun run typecheck
-
-# Lint code
-bun run lint
-bun run lint:fix
-
-# Format code
-bun run format
-bun run format:check
-
-# Generate documentation (after changing tools or env vars)
-bun run docs:generate
-
-# Preview docs locally (requires uv: https://docs.astral.sh/uv/)
-uv tool install mkdocs --with mkdocs-material
-bun run docs:serve
+bun test              # Run tests
+bun run typecheck     # Type check
+bun run lint          # Lint
+bun run format        # Format
 ```
 
-### Pre-commit Hooks
+Pre-commit hooks run these checks automatically via Husky.
 
-Husky automatically runs type checking, linting, and formatting on git commits via lint-staged.
+### Documentation
+
+```bash
+bun run docs:generate  # Regenerate docs from source
+bun run docs:check     # Verify docs match source (CI uses this)
+bun run docs:serve     # Preview at localhost:8000
+```
 
 ## Project Structure
 
 ```
-.
-├── index.ts                   # MCP server entry point
-├── src/
-│   ├── clients/
-│   │   └── kalshi.ts          # Kalshi API client wrapper
-│   ├── tools.ts               # MCP tool definitions
-│   ├── tools.test.ts          # Integration tests
-│   └── validation.ts          # Zod schemas for tool arguments
-├── scripts/
-│   ├── bootstrap.ts           # Claude Desktop registration
-│   ├── generate-docs.ts       # Documentation generator
-│   └── check-docs.ts          # CI doc freshness check
-├── docs/                      # Auto-generated documentation
-├── package.json
-├── tsconfig.json
-└── mkdocs.yml
+index.ts              # Server entry point
+src/
+  clients/
+    kalshi.ts         # Kalshi API client
+    polymarket.ts     # Polymarket Gamma + CLOB client
+  search/
+    cache.ts          # Search index
+    service.ts        # Search lifecycle
+  tools.ts            # MCP tool handlers
+  validation.ts       # Zod schemas
+scripts/
+  bootstrap.ts        # MCP registration
+  generate-docs.ts    # Doc generator
+  check-docs.ts       # Doc freshness check
 ```
 
-## Tech Stack
+## Links
 
-- **Runtime**: Bun (fast TypeScript execution)
-- **Language**: TypeScript
-- **Testing**: Bun's built-in test runner
-- **Linting**: ESLint with TypeScript support
-- **Formatting**: Prettier
-- **Git Hooks**: Husky + lint-staged
-
-## API Documentation
-
-- **Kalshi API Docs**: https://docs.kalshi.com
-- **Kalshi TypeScript SDK**: https://www.npmjs.com/package/kalshi-typescript
-- **MCP Protocol**: https://modelcontextprotocol.io
-
-## Contributing & Roadmap
-
-See [TODO.md](./TODO.md) for the full roadmap, planned features, and contribution opportunities.
+- [Tool Reference](docs/tools/reference.md)
+- [Kalshi API](https://docs.kalshi.com/api-reference)
+- [Polymarket API](https://docs.polymarket.com)
+- [MCP Protocol](https://modelcontextprotocol.io)
