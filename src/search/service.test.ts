@@ -5,6 +5,41 @@ import { KalshiClient } from "../clients/kalshi.js";
 
 describe("SearchService", () => {
   describe("cache lifecycle", () => {
+    test("concurrent ensurePopulated() calls only trigger one API call", async () => {
+      let callCount = 0;
+
+      // Mock with delay to allow concurrent calls
+      const mockClient = {
+        fetchAllEventsWithMarkets: async () => {
+          callCount++;
+          await new Promise((r) => setTimeout(r, 50)); // Simulate network delay
+          return {
+            events: [
+              {
+                event_ticker: "TEST1",
+                title: "Test Event",
+                subtitle: "",
+                markets: [],
+              },
+            ],
+            markets: [],
+          };
+        },
+      } as unknown as KalshiClient;
+
+      const service = new SearchService(mockClient);
+
+      // Fire 3 concurrent calls
+      await Promise.all([
+        service.ensurePopulated(),
+        service.ensurePopulated(),
+        service.ensurePopulated(),
+      ]);
+
+      // Should only have called API once (deduplication via populatePromise)
+      expect(callCount).toBe(1);
+    });
+
     test("ensurePopulated() calls API and populates cache once", async () => {
       let callCount = 0;
 
