@@ -248,10 +248,10 @@ export class SearchCache {
   }
 
   /**
-   * Incrementally updates the cache:
-   * - Adds new items (new tickers)
-   * - Updates existing items (existing tickers with potentially updated fields)
-   * - Removes missing items (tickers that were in cache but not in new data)
+   * Refreshes cache with new data via merge-based update strategy:
+   * - Full fetch from API (not incremental delta)
+   * - Merges new data: adds (new tickers), updates (existing with changed fields), removes (deleted tickers)
+   * - This approach simplifies consistency vs. tracking deltas on API side
    */
   refresh(events: EventData[], markets: Market[]): void {
     const startTime = Date.now();
