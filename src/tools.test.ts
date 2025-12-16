@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeAll } from "bun:test";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
-import { TOOLS, getToolsList, type ToolClients } from "./tools.js";
+import { SearchService } from "./search/index.js";
+import { TOOLS, getToolsList, type ToolContext } from "./tools.js";
 
 /**
  * Tests for MCP tools module
@@ -11,6 +12,7 @@ import { TOOLS, getToolsList, type ToolClients } from "./tools.js";
  * - Integration Tests: Test Kalshi tool handlers against live API
  *
  * Note: Polymarket integration tests are in polymarket.test.ts
+ * Note: Search integration tests are in search/integration.test.ts (require ~7s cache warmup)
  */
 
 // ============================================================
@@ -91,9 +93,10 @@ describe("getToolsList()", () => {
 // ============================================================
 
 describe("Polymarket Tool Handler Integration Tests", () => {
-  const clients: ToolClients = {
+  const ctx: ToolContext = {
     kalshi: new KalshiClient(),
     polymarket: new PolymarketClient(),
+    searchService: new SearchService(new KalshiClient()),
   };
 
   let testTokenId: string;
@@ -101,7 +104,7 @@ describe("Polymarket Tool Handler Integration Tests", () => {
   beforeAll(async () => {
     // Get a real token ID from an active market
     const listTool = TOOLS.polymarket_list_markets!;
-    const result = (await listTool.handler(clients, {
+    const result = (await listTool.handler(ctx, {
       closed: false,
       limit: 1,
     })) as { markets: Array<{ clobTokenIds?: string }> };
@@ -129,7 +132,7 @@ describe("Polymarket Tool Handler Integration Tests", () => {
     }
 
     const tool = TOOLS.polymarket_get_price!;
-    const result = (await tool.handler(clients, {
+    const result = (await tool.handler(ctx, {
       token_id: testTokenId,
       side: "BUY",
     })) as { price: string; midpoint: string; side: string };
@@ -157,14 +160,15 @@ describe("Polymarket Tool Handler Integration Tests", () => {
 // ============================================================
 
 describe("Kalshi Tool Integration Tests", () => {
-  const clients: ToolClients = {
+  const ctx: ToolContext = {
     kalshi: new KalshiClient(),
     polymarket: new PolymarketClient(),
+    searchService: new SearchService(new KalshiClient()),
   };
 
   test("kalshi_list_markets returns markets array", async () => {
     const tool = TOOLS.kalshi_list_markets!;
-    const result = (await tool.handler(clients, { limit: 5 })) as {
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
       markets: Array<{ ticker: string; event_ticker: string }>;
     };
 
@@ -181,7 +185,7 @@ describe("Kalshi Tool Integration Tests", () => {
   test("kalshi_get_market returns market details", async () => {
     // First get a valid ticker
     const listTool = TOOLS.kalshi_list_markets!;
-    const listResult = (await listTool.handler(clients, {
+    const listResult = (await listTool.handler(ctx, {
       status: "open",
       limit: 1,
     })) as { markets: Array<{ ticker: string }> };
@@ -193,7 +197,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
     const ticker = listResult.markets[0]!.ticker;
     const tool = TOOLS.kalshi_get_market!;
-    const result = (await tool.handler(clients, { ticker })) as {
+    const result = (await tool.handler(ctx, { ticker })) as {
       market: { ticker: string };
     };
 
@@ -204,7 +208,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
   test("kalshi_get_orderbook returns orderbook structure", async () => {
     const listTool = TOOLS.kalshi_list_markets!;
-    const listResult = (await listTool.handler(clients, {
+    const listResult = (await listTool.handler(ctx, {
       status: "open",
       limit: 1,
     })) as { markets: Array<{ ticker: string }> };
@@ -216,7 +220,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
     const ticker = listResult.markets[0]!.ticker;
     const tool = TOOLS.kalshi_get_orderbook!;
-    const result = (await tool.handler(clients, { ticker })) as {
+    const result = (await tool.handler(ctx, { ticker })) as {
       orderbook: { yes: unknown[] | null; no: unknown[] | null };
     };
 
@@ -230,7 +234,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
   test("kalshi_get_trades returns trades array", async () => {
     const tool = TOOLS.kalshi_get_trades!;
-    const result = (await tool.handler(clients, { limit: 5 })) as {
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
       trades: unknown[];
     };
 
@@ -242,7 +246,7 @@ describe("Kalshi Tool Integration Tests", () => {
   test("kalshi_get_series returns series metadata", async () => {
     // Get a valid series ticker from a market
     const listTool = TOOLS.kalshi_list_markets!;
-    const listResult = (await listTool.handler(clients, {
+    const listResult = (await listTool.handler(ctx, {
       limit: 100,
     })) as { markets: Array<{ series_ticker?: string }> };
 
@@ -256,7 +260,7 @@ describe("Kalshi Tool Integration Tests", () => {
     }
 
     const tool = TOOLS.kalshi_get_series!;
-    const result = (await tool.handler(clients, {
+    const result = (await tool.handler(ctx, {
       seriesTicker: marketWithSeries.series_ticker,
     })) as { series: { ticker: string } };
 
@@ -267,7 +271,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
   test("kalshi_get_event returns event metadata", async () => {
     const listTool = TOOLS.kalshi_list_markets!;
-    const listResult = (await listTool.handler(clients, {
+    const listResult = (await listTool.handler(ctx, {
       limit: 1,
     })) as { markets: Array<{ event_ticker: string }> };
 
@@ -278,7 +282,7 @@ describe("Kalshi Tool Integration Tests", () => {
 
     const eventTicker = listResult.markets[0]!.event_ticker;
     const tool = TOOLS.kalshi_get_event!;
-    const result = (await tool.handler(clients, { eventTicker })) as {
+    const result = (await tool.handler(ctx, { eventTicker })) as {
       event: { event_ticker: string };
     };
 
@@ -286,4 +290,7 @@ describe("Kalshi Tool Integration Tests", () => {
     expect(result.event).toBeDefined();
     expect(result.event.event_ticker).toBe(eventTicker);
   });
+
+  // Search integration tests are in a separate file (search/integration.test.ts)
+  // because they require cache population which takes ~7 seconds
 });
