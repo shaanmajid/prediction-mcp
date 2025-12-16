@@ -36,6 +36,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # git worktrees
 .worktrees/
 
+# Claude Code local settings (user-specific)
+.claude/settings.local.json
+
 # MCP config (may contain credentials)
 .mcp.json
 .mcp.json.backup
