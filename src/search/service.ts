@@ -48,9 +48,9 @@ export class SearchService {
     this.isPopulating = true;
 
     try {
-      const events = await this.client.fetchAllEvents();
-      const eventTickers = events.map((e) => e.event_ticker);
-      const markets = await this.client.fetchAllMarkets(eventTickers);
+      // Use single paginated call with nested markets for efficiency
+      // This fetches ~3400 events + ~25000 markets in ~17 API calls instead of 3400+
+      const { events, markets } = await this.client.fetchAllEventsWithMarkets();
 
       this.cache.populate(events, markets);
     } finally {
@@ -63,10 +63,7 @@ export class SearchService {
    * Adds new items, updates existing, and prunes removed.
    */
   async refresh(): Promise<void> {
-    const events = await this.client.fetchAllEvents();
-    const eventTickers = events.map((e) => e.event_ticker);
-    const markets = await this.client.fetchAllMarkets(eventTickers);
-
+    const { events, markets } = await this.client.fetchAllEventsWithMarkets();
     this.cache.refresh(events, markets);
   }
 
