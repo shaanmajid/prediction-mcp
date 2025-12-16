@@ -1,8 +1,8 @@
 /**
  * Search Integration Tests
  *
- * These tests require cache population which takes ~15 minutes.
- * Run separately with: bun test src/search/integration.test.ts --timeout 900000
+ * These tests require cache population which takes ~7 seconds (using withNestedMarkets
+ * optimization). The 900s timeout is retained as safety margin for slow networks/CI.
  *
  * These tests hit the live Kalshi API and verify:
  * - Search returns relevant results
@@ -23,10 +23,10 @@ describe("Search Integration Tests", () => {
   const searchService = new SearchService(kalshi);
   const ctx: ToolContext = { kalshi, polymarket, searchService };
 
-  // Populate cache once before all tests (takes ~15 minutes)
+  // Populate cache once before all tests (~7s with withNestedMarkets)
   beforeAll(async () => {
     await searchService.search("test", 1); // Triggers ensurePopulated()
-  }, 900000); // 15 minute timeout for beforeAll
+  }, 900000); // Safety timeout for slow networks
 
   describe("kalshi_search", () => {
     test("should search and return results with scores", async () => {
