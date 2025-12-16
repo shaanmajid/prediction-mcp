@@ -128,6 +128,9 @@ export const SearchQuerySchema = z
   .strict();
 
 // Schema for kalshi_cache_stats
+// Design note: refresh defaults to false (read-only by default) because it's a write
+// operation with side effects (7s delay). Explicit is better than implicit.
+// Pass refresh: true only when you want to fetch fresh data from the API.
 export const CacheStatsSchema = z
   .object({
     refresh: z

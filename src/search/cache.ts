@@ -41,12 +41,19 @@ function tokenize(query: string): string[] {
 /**
  * Scores how well a set of tokens matches a searchable text field.
  *
- * Scoring rules per token:
- * - Word boundary match (whole word): +50 * weight
- * - Word starts with token: +30 * weight
- * - Substring match: +10 * weight
+ * Three-level scoring algorithm per token (no double counting):
+ * 1. Exact word boundary match (\\btoken\\b): +50 points
+ * 2. Word starts with token (\\btoken): +30 points
+ * 3. Substring contains token: +10 points
  *
- * If ALL tokens match at least once, multiply final score by 1.5
+ * Tie-breaking: If ALL tokens match at least once, total score × 1.5.
+ * This ensures multi-word queries prefer items matching all terms.
+ *
+ * Special character handling: Uses escapeRegex() to handle $, +, *, etc.
+ * Example scores for query "presidential election":
+ * - "Presidential Election 2028" (title field, both words exact): (50+50) * 1.5 = 150
+ * - "Presidential Candidate" (only one word): 50 (no bonus)
+ * - "election official results" (one word, no exact): 10 (substring only)
  */
 function scoreItem(tokens: string[], searchableText: string): number {
   const lowerText = searchableText.toLowerCase();

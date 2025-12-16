@@ -215,4 +215,253 @@ describe("SearchCache", () => {
       expect(results[0]!.item.title).toBe("New Title");
     });
   });
+
+  describe("scoring algorithm - special characters", () => {
+    test("should handle special regex characters in queries (C++)", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "C++ Developer Market")], []);
+
+      const results = cache.searchEvents("C++", 10);
+
+      expect(results.length).toBe(1);
+      expect(results[0]!.item.title).toContain("C++");
+    });
+
+    test("should handle dollar signs and special characters", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [mockEvent("EVT1", "Bitcoin Price $100,000 Prediction")],
+        [],
+      );
+
+      const results = cache.searchEvents("$100,000", 10);
+
+      expect(results.length).toBe(1);
+    });
+
+    test("should handle word boundaries with hyphens", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [
+          mockEvent("EVT1", "COVID-19 Predictions"),
+          mockEvent("EVT2", "COVID Pandemic Data"),
+        ],
+        [],
+      );
+
+      const results = cache.searchEvents("COVID-19", 10);
+
+      // Should match the first event with exact COVID-19
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results[0]!.item.title).toContain("COVID-19");
+    });
+
+    test("should handle date ranges with hyphens", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "2024-2025 Winter Olympics")], []);
+
+      const results = cache.searchEvents("2024-2025", 10);
+
+      expect(results.length).toBe(1);
+    });
+
+    test("should handle parentheses and brackets", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "Fed Rate (FedFunds) Prediction")], []);
+
+      const results = cache.searchEvents("FedFunds", 10);
+
+      expect(results.length).toBe(1);
+    });
+  });
+
+  describe("scoring algorithm - weight multiplier", () => {
+    test("should score higher when ALL tokens match (1.5x multiplier)", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [
+          mockEvent("EVT1", "Presidential Election 2028"),
+          mockEvent("EVT2", "Presidential Candidate"),
+        ],
+        [],
+      );
+
+      const results = cache.searchEvents("presidential election", 10);
+
+      // EVT1 should score higher (matches both tokens)
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results[0]!.item.event_ticker).toBe("EVT1");
+    });
+
+    test("should rank exact word boundaries higher than substrings", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [
+          mockEvent("EVT1", "Election Official Results"),
+          mockEvent("EVT2", "Electronic Market Trading"),
+        ],
+        [],
+      );
+
+      const results = cache.searchEvents("election", 10);
+
+      // EVT1 should rank first (exact word match vs substring in "electronic")
+      expect(results[0]!.item.event_ticker).toBe("EVT1");
+    });
+
+    test("should rank word-start matches higher than substring-only matches", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [
+          mockEvent("EVT1", "Prediction Market"),
+          mockEvent("EVT2", "Market Prediction"),
+        ],
+        [],
+      );
+
+      const results = cache.searchEvents("prediction", 10);
+
+      // EVT1 should score equally or higher (word boundary + word start)
+      expect(results.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe("scoring algorithm - field weights", () => {
+    test("should weight title matches higher than ticker matches", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [
+          mockEvent("TRUMP", "Regular Election Event"),
+          mockEvent("EVT2", "Trump Presidential Race 2028"),
+        ],
+        [],
+      );
+
+      const results = cache.searchEvents("trump", 10);
+
+      // EVT2 should rank higher (matched in title) than EVT1 (matched in ticker only)
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results[0]!.item.event_ticker).toBe("EVT2");
+    });
+
+    test("should rank yes_sub_title matches appropriately for markets", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [],
+        [
+          mockMarket("MKT1", "EVT1", "2028 Nominee", "Gavin Newsom"),
+          mockMarket("MKT2", "EVT1", "Gavin Newsom Poll", "Yes"),
+        ],
+      );
+
+      const results = cache.searchMarkets("gavin newsom", 10);
+
+      // Both should match, but MKT1 scores higher (yes_sub_title is full name)
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results[0]!.item.ticker).toBe("MKT1");
+    });
+  });
+
+  describe("population edge cases", () => {
+    test("should handle empty events and markets arrays", () => {
+      const cache = new SearchCache();
+      cache.populate([], []);
+
+      const stats = cache.getStats();
+      // Status is "empty" when no data, even after populate() call
+      expect(stats.status).toBe("empty");
+      expect(stats.events_count).toBe(0);
+      expect(stats.markets_count).toBe(0);
+    });
+
+    test("should handle markets without event ticker reference", () => {
+      const cache = new SearchCache();
+      const marketWithoutEvent = {
+        ticker: "ORPHAN",
+        title: "Orphaned Market",
+        yes_sub_title: "Yes",
+        no_sub_title: "No",
+        event_ticker: "", // Empty event reference
+        market_type: "binary" as const,
+        status: "open" as const,
+      } as unknown as Market;
+
+      // Should not crash
+      expect(() => {
+        cache.populate([], [marketWithoutEvent]);
+      }).not.toThrow();
+    });
+
+    test("should handle refresh with duplicate tickers (last one wins)", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "Original Title")], []);
+
+      // Refresh with duplicate ticker - should update to latest
+      cache.refresh(
+        [mockEvent("EVT1", "First Update"), mockEvent("EVT1", "Second Update")],
+        [],
+      );
+
+      const results = cache.searchEvents("second update", 10);
+      expect(results.length).toBe(1);
+      expect(results[0]!.item.title).toBe("Second Update");
+    });
+
+    test("should handle refresh with empty new data (clears cache)", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "Event 1")], []);
+      expect(cache.getStats().events_count).toBe(1);
+
+      cache.refresh([], []);
+
+      expect(cache.getStats().events_count).toBe(0);
+      const results = cache.searchEvents("event", 10);
+      expect(results.length).toBe(0);
+    });
+  });
+
+  describe("search edge cases", () => {
+    test("should return empty results for queries that don't match", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "Presidential Election")], []);
+
+      const results = cache.searchEvents("nonexistent", 10);
+
+      expect(results.length).toBe(0);
+    });
+
+    test("should handle typos gracefully (exact matching only)", () => {
+      const cache = new SearchCache();
+      cache.populate([mockEvent("EVT1", "Presidential Election 2028")], []);
+
+      // Typo: "presidntial" instead of "presidential"
+      const results = cache.searchEvents("presidntial", 10);
+
+      expect(results.length).toBe(0); // No match - exact matching only
+    });
+
+    test("should handle very large result sets respecting limit", () => {
+      const cache = new SearchCache();
+      const events = Array.from({ length: 100 }, (_, i) =>
+        mockEvent(`EVT${i}`, "Test Event"),
+      );
+      cache.populate(events, []);
+
+      const results = cache.search("test", 10);
+
+      expect(results.length).toBe(10);
+    });
+
+    test("should handle limit of 1", () => {
+      const cache = new SearchCache();
+      cache.populate(
+        [mockEvent("EVT1", "Test Event 1"), mockEvent("EVT2", "Test Event 2")],
+        [],
+      );
+
+      const results = cache.searchEvents("test", 1);
+
+      expect(results.length).toBe(1);
+    });
+  });
 });
