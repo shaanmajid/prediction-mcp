@@ -278,10 +278,7 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     schema: PolymarketGetPriceArgsSchema,
     handler: async (ctx, args) => {
       const params = PolymarketGetPriceArgsSchema.parse(args);
-      const price = await ctx.polymarket.getPrice(
-        params.token_id,
-        params.side,
-      );
+      const price = await ctx.polymarket.getPrice(params.token_id, params.side);
       const midpoint = await ctx.polymarket.getMidpoint(params.token_id);
       return { price, midpoint, side: params.side };
     },
