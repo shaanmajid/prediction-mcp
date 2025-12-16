@@ -201,6 +201,12 @@ function scoreMarket(tokens: string[], market: Market): number {
  * - Fast in-memory search with relevance scoring
  * - Incremental refresh that adds/updates/removes items
  * - Separate search for events, markets, or combined results
+ *
+ * @note Future: The cache has no expiry currently. For long-running servers, consider:
+ * 1. Adding lastRefreshTime checks to warn if data is stale (>1 hour)
+ * 2. Implementing optional TTL with automatic background refresh
+ * 3. Exposing refresh() through MCP tools for manual cache invalidation
+ * The current implementation is suitable for per-request or per-session usage patterns.
  */
 export class SearchCache {
   private events: Map<string, EventData>;
