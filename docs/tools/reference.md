@@ -68,6 +68,51 @@ Get event metadata including title for URL construction. Events represent specif
 - `eventTicker` (string (minLength: 1), required)
   Event ticker symbol (e.g., 'KXPRESIDENT'). Returns metadata about an event, which represents a specific occurrence that can be traded on.
 
+## kalshi_search
+
+Search across Kalshi events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market titles, and candidate/outcome names (yes_sub_title).
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  Search terms to find events or markets
+
+- `limit` (integer (min: 1, max: 100), required)
+  Maximum number of results to return
+
+## kalshi_search_events
+
+Search Kalshi events by keyword. Returns events ranked by relevance based on title, subtitle, and ticker matches.
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  Search terms to find events or markets
+
+- `limit` (integer (min: 1, max: 100), required)
+  Maximum number of results to return
+
+## kalshi_search_markets
+
+Search Kalshi markets by keyword. Returns markets ranked by relevance. Searches title, yes_sub_title (candidate/outcome names), no_sub_title, and ticker.
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  Search terms to find events or markets
+
+- `limit` (integer (min: 1, max: 100), required)
+  Maximum number of results to return
+
+## kalshi_cache_stats
+
+Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
+
+**Parameters:**
+
+- `refresh` (boolean, required)
+  If true, trigger a cache refresh before returning stats
+
 ## polymarket_list_markets
 
 List available markets on Polymarket. Filter by status (open/closed) and category tags. Returns market metadata including question, prices, volume, and token IDs for CLOB operations.

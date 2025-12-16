@@ -19,6 +19,10 @@ MCP server for fetching prediction market data from Kalshi and Polymarket.
 - **kalshi_get_trades** - Get recent trade history for Kalshi markets. Can filter by specific market ticker.
 - **kalshi_get_series** - Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).
 - **kalshi_get_event** - Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.
+- **kalshi_search** - Search across Kalshi events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market titles, and candidate/outcome names (yes_sub_title).
+- **kalshi_search_events** - Search Kalshi events by keyword. Returns events ranked by relevance based on title, subtitle, and ticker matches.
+- **kalshi_search_markets** - Search Kalshi markets by keyword. Returns markets ranked by relevance. Searches title, yes_sub_title (candidate/outcome names), no_sub_title, and ticker.
+- **kalshi_cache_stats** - Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
 
 ## Polymarket Tools
 

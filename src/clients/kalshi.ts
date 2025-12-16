@@ -3,6 +3,8 @@ import {
   MarketApi,
   PortfolioApi,
   EventsApi,
+  type EventData,
+  type Market,
 } from "kalshi-typescript";
 import { backOff } from "exponential-backoff";
 import { isAxiosError } from "axios";
@@ -131,5 +133,110 @@ export class KalshiClient {
    */
   async getEvent(eventTicker: string) {
     return backOff(() => this.eventsApi.getEvent(eventTicker), RETRY_OPTIONS);
+  }
+
+  /**
+   * List events with optional filters
+   * @param params - Optional filters (status, limit, cursor, etc.)
+   */
+  async listEvents(params?: {
+    status?: "open" | "closed" | "settled";
+    limit?: number;
+    cursor?: string;
+    seriesTicker?: string;
+    withNestedMarkets?: boolean;
+  }) {
+    return backOff(
+      () =>
+        this.eventsApi.getEvents(
+          params?.limit,
+          params?.cursor,
+          params?.withNestedMarkets,
+          undefined, // withMilestones
+          params?.status,
+          params?.seriesTicker,
+          undefined, // minCloseTs
+        ),
+      RETRY_OPTIONS,
+    );
+  }
+
+  /**
+   * Fetch all open events with their nested markets in a single paginated call
+   * Uses withNestedMarkets=true to get both events and markets efficiently
+   * @returns Object containing events array and markets array
+   */
+  async fetchAllEventsWithMarkets(): Promise<{
+    events: EventData[];
+    markets: Market[];
+  }> {
+    const allEvents: EventData[] = [];
+    const allMarkets: Market[] = [];
+    let cursor: string | undefined = undefined;
+
+    do {
+      const response = await this.listEvents({
+        status: "open",
+        limit: 200,
+        cursor,
+        withNestedMarkets: true,
+      });
+
+      for (const event of response.data.events) {
+        // Extract markets from event before storing
+        const markets = event.markets || [];
+        allMarkets.push(...markets);
+
+        // Store event without nested markets to save memory
+        const { markets: _markets, ...eventWithoutMarkets } = event;
+        void _markets; // Explicitly mark as intentionally unused
+        allEvents.push(eventWithoutMarkets as EventData);
+      }
+
+      cursor = response.data.cursor || undefined;
+
+      // Rate limiting delay between pages (conservative for basic tier: 20 req/sec)
+      if (cursor) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    } while (cursor);
+
+    return { events: allEvents, markets: allMarkets };
+  }
+
+  /**
+   * Fetch all markets by paginating through the entire market list
+   * Much faster than fetching per-event since it uses bulk pagination
+   * @param eventTickers - Optional filter to only include markets for these events
+   * @returns Array of all Market objects
+   */
+  async fetchAllMarkets(eventTickers?: string[]): Promise<Market[]> {
+    const allMarkets: Market[] = [];
+    let cursor: string | undefined = undefined;
+    const eventTickerSet = eventTickers ? new Set(eventTickers) : null;
+
+    do {
+      const response = await this.listMarkets({
+        limit: 1000,
+        cursor,
+      });
+
+      // Filter to only include markets for specified events if provided
+      const markets = eventTickerSet
+        ? response.data.markets.filter((m) =>
+            eventTickerSet.has(m.event_ticker),
+          )
+        : response.data.markets;
+
+      allMarkets.push(...markets);
+      cursor = response.data.cursor || undefined;
+
+      // Rate limiting delay between pages
+      if (cursor) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+    } while (cursor);
+
+    return allMarkets;
   }
 }

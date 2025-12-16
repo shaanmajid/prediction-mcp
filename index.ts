@@ -8,7 +8,8 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
-import { TOOLS, getToolsList, type ToolClients } from "./src/tools.js";
+import { SearchService } from "./src/search/index.js";
+import { TOOLS, getToolsList, type ToolContext } from "./src/tools.js";
 
 /**
  * Error classification result
@@ -73,11 +74,15 @@ const server = new Server(
   },
 );
 
-// Initialize clients
-// Kalshi requires API key; Polymarket works without auth for read operations
-const clients: ToolClients = {
-  kalshi: new KalshiClient(),
-  polymarket: new PolymarketClient(),
+// Initialize clients and services
+const kalshiClient = new KalshiClient();
+const polymarketClient = new PolymarketClient();
+const searchService = new SearchService(kalshiClient);
+
+const toolContext: ToolContext = {
+  kalshi: kalshiClient,
+  polymarket: polymarketClient,
+  searchService,
 };
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -95,7 +100,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error(`Unknown tool: ${name}`);
     }
 
-    const data = await tool.handler(clients, args);
+    const data = await tool.handler(toolContext, args);
     return {
       structuredContent: data,
     };
