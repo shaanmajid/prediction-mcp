@@ -7,6 +7,10 @@ import { z } from "zod";
  * 2. JSON Schema generation for MCP tool definitions
  */
 
+// ============================================================
+// Kalshi Schemas
+// ============================================================
+
 // Schema for kalshi_list_markets
 export const ListMarketsArgsSchema = z
   .object({
@@ -106,6 +110,30 @@ export const GetEventArgsSchema = z
       .describe(
         "Event ticker symbol (e.g., 'KXPRESIDENT'). Returns metadata about an event, which represents a specific occurrence that can be traded on.",
       ),
+  })
+  .strict();
+
+// Schema for kalshi_search, kalshi_search_events, kalshi_search_markets
+export const SearchQuerySchema = z
+  .object({
+    query: z.string().min(1).describe("Search terms to find events or markets"),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe("Maximum number of results to return"),
+  })
+  .strict();
+
+// Schema for kalshi_cache_stats
+export const CacheStatsSchema = z
+  .object({
+    refresh: z
+      .boolean()
+      .default(false)
+      .describe("If true, trigger a cache refresh before returning stats"),
   })
   .strict();
 
@@ -285,6 +313,8 @@ export type GetOrderbookArgs = z.infer<typeof GetOrderbookArgsSchema>;
 export type GetTradesArgs = z.infer<typeof GetTradesArgsSchema>;
 export type GetSeriesArgs = z.infer<typeof GetSeriesArgsSchema>;
 export type GetEventArgs = z.infer<typeof GetEventArgsSchema>;
+export type SearchQueryArgs = z.infer<typeof SearchQuerySchema>;
+export type CacheStatsArgs = z.infer<typeof CacheStatsSchema>;
 
 /**
  * Type inference helpers - Polymarket

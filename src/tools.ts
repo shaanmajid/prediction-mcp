@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
+import { SearchService } from "./search/index.js";
 import {
   ListMarketsArgsSchema,
   GetMarketArgsSchema,
@@ -8,6 +9,8 @@ import {
   GetTradesArgsSchema,
   GetSeriesArgsSchema,
   GetEventArgsSchema,
+  SearchQuerySchema,
+  CacheStatsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketGetMarketArgsSchema,
   PolymarketListEventsArgsSchema,
@@ -20,18 +23,19 @@ import {
 } from "./validation.js";
 
 /**
- * Clients available to tool handlers
+ * Context available to tool handlers
  */
-export interface ToolClients {
+export interface ToolContext {
   kalshi: KalshiClient;
   polymarket: PolymarketClient;
+  searchService: SearchService;
 }
 
 export interface ToolDefinition {
   name: string;
   description: string;
   schema: z.ZodType;
-  handler: (clients: ToolClients, args: unknown) => Promise<unknown>;
+  handler: (ctx: ToolContext, args: unknown) => Promise<unknown>;
 }
 
 // ============================================================
@@ -44,9 +48,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "List available markets on Kalshi. Filter by status (open/closed/settled), event, or series.",
     schema: ListMarketsArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = ListMarketsArgsSchema.parse(args || {});
-      const result = await clients.kalshi.listMarkets(params);
+      const result = await ctx.kalshi.listMarkets(params);
       return result.data;
     },
   },
@@ -56,9 +60,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get detailed information about a specific Kalshi market including prices, volume, and settlement terms.",
     schema: GetMarketArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = GetMarketArgsSchema.parse(args);
-      const result = await clients.kalshi.getMarketDetails(params.ticker);
+      const result = await ctx.kalshi.getMarketDetails(params.ticker);
       return result.data;
     },
   },
@@ -68,9 +72,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get the current orderbook for a Kalshi market. Note: Only returns bids (no asks) due to binary market reciprocity.",
     schema: GetOrderbookArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = GetOrderbookArgsSchema.parse(args);
-      const result = await clients.kalshi.getOrderBook(params.ticker);
+      const result = await ctx.kalshi.getOrderBook(params.ticker);
       return result.data;
     },
   },
@@ -80,9 +84,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get recent trade history for Kalshi markets. Can filter by specific market ticker.",
     schema: GetTradesArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = GetTradesArgsSchema.parse(args || {});
-      const result = await clients.kalshi.getTrades(params);
+      const result = await ctx.kalshi.getTrades(params);
       return result.data;
     },
   },
@@ -92,9 +96,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).",
     schema: GetSeriesArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = GetSeriesArgsSchema.parse(args);
-      const result = await clients.kalshi.getSeries(params.seriesTicker);
+      const result = await ctx.kalshi.getSeries(params.seriesTicker);
       return result.data;
     },
   },
@@ -104,10 +108,89 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.",
     schema: GetEventArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = GetEventArgsSchema.parse(args);
-      const result = await clients.kalshi.getEvent(params.eventTicker);
+      const result = await ctx.kalshi.getEvent(params.eventTicker);
       return result.data;
+    },
+  },
+
+  kalshi_search: {
+    name: "kalshi_search",
+    description:
+      "Search across Kalshi events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market titles, and candidate/outcome names (yes_sub_title).",
+    schema: SearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = SearchQuerySchema.parse(args);
+      const results = await ctx.searchService.search(
+        params.query,
+        params.limit,
+      );
+      return {
+        results,
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  kalshi_search_events: {
+    name: "kalshi_search_events",
+    description:
+      "Search Kalshi events by keyword. Returns events ranked by relevance based on title, subtitle, and ticker matches.",
+    schema: SearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = SearchQuerySchema.parse(args);
+      const results = await ctx.searchService.searchEvents(
+        params.query,
+        params.limit,
+      );
+      return {
+        results: results.map((r) => ({
+          type: "event" as const,
+          score: r.score,
+          item: r.item,
+        })),
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  kalshi_search_markets: {
+    name: "kalshi_search_markets",
+    description:
+      "Search Kalshi markets by keyword. Returns markets ranked by relevance. Searches title, yes_sub_title (candidate/outcome names), no_sub_title, and ticker.",
+    schema: SearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = SearchQuerySchema.parse(args);
+      const results = await ctx.searchService.searchMarkets(
+        params.query,
+        params.limit,
+      );
+      return {
+        results: results.map((r) => ({
+          type: "market" as const,
+          score: r.score,
+          item: r.item,
+        })),
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  kalshi_cache_stats: {
+    name: "kalshi_cache_stats",
+    description:
+      "Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.",
+    schema: CacheStatsSchema,
+    handler: async (ctx, args) => {
+      const params = CacheStatsSchema.parse(args || {});
+      if (params.refresh) {
+        await ctx.searchService.refresh();
+      }
+      return ctx.searchService.getStats();
     },
   },
 };
@@ -122,9 +205,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "List available markets on Polymarket. Filter by status (open/closed) and category tags. Returns market metadata including question, prices, volume, and token IDs for CLOB operations.",
     schema: PolymarketListMarketsArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketListMarketsArgsSchema.parse(args || {});
-      const result = await clients.polymarket.listMarkets(params);
+      const result = await ctx.polymarket.listMarkets(params);
       return result;
     },
   },
@@ -134,9 +217,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get detailed information about a specific Polymarket market by slug. Returns question, description, resolution criteria, current prices, volume, and token IDs.",
     schema: PolymarketGetMarketArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketGetMarketArgsSchema.parse(args);
-      const result = await clients.polymarket.getMarket(params.slug);
+      const result = await ctx.polymarket.getMarket(params.slug);
       return result;
     },
   },
@@ -146,9 +229,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "List events on Polymarket. Events group related markets (e.g., '2024 Election' may contain multiple market questions).",
     schema: PolymarketListEventsArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketListEventsArgsSchema.parse(args || {});
-      const result = await clients.polymarket.listEvents(params);
+      const result = await ctx.polymarket.listEvents(params);
       return result;
     },
   },
@@ -158,9 +241,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get detailed event information by slug. Events contain metadata and may include nested markets.",
     schema: PolymarketGetEventArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketGetEventArgsSchema.parse(args);
-      const result = await clients.polymarket.getEvent(params.slug);
+      const result = await ctx.polymarket.getEvent(params.slug);
       return result;
     },
   },
@@ -170,8 +253,8 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "List available category tags on Polymarket. Tags can be used to filter markets and events by category (e.g., Politics, Sports, Crypto).",
     schema: PolymarketListTagsArgsSchema,
-    handler: async (clients) => {
-      const result = await clients.polymarket.listTags();
+    handler: async (ctx) => {
+      const result = await ctx.polymarket.listTags();
       return result;
     },
   },
@@ -181,9 +264,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get the current orderbook for a Polymarket outcome token. Returns both bids and asks with price and size. Use token_id from market's clobTokenIds field.",
     schema: PolymarketGetOrderbookArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketGetOrderbookArgsSchema.parse(args);
-      const result = await clients.polymarket.getOrderBook(params.token_id);
+      const result = await ctx.polymarket.getOrderBook(params.token_id);
       return result;
     },
   },
@@ -193,13 +276,13 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get the current best price for a Polymarket outcome token. Specify BUY or SELL side.",
     schema: PolymarketGetPriceArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketGetPriceArgsSchema.parse(args);
-      const price = await clients.polymarket.getPrice(
+      const price = await ctx.polymarket.getPrice(
         params.token_id,
         params.side,
       );
-      const midpoint = await clients.polymarket.getMidpoint(params.token_id);
+      const midpoint = await ctx.polymarket.getMidpoint(params.token_id);
       return { price, midpoint, side: params.side };
     },
   },
@@ -209,9 +292,9 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
     description:
       "Get historical price data for a Polymarket outcome token. Returns time series of price points. Defaults to last 24 hours with hourly resolution.",
     schema: PolymarketGetPriceHistoryArgsSchema,
-    handler: async (clients, args) => {
+    handler: async (ctx, args) => {
       const params = PolymarketGetPriceHistoryArgsSchema.parse(args);
-      const result = await clients.polymarket.getPriceHistory({
+      const result = await ctx.polymarket.getPriceHistory({
         tokenId: params.token_id,
         fidelity: params.fidelity,
         startTs: params.startTs,
