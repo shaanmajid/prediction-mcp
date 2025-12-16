@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
