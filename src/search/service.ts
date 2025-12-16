@@ -14,12 +14,16 @@ import {
  * - Initial cache population from Kalshi API
  * - Incremental cache refresh
  * - Search operations delegated to the cache
+ *
+ * @note Future: Support for Polymarket search would likely be implemented as a separate
+ * PolymarketSearchService, following the same pattern as this class but using the
+ * PolymarketClient. This allows maintaining platform-specific optimizations while
+ * keeping the interface consistent.
  */
 export class SearchService {
   private cache: SearchCache;
   private client: KalshiClient;
   private populatePromise: Promise<void> | null = null;
-  private isPopulating = false;
 
   constructor(client: KalshiClient) {
     this.cache = new SearchCache();
@@ -29,6 +33,11 @@ export class SearchService {
   /**
    * Ensures the cache is populated before performing operations.
    * Safe to call multiple times - will only populate once.
+   *
+   * @note Future: Consider adding cache TTL (time-to-live) for long-running servers.
+   * Currently, the cache persists indefinitely. A time-based expiry would help keep
+   * data fresh without requiring manual refresh() calls. Target: ~1 hour TTL with
+   * background refresh during idle time.
    */
   async ensurePopulated(): Promise<void> {
     if (this.cache.getStats().status === "ready") {
@@ -44,18 +53,11 @@ export class SearchService {
   }
 
   private async doPopulate(): Promise<void> {
-    if (this.isPopulating) return;
-    this.isPopulating = true;
+    // Use single paginated call with nested markets for efficiency
+    // This fetches ~3400 events + ~25000 markets in ~17 API calls instead of 3400+
+    const { events, markets } = await this.client.fetchAllEventsWithMarkets();
 
-    try {
-      // Use single paginated call with nested markets for efficiency
-      // This fetches ~3400 events + ~25000 markets in ~17 API calls instead of 3400+
-      const { events, markets } = await this.client.fetchAllEventsWithMarkets();
-
-      this.cache.populate(events, markets);
-    } finally {
-      this.isPopulating = false;
-    }
+    this.cache.populate(events, markets);
   }
 
   /**

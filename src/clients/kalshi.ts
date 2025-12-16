@@ -205,16 +205,6 @@ export class KalshiClient {
   }
 
   /**
-   * Fetch all open events by paginating through API
-   * @deprecated Use fetchAllEventsWithMarkets() for better performance
-   * @returns Array of all open EventData objects
-   */
-  async fetchAllEvents(): Promise<EventData[]> {
-    const { events } = await this.fetchAllEventsWithMarkets();
-    return events;
-  }
-
-  /**
    * Fetch all markets by paginating through the entire market list
    * Much faster than fetching per-event since it uses bulk pagination
    * @param eventTickers - Optional filter to only include markets for these events
