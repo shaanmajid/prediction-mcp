@@ -6,6 +6,8 @@ import {
   GetTradesArgsSchema,
   GetSeriesArgsSchema,
   GetEventArgsSchema,
+  SearchQuerySchema,
+  CacheStatsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketGetMarketArgsSchema,
   PolymarketListEventsArgsSchema,
@@ -183,6 +185,109 @@ describe("Kalshi Schemas", () => {
 
     test("rejects missing eventTicker", () => {
       const result = GetEventArgsSchema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("SearchQuerySchema", () => {
+    test("accepts valid query and limit", () => {
+      const result = SearchQuerySchema.safeParse({
+        query: "election",
+        limit: 10,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts query with default limit", () => {
+      const result = SearchQuerySchema.safeParse({ query: "trump" });
+      expect(result.success).toBe(true);
+      expect(result.data?.limit).toBe(20);
+    });
+
+    test("rejects empty query", () => {
+      const result = SearchQuerySchema.safeParse({ query: "", limit: 10 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing query", () => {
+      const result = SearchQuerySchema.safeParse({ limit: 10 });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts limit within bounds (1-100)", () => {
+      expect(
+        SearchQuerySchema.safeParse({ query: "test", limit: 1 }).success,
+      ).toBe(true);
+      expect(
+        SearchQuerySchema.safeParse({ query: "test", limit: 50 }).success,
+      ).toBe(true);
+      expect(
+        SearchQuerySchema.safeParse({ query: "test", limit: 100 }).success,
+      ).toBe(true);
+    });
+
+    test("rejects limit below minimum", () => {
+      const result = SearchQuerySchema.safeParse({ query: "test", limit: 0 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit above maximum", () => {
+      const result = SearchQuerySchema.safeParse({ query: "test", limit: 101 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects non-integer limit", () => {
+      const result = SearchQuerySchema.safeParse({
+        query: "test",
+        limit: 10.5,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = SearchQuerySchema.safeParse({
+        query: "test",
+        limit: 10,
+        extra: "field",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("CacheStatsSchema", () => {
+    test("accepts empty object (defaults refresh to false)", () => {
+      const result = CacheStatsSchema.safeParse({});
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(false);
+    });
+
+    test("accepts explicit refresh true", () => {
+      const result = CacheStatsSchema.safeParse({ refresh: true });
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(true);
+    });
+
+    test("accepts explicit refresh false", () => {
+      const result = CacheStatsSchema.safeParse({ refresh: false });
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(false);
+    });
+
+    test("rejects non-boolean refresh", () => {
+      const result = CacheStatsSchema.safeParse({ refresh: "yes" });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects non-boolean refresh as number", () => {
+      const result = CacheStatsSchema.safeParse({ refresh: 1 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = CacheStatsSchema.safeParse({
+        refresh: true,
+        extra: "field",
+      });
       expect(result.success).toBe(false);
     });
   });
