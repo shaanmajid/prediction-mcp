@@ -38,20 +38,26 @@ function tokenize(query: string): string[] {
     .filter((t) => t.length > 0);
 }
 
+// Scoring algorithm constants - adjust to tune ranking behavior
+const EXACT_WORD_MATCH_SCORE = 50; // Highest: exact word boundary (\btoken\b)
+const WORD_PREFIX_MATCH_SCORE = 30; // Medium: word starts with token (\btoken)
+const SUBSTRING_MATCH_SCORE = 10; // Lowest: substring contains token
+const ALL_TOKENS_BONUS = 1.5; // Multiplier when ALL query tokens match
+
 /**
  * Scores how well a set of tokens matches a searchable text field.
  *
  * Three-level scoring algorithm per token (no double counting):
- * 1. Exact word boundary match (\\btoken\\b): +50 points
- * 2. Word starts with token (\\btoken): +30 points
- * 3. Substring contains token: +10 points
+ * 1. Exact word boundary match: EXACT_WORD_MATCH_SCORE (50) points
+ * 2. Word starts with token: WORD_PREFIX_MATCH_SCORE (30) points
+ * 3. Substring contains token: SUBSTRING_MATCH_SCORE (10) points
  *
- * Tie-breaking: If ALL tokens match at least once, total score × 1.5.
+ * Tie-breaking: If ALL tokens match at least once, total score × ALL_TOKENS_BONUS (1.5).
  * This ensures multi-word queries prefer items matching all terms.
  *
  * Special character handling: Uses escapeRegex() to handle $, +, *, etc.
  * Example scores for query "presidential election":
- * - "Presidential Election 2028" (title field, both words exact): (50+50) * 1.5 = 150
+ * - "Presidential Election 2028" (both words exact): (50+50) * 1.5 = 150
  * - "Presidential Candidate" (only one word): 50 (no bonus)
  * - "election official results" (one word, no exact): 10 (substring only)
  */
@@ -68,7 +74,7 @@ function scoreItem(tokens: string[], searchableText: string): number {
     const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(token)}\\b`, "g");
     const wordMatches = lowerText.match(wordBoundaryRegex);
     if (wordMatches) {
-      tokenScore += wordMatches.length * 50;
+      tokenScore += wordMatches.length * EXACT_WORD_MATCH_SCORE;
       tokenMatched = true;
     }
 
@@ -79,7 +85,7 @@ function scoreItem(tokens: string[], searchableText: string): number {
       // Subtract word boundary matches to avoid double counting
       const startsOnlyCount = startMatches.length - (wordMatches?.length || 0);
       if (startsOnlyCount > 0) {
-        tokenScore += startsOnlyCount * 30;
+        tokenScore += startsOnlyCount * WORD_PREFIX_MATCH_SCORE;
         tokenMatched = true;
       }
     }
@@ -89,7 +95,7 @@ function scoreItem(tokens: string[], searchableText: string): number {
     // Subtract already counted matches
     const substringOnlyCount = substringMatches - (startMatches?.length || 0);
     if (substringOnlyCount > 0) {
-      tokenScore += substringOnlyCount * 10;
+      tokenScore += substringOnlyCount * SUBSTRING_MATCH_SCORE;
       tokenMatched = true;
     }
 
@@ -102,7 +108,7 @@ function scoreItem(tokens: string[], searchableText: string): number {
 
   // Bonus if all tokens matched
   if (matchedTokens === tokens.length) {
-    totalScore *= 1.5;
+    totalScore *= ALL_TOKENS_BONUS;
   }
 
   return totalScore;
