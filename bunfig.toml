@@ -1,0 +1,17 @@
+[test]
+# Coverage reporters: text for terminal, lcov for file output
+coverageReporter = ["text", "lcov"]
+
+# Output directory for lcov.info
+coverageDir = "coverage"
+
+# Exclude test files from coverage metrics
+coverageSkipTestFiles = true
+
+# Ignore patterns - don't measure coverage for these
+coveragePathIgnorePatterns = [
+  "node_modules/**",
+  "**/*.test.ts",
+  "**/*.spec.ts",
+  "scripts/**"
+]
