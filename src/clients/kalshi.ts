@@ -8,6 +8,7 @@ import {
 } from "kalshi-typescript";
 import { backOff } from "exponential-backoff";
 import { isAxiosError } from "axios";
+import { logger } from "../logger.js";
 
 const KALSHI_PRODUCTION_URL = "https://api.elections.kalshi.com/trade-api/v2";
 const KALSHI_DEMO_URL = "https://demo-api.kalshi.co/trade-api/v2";
@@ -35,10 +36,18 @@ export class KalshiClient {
 
   constructor(config: KalshiConfig = {}) {
     const useDemo = config.useDemo ?? process.env.KALSHI_USE_DEMO === "true";
+    const explicitBasePath = config.basePath || process.env.KALSHI_BASE_PATH;
+
+    // Warn if both demo flag and explicit base path are set
+    if (useDemo && explicitBasePath) {
+      logger.warn(
+        { basePath: explicitBasePath },
+        "Both KALSHI_USE_DEMO and KALSHI_BASE_PATH are set; KALSHI_BASE_PATH takes precedence",
+      );
+    }
+
     const basePath =
-      config.basePath ||
-      process.env.KALSHI_BASE_PATH ||
-      (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
+      explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
 
     const configuration = new Configuration({
       apiKey: config.apiKey || process.env.KALSHI_API_KEY,
