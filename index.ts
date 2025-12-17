@@ -103,6 +103,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   } catch (error) {
     const classified = classifyError(error);
 
+    logger.error(
+      { tool: name, errorCode: classified.code, message: classified.message },
+      "Tool execution failed",
+    );
+
     return {
       content: [
         {
