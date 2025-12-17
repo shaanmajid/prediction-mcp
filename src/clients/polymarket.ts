@@ -12,6 +12,7 @@
 
 import { ClobClient, type OrderBookSummary } from "@polymarket/clob-client";
 import { backOff } from "exponential-backoff";
+import { logger } from "../logger.js";
 
 /** Custom error class for API errors with status code */
 class ApiError extends Error {
@@ -24,12 +25,30 @@ class ApiError extends Error {
   }
 }
 
+const MAX_RETRY_ATTEMPTS = 4;
+
+const isRateLimited = (err: unknown): boolean =>
+  err instanceof ApiError && err.status === 429;
+
 /** Retry options for rate-limited API calls */
 const RETRY_OPTIONS = {
-  numOfAttempts: 4,
+  numOfAttempts: MAX_RETRY_ATTEMPTS,
   startingDelay: 100,
   jitter: "full" as const,
-  retry: (err: unknown) => err instanceof ApiError && err.status === 429,
+  retry: (err: unknown, attemptNumber: number) => {
+    const shouldRetry = isRateLimited(err);
+    if (shouldRetry) {
+      logger.warn(
+        {
+          attempt: attemptNumber,
+          maxAttempts: MAX_RETRY_ATTEMPTS,
+          status: 429,
+        },
+        "Polymarket rate limited, retrying",
+      );
+    }
+    return shouldRetry;
+  },
 };
 
 /**

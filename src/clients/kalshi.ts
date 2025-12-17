@@ -42,12 +42,30 @@ export function resolveKalshiBasePath(config: KalshiConfig = {}): {
   return { basePath, shouldWarn, explicitBasePath };
 }
 
+const MAX_RETRY_ATTEMPTS = 4;
+
+const isRateLimited = (err: unknown): boolean =>
+  isAxiosError(err) && err.response?.status === 429;
+
 /** Retry options for rate-limited API calls */
 const RETRY_OPTIONS = {
-  numOfAttempts: 4,
+  numOfAttempts: MAX_RETRY_ATTEMPTS,
   startingDelay: 100,
   jitter: "full" as const,
-  retry: (err: unknown) => isAxiosError(err) && err.response?.status === 429,
+  retry: (err: unknown, attemptNumber: number) => {
+    const shouldRetry = isRateLimited(err);
+    if (shouldRetry) {
+      logger.warn(
+        {
+          attempt: attemptNumber,
+          maxAttempts: MAX_RETRY_ATTEMPTS,
+          status: 429,
+        },
+        "Kalshi rate limited, retrying",
+      );
+    }
+    return shouldRetry;
+  },
 };
 
 export class KalshiClient {

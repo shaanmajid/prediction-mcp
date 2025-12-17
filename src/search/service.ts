@@ -6,6 +6,7 @@ import {
   type CombinedSearchResult,
   type CacheStats,
 } from "./cache.js";
+import { logger } from "../logger.js";
 
 /**
  * Service that manages the search cache lifecycle and provides search operations.
@@ -53,11 +54,22 @@ export class SearchService {
   }
 
   private async doPopulate(): Promise<void> {
-    // Use single paginated call with nested markets for efficiency
-    // This fetches ~3400 events + ~25000 markets in ~17 API calls instead of 3400+
+    logger.info("Populating search cache from Kalshi API...");
+    const startTime = Date.now();
+
     const { events, markets } = await this.client.fetchAllEventsWithMarkets();
 
     this.cache.populate(events, markets);
+
+    const elapsedMs = Date.now() - startTime;
+    logger.info(
+      {
+        events: events.length,
+        markets: markets.length,
+        elapsedMs,
+      },
+      "Search cache populated",
+    );
   }
 
   /**
@@ -65,8 +77,21 @@ export class SearchService {
    * Adds new items, updates existing, and prunes removed.
    */
   async refresh(): Promise<void> {
+    logger.info("Refreshing search cache...");
+    const startTime = Date.now();
+
     const { events, markets } = await this.client.fetchAllEventsWithMarkets();
     this.cache.refresh(events, markets);
+
+    const elapsedMs = Date.now() - startTime;
+    logger.info(
+      {
+        events: events.length,
+        markets: markets.length,
+        elapsedMs,
+      },
+      "Search cache refreshed",
+    );
   }
 
   /**
