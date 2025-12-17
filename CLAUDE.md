@@ -11,6 +11,40 @@ Always consult these docs when working with platform APIs:
 | Polymarket CLOB  | https://docs.polymarket.com/#clob-api                             |
 | MCP Protocol     | https://modelcontextprotocol.io/specification                     |
 
+## Development Workflow
+
+### Testing Changes
+
+**All functional changes must be tested by invoking the MCP tools directly.**
+
+1. Run `bun run scripts/bootstrap.ts` to register your worktree's server in `.mcp.json`
+2. **Exit and resume your Claude Code session** — the server won't reload until restart
+3. Invoke the tools you modified to verify they work correctly
+4. Run `bun test` to ensure all tests pass
+
+### Critical: Session Restart Required
+
+MCP servers are loaded when the Claude Code session starts. If you:
+
+- Add MCP config for the first time
+- Update server code and need to test changes
+- Modify tool definitions or handlers
+
+**You must exit and resume the session to load the updated server.**
+
+The bootstrap script reminds you of this, but it's easy to forget when iterating on code changes.
+
+### Worktree Setup
+
+Each git worktree needs its own `.mcp.json` pointing to its `index.ts`:
+
+```bash
+cd /path/to/your-worktree
+bun install
+bun run scripts/bootstrap.ts
+# Exit and resume Claude Code session
+```
+
 ## Architecture
 
 ```
@@ -25,7 +59,7 @@ src/
   tools.ts                  MCP tool handlers
   validation.ts             Zod v4 schemas (generate JSON Schema)
 scripts/
-  bootstrap.ts              Register with Claude Code/Desktop
+  bootstrap.ts              Register server with MCP clients
   generate-docs.ts          Generate docs/ from source
   check-docs.ts             CI freshness check
 docs/                       Auto-generated—do not edit
@@ -39,7 +73,10 @@ docs/                       Auto-generated—do not edit
 - Auth: API key + RSA private key
 - Orderbook returns bids only (binary market reciprocity)
 - SDK 3.0 uses `MarketApi` (singular)
-- Base URL: `https://api.elections.kalshi.com/trade-api/v2`
+- Production URL: `https://api.elections.kalshi.com/trade-api/v2`
+- Demo URL: `https://demo-api.kalshi.co/trade-api/v2`
+
+Set `KALSHI_USE_DEMO=true` to use the demo environment. Demo credentials are separate from production.
 
 ### Polymarket
 
@@ -48,6 +85,7 @@ docs/                       Auto-generated—do not edit
 - SDK: `@polymarket/clob-client` for CLOB operations
 - Markets identified by `slug`; CLOB uses `token_id` from `clobTokenIds`
 - Orderbook returns both bids and asks
+- No demo environment available (all operations are read-only)
 
 ## Search
 
@@ -62,12 +100,13 @@ Kalshi search uses an in-memory cache:
 
 ### bootstrap.ts
 
-Registers the MCP server with Claude:
+Registers the MCP server with Claude Code or other MCP clients:
 
 ```bash
 bun run scripts/bootstrap.ts              # Project config (.mcp.json)
 bun run scripts/bootstrap.ts --global     # User config (~/.claude.json)
 bun run scripts/bootstrap.ts --interactive # Prompt for credentials
+bun run scripts/bootstrap.ts --demo       # Use Kalshi demo environment
 ```
 
 ### generate-docs.ts
@@ -97,7 +136,7 @@ CI runs this to catch stale documentation.
 ```bash
 KALSHI_API_KEY=...
 KALSHI_PRIVATE_KEY_PATH=/path/to/key.pem   # or KALSHI_PRIVATE_KEY_PEM
-KALSHI_BASE_PATH=...                        # optional, defaults to production
+KALSHI_USE_DEMO=true                        # optional, use demo environment
 ```
 
 ### Polymarket
@@ -115,7 +154,7 @@ GitHub Actions runs on PRs and pushes to main:
 - `format` — Prettier
 - `typecheck` — TypeScript
 - `lint` — ESLint
-- `test` — Bun test with coverage
+- `test` — Bun test with coverage (uses Kalshi demo environment)
 - `security` — Dependency audit
 - `secrets` — Gitleaks
 - `docs` — Documentation freshness

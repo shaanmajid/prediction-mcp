@@ -9,11 +9,15 @@ import {
 import { backOff } from "exponential-backoff";
 import { isAxiosError } from "axios";
 
+const KALSHI_PRODUCTION_URL = "https://api.elections.kalshi.com/trade-api/v2";
+const KALSHI_DEMO_URL = "https://demo-api.kalshi.co/trade-api/v2";
+
 export interface KalshiConfig {
   apiKey?: string;
   privateKeyPem?: string;
   privateKeyPath?: string;
   basePath?: string;
+  useDemo?: boolean;
 }
 
 /** Retry options for rate-limited API calls */
@@ -30,15 +34,18 @@ export class KalshiClient {
   private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig = {}) {
+    const useDemo = config.useDemo ?? process.env.KALSHI_USE_DEMO === "true";
+    const basePath =
+      config.basePath ||
+      process.env.KALSHI_BASE_PATH ||
+      (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
+
     const configuration = new Configuration({
       apiKey: config.apiKey || process.env.KALSHI_API_KEY,
       privateKeyPem: config.privateKeyPem || process.env.KALSHI_PRIVATE_KEY_PEM,
       privateKeyPath:
         config.privateKeyPath || process.env.KALSHI_PRIVATE_KEY_PATH,
-      basePath:
-        config.basePath ||
-        process.env.KALSHI_BASE_PATH ||
-        "https://api.elections.kalshi.com/trade-api/v2",
+      basePath,
     });
 
     this.marketApi = new MarketApi(configuration);

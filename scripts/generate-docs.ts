@@ -42,9 +42,16 @@ const ENV_VARS: EnvVar[] = [
     required: false,
   },
   {
+    name: "KALSHI_USE_DEMO",
+    description:
+      "Set to `true` to use Kalshi demo environment. Requires demo credentials from https://demo.kalshi.co/",
+    required: false,
+    default: "false",
+  },
+  {
     name: "KALSHI_BASE_PATH",
     description:
-      "API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing",
+      "API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set",
     required: false,
     default: "https://api.elections.kalshi.com/trade-api/v2",
   },

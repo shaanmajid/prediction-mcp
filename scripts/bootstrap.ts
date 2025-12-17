@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 /* eslint-disable no-console */
 /**
- * Bootstrap script for registering the prediction-markets MCP server with Claude Code.
+ * Bootstrap script for registering the prediction-markets MCP server with MCP clients.
  *
  * Usage:
  *   bun run scripts/bootstrap.ts              # Project-level config (.mcp.json)
  *   bun run scripts/bootstrap.ts --global     # Global config (~/.claude.json)
  *   bun run scripts/bootstrap.ts --interactive # Prompt for credentials
+ *   bun run scripts/bootstrap.ts --demo       # Use Kalshi demo environment
  */
 
 import * as fs from "fs";
@@ -136,19 +137,23 @@ function printCredentialStatus(creds: CredentialStatus): void {
 function buildMCPServerConfig(
   indexPath: string,
   creds?: CredentialStatus,
+  useDemo?: boolean,
 ): MCPServerConfig {
   const config: MCPServerConfig = {
     command: "bun",
     args: ["run", indexPath],
   };
 
-  if (creds?.apiKey || creds?.privateKeyPath) {
+  if (creds?.apiKey || creds?.privateKeyPath || useDemo) {
     config.env = {};
-    if (creds.apiKey) {
+    if (creds?.apiKey) {
       config.env.KALSHI_API_KEY = creds.apiKey;
     }
-    if (creds.privateKeyPath) {
+    if (creds?.privateKeyPath) {
       config.env.KALSHI_PRIVATE_KEY_PATH = creds.privateKeyPath;
+    }
+    if (useDemo) {
+      config.env.KALSHI_USE_DEMO = "true";
     }
   }
 
@@ -298,6 +303,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const isInteractive = args.includes("--interactive") || args.includes("-i");
   const isGlobal = args.includes("--global") || args.includes("-g");
+  const useDemo = args.includes("--demo") || args.includes("-d");
 
   // Step 1: Resolve paths
   const packageRoot = resolvePackageRoot();
@@ -309,7 +315,11 @@ async function main(): Promise<void> {
     : path.join(packageRoot, ".mcp.json");
 
   const scopeLabel = isGlobal ? "global" : "project";
-  console.log(colors.dim(`Using ${scopeLabel} config: ${configPath}\n`));
+  console.log(colors.dim(`Using ${scopeLabel} config: ${configPath}`));
+  if (useDemo) {
+    console.log(colors.yellow("Using Kalshi demo environment"));
+  }
+  console.log();
 
   // Step 3: Read existing config
   const config = readConfig(configPath);
@@ -325,6 +335,7 @@ async function main(): Promise<void> {
   config.mcpServers["prediction-markets"] = buildMCPServerConfig(
     indexPath,
     creds,
+    useDemo,
   );
 
   // Step 7: Write config
@@ -332,6 +343,9 @@ async function main(): Promise<void> {
 
   console.log(colors.green("✓ Registered prediction-markets MCP server"));
   console.log(colors.dim(`  Path: ${indexPath}`));
+  if (useDemo) {
+    console.log(colors.dim("  Environment: Kalshi demo"));
+  }
 
   // Step 8: Handle credentials
   if (isInteractive) {
@@ -342,6 +356,7 @@ async function main(): Promise<void> {
       config.mcpServers["prediction-markets"] = buildMCPServerConfig(
         indexPath,
         creds,
+        useDemo,
       );
       writeConfig(configPath, config);
       console.log(colors.green("\n✓ Credentials configured"));
@@ -366,7 +381,7 @@ async function main(): Promise<void> {
     );
   }
   console.log(
-    colors.dim("\nRestart Claude Code to pick up the new configuration."),
+    colors.dim("\nRestart your MCP client to pick up the new configuration."),
   );
 }
 

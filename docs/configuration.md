@@ -16,9 +16,15 @@ Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM` (opti
 
 RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH` (optional)
 
+### KALSHI_USE_DEMO
+
+Set to `true` to use Kalshi demo environment. Requires demo credentials from https://demo.kalshi.co/ (optional)
+
+Default: `false`
+
 ### KALSHI_BASE_PATH
 
-API endpoint override. Use `https://demo-api.kalshi.co/trade-api/v2` for testing (optional)
+API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set (optional)
 
 Default: `https://api.elections.kalshi.com/trade-api/v2`
 
