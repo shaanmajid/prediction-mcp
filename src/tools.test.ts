@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from "bun:test";
+import { describe, test, expect } from "bun:test";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
 import { SearchService } from "./search/index.js";
@@ -99,41 +99,45 @@ describe("Polymarket Tool Handler Integration Tests", () => {
     searchService: new SearchService(new KalshiClient()),
   };
 
-  let testTokenId: string;
-
-  beforeAll(async () => {
-    // Get a real token ID from an active market
+  test("polymarket_get_price returns price and midpoint", async () => {
+    // Search through markets until we find one with valid CLOB token IDs
     const listTool = TOOLS.polymarket_list_markets!;
-    const result = (await listTool.handler(ctx, {
-      closed: false,
-      limit: 1,
-    })) as { markets: Array<{ clobTokenIds?: string }> };
+    const MAX_PAGES = 5;
+    let testTokenId: string | undefined;
 
-    if (result.markets.length > 0) {
-      const market = result.markets[0]!;
-      if (market.clobTokenIds) {
-        try {
-          const tokenIds = JSON.parse(market.clobTokenIds as string);
-          if (Array.isArray(tokenIds) && tokenIds.length > 0) {
-            testTokenId = tokenIds[0];
+    for (let page = 0; page < MAX_PAGES && !testTokenId; page++) {
+      const result = (await listTool.handler(ctx, {
+        closed: false,
+        limit: 100,
+        offset: page * 100,
+      })) as { markets: Array<{ clobTokenIds?: string }> };
+
+      if (result.markets.length === 0) break;
+
+      for (const market of result.markets) {
+        if (market.clobTokenIds) {
+          try {
+            const tokenIds = JSON.parse(market.clobTokenIds as string);
+            if (Array.isArray(tokenIds) && tokenIds.length > 0) {
+              testTokenId = tokenIds[0];
+              break;
+            }
+          } catch {
+            const tokenIds = (market.clobTokenIds as string).split(",");
+            if (tokenIds[0]?.trim()) {
+              testTokenId = tokenIds[0].trim();
+              break;
+            }
           }
-        } catch {
-          const tokenIds = (market.clobTokenIds as string).split(",");
-          testTokenId = tokenIds[0]!.trim();
         }
       }
     }
-  });
 
-  test("polymarket_get_price returns price and midpoint", async () => {
-    if (!testTokenId) {
-      console.log("Skipping: no test token available");
-      return;
-    }
+    expect(testTokenId).toBeDefined();
 
     const tool = TOOLS.polymarket_get_price!;
     const result = (await tool.handler(ctx, {
-      token_id: testTokenId,
+      token_id: testTokenId!,
       side: "BUY",
     })) as { price: string; midpoint: string; side: string };
 
@@ -174,26 +178,22 @@ describe("Kalshi Tool Integration Tests", () => {
 
     expect(result).toBeDefined();
     expect(Array.isArray(result.markets)).toBe(true);
+    expect(result.markets.length).toBeGreaterThan(0);
     expect(result.markets.length).toBeLessThanOrEqual(5);
 
-    if (result.markets.length > 0) {
-      const market = result.markets[0]!;
-      expect(typeof market.ticker).toBe("string");
-    }
+    const market = result.markets[0]!;
+    expect(typeof market.ticker).toBe("string");
   });
 
   test("kalshi_get_market returns market details", async () => {
-    // First get a valid ticker
+    // Get an open market - Kalshi should always have open markets
     const listTool = TOOLS.kalshi_list_markets!;
     const listResult = (await listTool.handler(ctx, {
       status: "open",
-      limit: 1,
+      limit: 10,
     })) as { markets: Array<{ ticker: string }> };
 
-    if (listResult.markets.length === 0) {
-      console.log("Skipping: no open markets available");
-      return;
-    }
+    expect(listResult.markets.length).toBeGreaterThan(0);
 
     const ticker = listResult.markets[0]!.ticker;
     const tool = TOOLS.kalshi_get_market!;
@@ -210,13 +210,10 @@ describe("Kalshi Tool Integration Tests", () => {
     const listTool = TOOLS.kalshi_list_markets!;
     const listResult = (await listTool.handler(ctx, {
       status: "open",
-      limit: 1,
+      limit: 10,
     })) as { markets: Array<{ ticker: string }> };
 
-    if (listResult.markets.length === 0) {
-      console.log("Skipping: no open markets available");
-      return;
-    }
+    expect(listResult.markets.length).toBeGreaterThan(0);
 
     const ticker = listResult.markets[0]!.ticker;
     const tool = TOOLS.kalshi_get_orderbook!;
@@ -244,48 +241,53 @@ describe("Kalshi Tool Integration Tests", () => {
   });
 
   test("kalshi_get_series returns series metadata", async () => {
-    // Get a valid series ticker from an event (series_ticker is on events, not markets)
+    // Search through events until we find one with a series_ticker
     const listTool = TOOLS.kalshi_list_markets!;
+    const eventTool = TOOLS.kalshi_get_event!;
+    const MAX_MARKETS = 50;
+
+    let seriesTicker: string | undefined;
+
     const listResult = (await listTool.handler(ctx, {
-      limit: 1,
+      limit: MAX_MARKETS,
     })) as { markets: Array<{ event_ticker: string }> };
 
-    if (listResult.markets.length === 0) {
-      console.log("Skipping: no markets available");
-      return;
+    expect(listResult.markets.length).toBeGreaterThan(0);
+
+    // Collect unique event tickers to avoid redundant API calls
+    const eventTickers = [
+      ...new Set(listResult.markets.map((m) => m.event_ticker)),
+    ];
+
+    for (const eventTicker of eventTickers) {
+      const eventResult = (await eventTool.handler(ctx, { eventTicker })) as {
+        event: { series_ticker?: string };
+      };
+      if (eventResult.event.series_ticker) {
+        seriesTicker = eventResult.event.series_ticker;
+        break;
+      }
     }
 
-    // Get the event to find its series_ticker
-    const eventTool = TOOLS.kalshi_get_event!;
-    const eventResult = (await eventTool.handler(ctx, {
-      eventTicker: listResult.markets[0]!.event_ticker,
-    })) as { event: { series_ticker?: string } };
-
-    if (!eventResult.event.series_ticker) {
-      console.log("Skipping: event has no series_ticker");
-      return;
-    }
+    expect(seriesTicker).toBeDefined();
 
     const tool = TOOLS.kalshi_get_series!;
     const result = (await tool.handler(ctx, {
-      seriesTicker: eventResult.event.series_ticker,
+      seriesTicker: seriesTicker!,
     })) as { series: { ticker: string } };
 
     expect(result).toBeDefined();
     expect(result.series).toBeDefined();
-    expect(result.series.ticker).toBe(eventResult.event.series_ticker);
+    expect(result.series.ticker).toBe(seriesTicker!);
   });
 
   test("kalshi_get_event returns event metadata", async () => {
     const listTool = TOOLS.kalshi_list_markets!;
     const listResult = (await listTool.handler(ctx, {
-      limit: 1,
+      limit: 10,
     })) as { markets: Array<{ event_ticker: string }> };
 
-    if (listResult.markets.length === 0) {
-      console.log("Skipping: no markets available");
-      return;
-    }
+    expect(listResult.markets.length).toBeGreaterThan(0);
 
     const eventTicker = listResult.markets[0]!.event_ticker;
     const tool = TOOLS.kalshi_get_event!;
