@@ -1,6 +1,6 @@
 # Prediction Markets MCP Server
 
-An MCP server that fetches prediction market data from Kalshi and Polymarket.
+An MCP server providing unified access to prediction market data from Kalshi and Polymarket.
 
 ## Features
 
@@ -8,35 +8,13 @@ An MCP server that fetches prediction market data from Kalshi and Polymarket.
 - **Full-text search** — Find Kalshi events and markets by keyword
 - **Rate limit handling** — Automatic retry with exponential backoff
 
-## Quick Start
+## Installation
 
-```bash
-bun install
-bun run scripts/bootstrap.ts --interactive
-```
+This server follows the standard [MCP configuration format](https://modelcontextprotocol.io/examples). Add it to your MCP client's configuration file.
 
-The bootstrap script registers this server with Claude Code or Claude Desktop and prompts for your Kalshi credentials.
+### Configuration Format
 
-## Configuration
-
-### Kalshi
-
-Kalshi requires API credentials for authenticated requests:
-
-```bash
-KALSHI_API_KEY=your-api-key-id
-KALSHI_PRIVATE_KEY_PATH=/path/to/private-key.pem
-```
-
-Get credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api).
-
-### Polymarket
-
-Polymarket tools work without authentication—all read operations are public.
-
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+All MCP clients use the same JSON structure:
 
 ```json
 {
@@ -52,6 +30,55 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   }
 }
 ```
+
+### Client-Specific Locations
+
+| Client            | Configuration File                                                        |
+| ----------------- | ------------------------------------------------------------------------- |
+| Claude Code       | `.mcp.json` (project root) or `~/.claude.json` (global)                   |
+| Claude Desktop    | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) |
+| VS Code (Copilot) | `.vscode/mcp.json` or VS Code settings                                    |
+| Cursor            | `.cursor/mcp.json` or Cursor settings                                     |
+
+### Quick Setup (Claude Code)
+
+For Claude Code users, a bootstrap script generates the configuration:
+
+```bash
+bun install
+bun run scripts/bootstrap.ts              # Creates .mcp.json in project root
+bun run scripts/bootstrap.ts --global     # Adds to ~/.claude.json
+bun run scripts/bootstrap.ts --interactive # Prompts for Kalshi credentials
+```
+
+**Note:** After adding or updating MCP configuration, restart your MCP client to load the changes.
+
+## Credentials
+
+### Kalshi
+
+Kalshi requires API credentials for authenticated requests:
+
+```bash
+KALSHI_API_KEY=your-api-key-id
+KALSHI_PRIVATE_KEY_PATH=/path/to/private-key.pem
+```
+
+Get credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api).
+
+#### Demo Environment
+
+Kalshi provides a [demo environment](https://demo.kalshi.co/) for testing with mock funds:
+
+```bash
+KALSHI_USE_DEMO=true
+```
+
+Demo credentials are separate from production—create a demo account at [demo.kalshi.co](https://demo.kalshi.co/).
+
+### Polymarket
+
+Polymarket tools work without authentication—all read operations are public.
 
 ## Available Tools
 
@@ -92,7 +119,7 @@ src/
   tools.ts            # MCP tool handlers
   validation.ts       # Zod schemas
 scripts/
-  bootstrap.ts        # MCP registration
+  bootstrap.ts        # MCP registration helper
   generate-docs.ts    # Doc generator
   check-docs.ts       # Doc freshness check
 ```

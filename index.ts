@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-import { pino } from "pino";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -10,6 +9,7 @@ import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { SearchService } from "./src/search/index.js";
 import { TOOLS, getToolsList, type ToolContext } from "./src/tools.js";
+import { logger } from "./src/logger.js";
 
 /**
  * Error classification result
@@ -57,10 +57,6 @@ export function classifyError(error: unknown): ClassifiedError {
 
   return { code: errorCode, message: errorMessage };
 }
-
-const logger = pino({
-  level: "info",
-});
 
 const server = new Server(
   {

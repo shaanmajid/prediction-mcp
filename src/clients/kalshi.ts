@@ -8,12 +8,38 @@ import {
 } from "kalshi-typescript";
 import { backOff } from "exponential-backoff";
 import { isAxiosError } from "axios";
+import { logger } from "../logger.js";
+
+export const KALSHI_PRODUCTION_URL =
+  "https://api.elections.kalshi.com/trade-api/v2";
+export const KALSHI_DEMO_URL = "https://demo-api.kalshi.co/trade-api/v2";
 
 export interface KalshiConfig {
   apiKey?: string;
   privateKeyPem?: string;
   privateKeyPath?: string;
   basePath?: string;
+  useDemo?: boolean;
+}
+
+/**
+ * Resolve the Kalshi API base path from config and environment variables.
+ * Priority: explicit basePath > KALSHI_BASE_PATH env > useDemo flag > production default
+ *
+ * @returns Object with resolved basePath and whether a warning should be logged
+ */
+export function resolveKalshiBasePath(config: KalshiConfig = {}): {
+  basePath: string;
+  shouldWarn: boolean;
+  explicitBasePath: string | undefined;
+} {
+  const useDemo = config.useDemo ?? process.env.KALSHI_USE_DEMO === "true";
+  const explicitBasePath = config.basePath || process.env.KALSHI_BASE_PATH;
+  const shouldWarn = useDemo && !!explicitBasePath;
+  const basePath =
+    explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
+
+  return { basePath, shouldWarn, explicitBasePath };
 }
 
 /** Retry options for rate-limited API calls */
@@ -30,15 +56,22 @@ export class KalshiClient {
   private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig = {}) {
+    const { basePath, shouldWarn, explicitBasePath } =
+      resolveKalshiBasePath(config);
+
+    if (shouldWarn) {
+      logger.warn(
+        { basePath: explicitBasePath },
+        "Both KALSHI_USE_DEMO and KALSHI_BASE_PATH are set; KALSHI_BASE_PATH takes precedence",
+      );
+    }
+
     const configuration = new Configuration({
       apiKey: config.apiKey || process.env.KALSHI_API_KEY,
       privateKeyPem: config.privateKeyPem || process.env.KALSHI_PRIVATE_KEY_PEM,
       privateKeyPath:
         config.privateKeyPath || process.env.KALSHI_PRIVATE_KEY_PATH,
-      basePath:
-        config.basePath ||
-        process.env.KALSHI_BASE_PATH ||
-        "https://api.elections.kalshi.com/trade-api/v2",
+      basePath,
     });
 
     this.marketApi = new MarketApi(configuration);

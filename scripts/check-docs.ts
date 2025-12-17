@@ -24,11 +24,14 @@ const DOCUMENTED_ENV_VARS = [
   "KALSHI_API_KEY",
   "KALSHI_PRIVATE_KEY_PATH",
   "KALSHI_PRIVATE_KEY_PEM",
+  "KALSHI_USE_DEMO",
   "KALSHI_BASE_PATH",
   // Polymarket
   "POLYMARKET_GAMMA_HOST",
   "POLYMARKET_CLOB_HOST",
   "POLYMARKET_CHAIN_ID",
+  // Logging
+  "LOG_LEVEL",
 ];
 
 function checkToolsInReference(): { valid: boolean; errors: string[] } {
