@@ -244,29 +244,36 @@ describe("Kalshi Tool Integration Tests", () => {
   });
 
   test("kalshi_get_series returns series metadata", async () => {
-    // Get a valid series ticker from a market
+    // Get a valid series ticker from an event (series_ticker is on events, not markets)
     const listTool = TOOLS.kalshi_list_markets!;
     const listResult = (await listTool.handler(ctx, {
-      limit: 100,
-    })) as { markets: Array<{ series_ticker?: string }> };
+      limit: 1,
+    })) as { markets: Array<{ event_ticker: string }> };
 
-    const marketWithSeries = listResult.markets.find(
-      (m) => m.series_ticker !== undefined,
-    );
+    if (listResult.markets.length === 0) {
+      console.log("Skipping: no markets available");
+      return;
+    }
 
-    if (!marketWithSeries?.series_ticker) {
-      console.log("Skipping: no market with series_ticker found");
+    // Get the event to find its series_ticker
+    const eventTool = TOOLS.kalshi_get_event!;
+    const eventResult = (await eventTool.handler(ctx, {
+      eventTicker: listResult.markets[0]!.event_ticker,
+    })) as { event: { series_ticker?: string } };
+
+    if (!eventResult.event.series_ticker) {
+      console.log("Skipping: event has no series_ticker");
       return;
     }
 
     const tool = TOOLS.kalshi_get_series!;
     const result = (await tool.handler(ctx, {
-      seriesTicker: marketWithSeries.series_ticker,
+      seriesTicker: eventResult.event.series_ticker,
     })) as { series: { ticker: string } };
 
     expect(result).toBeDefined();
     expect(result.series).toBeDefined();
-    expect(result.series.ticker).toBe(marketWithSeries.series_ticker);
+    expect(result.series.ticker).toBe(eventResult.event.series_ticker);
   });
 
   test("kalshi_get_event returns event metadata", async () => {
