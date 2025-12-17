@@ -87,10 +87,8 @@ jobs:
       - name: Run tests with coverage
         run: bun test --coverage --coverage-reporter=lcov
         env:
-          # Optional: Configure Kalshi credentials for authenticated tests
-          # Tests work without credentials (public market data)
-          KALSHI_API_KEY: ${{ secrets.KALSHI_API_KEY }}
-          KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM }}
+          # Use Kalshi demo environment to avoid production load
+          KALSHI_USE_DEMO: "true"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
