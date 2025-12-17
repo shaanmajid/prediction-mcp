@@ -46,6 +46,12 @@ Polygon chain ID for Polymarket CLOB client (optional)
 
 Default: `137`
 
+### LOG_LEVEL
+
+Logging verbosity level. Options: trace, debug, info, warn, error, fatal (optional)
+
+Default: `info`
+
 ## Setup
 
 1. Get API credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api)

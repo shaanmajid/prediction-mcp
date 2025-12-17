@@ -30,6 +30,8 @@ const DOCUMENTED_ENV_VARS = [
   "POLYMARKET_GAMMA_HOST",
   "POLYMARKET_CLOB_HOST",
   "POLYMARKET_CHAIN_ID",
+  // Logging
+  "LOG_LEVEL",
 ];
 
 function checkToolsInReference(): { valid: boolean; errors: string[] } {

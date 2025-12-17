@@ -74,6 +74,14 @@ const ENV_VARS: EnvVar[] = [
     required: false,
     default: "137",
   },
+  // Logging
+  {
+    name: "LOG_LEVEL",
+    description:
+      "Logging verbosity level. Options: trace, debug, info, warn, error, fatal",
+    required: false,
+    default: "info",
+  },
 ];
 
 function ensureDir(dir: string): void {
