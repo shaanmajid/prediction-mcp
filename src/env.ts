@@ -156,12 +156,3 @@ export const polymarketConfig = {
   clobHost: env.POLYMARKET_CLOB_HOST,
   chainId: env.POLYMARKET_CHAIN_ID,
 };
-
-// ============================================================
-// Type Exports
-// ============================================================
-
-export type Env = typeof env;
-export type LogLevel = z.infer<typeof logLevelSchema>;
-export type KalshiConfig = typeof kalshiConfig;
-export type PolymarketConfig = typeof polymarketConfig;
