@@ -5,7 +5,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { env } from "./src/env.js";
+import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { SearchService } from "./src/search/index.js";
@@ -71,19 +71,9 @@ const server = new Server(
   },
 );
 
-// Initialize clients with validated env
-const kalshiClient = new KalshiClient({
-  apiKey: env.KALSHI_API_KEY,
-  privateKeyPath: env.KALSHI_PRIVATE_KEY_PATH,
-  privateKeyPem: env.KALSHI_PRIVATE_KEY_PEM,
-  useDemo: env.KALSHI_USE_DEMO,
-  basePath: env.KALSHI_BASE_PATH,
-});
-const polymarketClient = new PolymarketClient({
-  gammaHost: env.POLYMARKET_GAMMA_HOST,
-  clobHost: env.POLYMARKET_CLOB_HOST,
-  chainId: env.POLYMARKET_CHAIN_ID,
-});
+// Initialize clients with validated config
+const kalshiClient = new KalshiClient(kalshiConfig);
+const polymarketClient = new PolymarketClient(polymarketConfig);
 const searchService = new SearchService(kalshiClient);
 
 const toolContext: ToolContext = {

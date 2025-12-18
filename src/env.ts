@@ -1,12 +1,11 @@
 /**
  * Environment configuration with fail-fast validation.
  *
- * Pydantic-settings pattern: schema IS documentation.
- * - Use .meta() to attach doc metadata (description, default) to schemas
- * - ENV_VAR_DOCS is derived from schema.meta() - single source of truth
+ * Uses @t3-oss/env-core for schema validation at import time.
+ * Documentation metadata is attached via .meta() and extracted in scripts/env-docs.ts.
  */
 import { createEnv } from "@t3-oss/env-core";
-import { z, type ZodTypeAny } from "zod";
+import { z } from "zod";
 import pino from "pino";
 
 // ============================================================
@@ -16,9 +15,10 @@ import pino from "pino";
 /**
  * Strict boolean env var validator.
  * Only accepts explicit boolean strings - rejects typos like "tru" or "yes".
+ * Note: Empty strings are converted to undefined by emptyStringAsUndefined option.
  */
 const booleanString = z
-  .enum(["true", "false", "1", "0", ""])
+  .enum(["true", "false", "1", "0"])
   .transform((v) => v === "true" || v === "1");
 
 /**
@@ -37,17 +37,18 @@ const logLevelSchema = z.enum(LOG_LEVELS);
 
 /**
  * Documentation metadata for each env var.
- * Stored via .meta() - the ONLY place env vars are documented.
+ * Stored via .meta() - extracted by scripts/env-docs.ts for doc generation.
  */
-interface DocMeta {
+export interface DocMeta {
   description: string;
   docDefault?: string; // For transforms where default can't be inferred
 }
 
 /**
  * Schema definitions with embedded documentation via .meta().
+ * Exported for scripts/env-docs.ts to extract documentation.
  */
-const serverSchema = {
+export const serverSchema = {
   // Kalshi
   KALSHI_API_KEY: z
     .string()
@@ -138,65 +139,44 @@ export const env = createEnv({
 });
 
 // ============================================================
-// Documentation Metadata (Derived from Schema)
+// Nested Config Objects (Convenience Layer)
 // ============================================================
 
-export interface EnvVarDoc {
-  name: string;
-  description: string;
-  required: boolean;
-  default?: string;
-}
+/**
+ * Kalshi client configuration derived from env vars.
+ */
+export const kalshiConfig = {
+  get apiKey() {
+    return env.KALSHI_API_KEY;
+  },
+  get privateKeyPath() {
+    return env.KALSHI_PRIVATE_KEY_PATH;
+  },
+  get privateKeyPem() {
+    return env.KALSHI_PRIVATE_KEY_PEM;
+  },
+  get useDemo() {
+    return env.KALSHI_USE_DEMO;
+  },
+  get basePath() {
+    return env.KALSHI_BASE_PATH;
+  },
+} as const;
 
 /**
- * Extract documentation metadata from a Zod schema.
- *
- * Reads from:
- * - schema.meta() for description and docDefault
- * - schema.isOptional() for required detection
- * - z.toJSONSchema() for actual default values (when not a transform)
+ * Polymarket client configuration derived from env vars.
  */
-function extractSchemaDoc(name: string, schema: ZodTypeAny): EnvVarDoc {
-  // Get metadata from .meta()
-  const meta = (schema.meta?.() ?? {}) as DocMeta;
-
-  // Description is required in DocMeta, but fallback just in case
-  const description = meta.description || `Environment variable ${name}`;
-
-  // Try to get default from JSON Schema (works for non-transform schemas)
-  let defaultStr: string | undefined = meta.docDefault;
-  if (!defaultStr) {
-    try {
-      const jsonSchema = z.toJSONSchema(schema, {
-        io: "input",
-        unrepresentable: "any",
-      }) as { default?: unknown };
-      if ("default" in jsonSchema && jsonSchema.default !== undefined) {
-        defaultStr = String(jsonSchema.default);
-      }
-    } catch {
-      // Transform schemas can't be converted - use docDefault from meta
-    }
-  }
-
-  // A field is required if it's not optional and has no default
-  const isOptional = schema.isOptional() || defaultStr !== undefined;
-
-  return {
-    name,
-    description,
-    required: !isOptional,
-    default: defaultStr,
-  };
-}
-
-/**
- * Environment variable documentation derived from schema.
- * Used by generate-docs.ts - NOT a separate source of truth.
- */
-export const ENV_VAR_DOCS: EnvVarDoc[] = Object.entries(serverSchema).map(
-  ([name, schema]) => extractSchemaDoc(name, schema),
-);
+export const polymarketConfig = {
+  get gammaHost() {
+    return env.POLYMARKET_GAMMA_HOST;
+  },
+  get clobHost() {
+    return env.POLYMARKET_CLOB_HOST;
+  },
+  get chainId() {
+    return env.POLYMARKET_CHAIN_ID;
+  },
+} as const;
 
 // ============================================================
 // Type Exports
@@ -204,3 +184,5 @@ export const ENV_VAR_DOCS: EnvVarDoc[] = Object.entries(serverSchema).map(
 
 export type Env = typeof env;
 export type LogLevel = z.infer<typeof logLevelSchema>;
+export type KalshiConfig = typeof kalshiConfig;
+export type PolymarketConfig = typeof polymarketConfig;

@@ -12,7 +12,7 @@
  */
 
 import { getToolsList } from "../src/tools.js";
-import { ENV_VAR_DOCS } from "../src/env.js";
+import { ENV_VAR_DOCS } from "./env-docs.js";
 import * as fs from "fs";
 import * as path from "path";
 
