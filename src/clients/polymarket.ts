@@ -12,6 +12,7 @@
 
 import { ClobClient, type OrderBookSummary } from "@polymarket/clob-client";
 import { backOff } from "exponential-backoff";
+import { type PolymarketConfig } from "../config.js";
 
 /** Custom error class for API errors with status code */
 class ApiError extends Error {
@@ -31,18 +32,6 @@ const RETRY_OPTIONS = {
   jitter: "full" as const,
   retry: (err: unknown) => err instanceof ApiError && err.status === 429,
 };
-
-/**
- * Configuration for PolymarketClient
- */
-export interface PolymarketConfig {
-  /** Gamma API host (default: https://gamma-api.polymarket.com) */
-  gammaHost?: string;
-  /** CLOB API host (default: https://clob.polymarket.com) */
-  clobHost?: string;
-  /** Polygon chain ID (default: 137 for mainnet) */
-  chainId?: number;
-}
 
 /**
  * Market object from Gamma API
@@ -154,22 +143,10 @@ export class PolymarketClient {
   private clobHost: string;
   private clobClient: ClobClient;
 
-  constructor(config: PolymarketConfig = {}) {
-    this.gammaHost =
-      config.gammaHost ||
-      process.env.POLYMARKET_GAMMA_HOST ||
-      "https://gamma-api.polymarket.com";
-
-    this.clobHost =
-      config.clobHost ||
-      process.env.POLYMARKET_CLOB_HOST ||
-      "https://clob.polymarket.com";
-
-    const chainId =
-      config.chainId ||
-      (process.env.POLYMARKET_CHAIN_ID
-        ? parseInt(process.env.POLYMARKET_CHAIN_ID)
-        : 137);
+  constructor(config: Partial<PolymarketConfig> = {}) {
+    this.gammaHost = config.gammaHost ?? "https://gamma-api.polymarket.com";
+    this.clobHost = config.clobHost ?? "https://clob.polymarket.com";
+    const chainId = config.chainId ?? 137;
 
     // Initialize CLOB client for public operations (no signer needed for reads)
     this.clobClient = new ClobClient(this.clobHost, chainId);
