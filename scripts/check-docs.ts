@@ -12,27 +12,12 @@
  */
 
 import { getToolsList } from "../src/tools.js";
+import { getEnvVarMetadata } from "../src/config-metadata.js";
 import * as fs from "fs";
 import * as path from "path";
 
 const DOCS_DIR = path.join(import.meta.dir, "../docs");
 const SRC_DIR = path.join(import.meta.dir, "../src");
-
-// Env vars that are documented in generate-docs.ts
-const DOCUMENTED_ENV_VARS = [
-  // Kalshi
-  "KALSHI_API_KEY",
-  "KALSHI_PRIVATE_KEY_PATH",
-  "KALSHI_PRIVATE_KEY_PEM",
-  "KALSHI_USE_DEMO",
-  "KALSHI_BASE_PATH",
-  // Polymarket
-  "POLYMARKET_GAMMA_HOST",
-  "POLYMARKET_CLOB_HOST",
-  "POLYMARKET_CHAIN_ID",
-  // Logging
-  "LOG_LEVEL",
-];
 
 function checkToolsInReference(): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -93,15 +78,10 @@ function checkEnvVarsInConfig(): { valid: boolean; errors: string[] } {
 
   const content = fs.readFileSync(configPath, "utf-8");
 
-  // Expected env vars from source code
-  const expectedEnvVars = [
-    "KALSHI_API_KEY",
-    "KALSHI_PRIVATE_KEY_PATH",
-    "KALSHI_PRIVATE_KEY_PEM",
-    "KALSHI_BASE_PATH",
-  ];
+  // Get expected env vars from ConfigSchema
+  const schemaEnvVars = getEnvVarMetadata().map((m) => m.name);
 
-  for (const envVar of expectedEnvVars) {
+  for (const envVar of schemaEnvVars) {
     if (!content.includes(envVar)) {
       errors.push(`Environment variable '${envVar}' not documented`);
     }
@@ -163,22 +143,15 @@ function findEnvVarsInSource(): Set<string> {
 function checkEnvVarsInSource(): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   const sourceEnvVars = findEnvVarsInSource();
-  const documentedSet = new Set(DOCUMENTED_ENV_VARS);
+  const schemaEnvVars = new Set(getEnvVarMetadata().map((m) => m.name));
 
-  // Check for undocumented env vars in source
+  // Check for env vars in source not in schema
   for (const envVar of sourceEnvVars) {
-    if (!documentedSet.has(envVar)) {
+    if (!schemaEnvVars.has(envVar)) {
+      // Allow LOG_LEVEL since logger.ts reads it directly before config loads
+      if (envVar === "LOG_LEVEL") continue;
       errors.push(
-        `Env var '${envVar}' found in source but not documented. Add it to ENV_VARS in generate-docs.ts`,
-      );
-    }
-  }
-
-  // Check for documented env vars not in source (stale docs)
-  for (const envVar of DOCUMENTED_ENV_VARS) {
-    if (!sourceEnvVars.has(envVar)) {
-      errors.push(
-        `Env var '${envVar}' documented but not found in source. Remove from ENV_VARS in generate-docs.ts`,
+        `Env var '${envVar}' found in source but not in ConfigSchema. Add it to src/config.ts`,
       );
     }
   }

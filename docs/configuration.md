@@ -1,54 +1,56 @@
-<!-- AUTO-GENERATED. Run `bun run docs:generate` to update. -->
+<!-- AUTO-GENERATED from src/config.ts. Run `bun run docs:generate` to update. -->
 
 # Configuration
 
 ## Environment Variables
 
-### KALSHI_API_KEY
+### Kalshi
 
-Your Kalshi API key ID. Not required for public market data (current tools) (optional)
+#### KALSHI_API_KEY
 
-### KALSHI_PRIVATE_KEY_PATH
+Kalshi API key ID. Not required for public market data (optional)
 
-Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM` (optional)
+#### KALSHI_PRIVATE_KEY_PATH
 
-### KALSHI_PRIVATE_KEY_PEM
+Path to RSA private key PEM file. Provide this OR KALSHI_PRIVATE_KEY_PEM (optional)
 
-RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH` (optional)
+#### KALSHI_PRIVATE_KEY_PEM
 
-### KALSHI_USE_DEMO
+RSA private key as PEM string. Provide this OR KALSHI_PRIVATE_KEY_PATH (optional)
 
-Set to `true` to use Kalshi demo environment. Requires demo credentials from https://demo.kalshi.co/ (optional)
+#### KALSHI_USE_DEMO
+
+Set to 'true' to use Kalshi demo environment (demo.kalshi.co) (optional)
 
 Default: `false`
 
-### KALSHI_BASE_PATH
+### Polymarket
 
-API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set (optional)
-
-Default: `https://api.elections.kalshi.com/trade-api/v2`
-
-### POLYMARKET_GAMMA_HOST
+#### POLYMARKET_GAMMA_HOST
 
 Polymarket Gamma API host for market discovery (optional)
 
 Default: `https://gamma-api.polymarket.com`
 
-### POLYMARKET_CLOB_HOST
+#### POLYMARKET_CLOB_HOST
 
 Polymarket CLOB API host for orderbook/trading data (optional)
 
 Default: `https://clob.polymarket.com`
 
-### POLYMARKET_CHAIN_ID
+#### POLYMARKET_CHAIN_ID
 
 Polygon chain ID for Polymarket CLOB client (optional)
 
 Default: `137`
 
-### LOG_LEVEL
+### General
 
-Logging verbosity level. Options: trace, debug, info, warn, error, fatal (optional)
+#### LOG_LEVEL
+
+Logging verbosity level (optional)
+
+Options: `trace`, `debug`, `info`, `warn`, `error`, `fatal`
 
 Default: `info`
 
