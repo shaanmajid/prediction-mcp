@@ -143,13 +143,12 @@ export class PolymarketClient {
   private clobHost: string;
   private clobClient: ClobClient;
 
-  constructor(config: Partial<PolymarketConfig> = {}) {
-    this.gammaHost = config.gammaHost ?? "https://gamma-api.polymarket.com";
-    this.clobHost = config.clobHost ?? "https://clob.polymarket.com";
-    const chainId = config.chainId ?? 137;
+  constructor(config: PolymarketConfig) {
+    this.gammaHost = config.gammaHost;
+    this.clobHost = config.clobHost;
 
     // Initialize CLOB client for public operations (no signer needed for reads)
-    this.clobClient = new ClobClient(this.clobHost, chainId);
+    this.clobClient = new ClobClient(this.clobHost, config.chainId);
   }
 
   // ============================================================

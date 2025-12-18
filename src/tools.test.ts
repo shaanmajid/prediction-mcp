@@ -3,6 +3,7 @@ import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
 import { SearchService } from "./search/index.js";
 import { TOOLS, getToolsList, type ToolContext } from "./tools.js";
+import { createTestConfig } from "./config.js";
 
 /**
  * Tests for MCP tools module
@@ -93,10 +94,12 @@ describe("getToolsList()", () => {
 // ============================================================
 
 describe("Polymarket Tool Handler Integration Tests", () => {
+  const config = createTestConfig();
+  const kalshi = new KalshiClient(config.kalshi);
   const ctx: ToolContext = {
-    kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient(),
-    searchService: new SearchService(new KalshiClient()),
+    kalshi,
+    polymarket: new PolymarketClient(config.polymarket),
+    searchService: new SearchService(kalshi),
   };
 
   test("polymarket_get_price returns price and midpoint", async () => {
@@ -164,10 +167,12 @@ describe("Polymarket Tool Handler Integration Tests", () => {
 // ============================================================
 
 describe("Kalshi Tool Integration Tests", () => {
+  const config = createTestConfig();
+  const kalshi = new KalshiClient(config.kalshi);
   const ctx: ToolContext = {
-    kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient(),
-    searchService: new SearchService(new KalshiClient()),
+    kalshi,
+    polymarket: new PolymarketClient(config.polymarket),
+    searchService: new SearchService(kalshi),
   };
 
   test("kalshi_list_markets returns markets array", async () => {

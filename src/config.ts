@@ -1,11 +1,12 @@
 // src/config.ts
 import { z } from "zod";
+import type { Level } from "pino";
 import { logger } from "./logger.js";
 
 /**
- * Valid log levels for pino logger
+ * Valid log levels (re-exported from pino for schema use)
  */
-const LOG_LEVELS = [
+const LOG_LEVELS: readonly Level[] = [
   "trace",
   "debug",
   "info",
@@ -114,4 +115,18 @@ export function loadConfig(): Config {
   }
 
   return result.data;
+}
+
+/**
+ * Create a config with defaults applied (for testing).
+ * In production, use loadConfig() instead.
+ */
+export function createTestConfig(overrides: Partial<Config> = {}): Config {
+  const defaults = ConfigSchema.parse({});
+  return {
+    ...defaults,
+    ...overrides,
+    kalshi: { ...defaults.kalshi, ...overrides.kalshi },
+    polymarket: { ...defaults.polymarket, ...overrides.polymarket },
+  };
 }

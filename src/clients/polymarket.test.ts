@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, spyOn } from "bun:test";
 import { PolymarketClient } from "./polymarket.js";
+import { createTestConfig, type PolymarketConfig } from "../config.js";
 
 /**
  * Tests for PolymarketClient
@@ -9,30 +10,41 @@ import { PolymarketClient } from "./polymarket.js";
  * - Integration Tests: Live API tests for regression detection
  */
 
+/** Create a PolymarketConfig with test defaults */
+function testConfig(
+  overrides: Partial<PolymarketConfig> = {},
+): PolymarketConfig {
+  return { ...createTestConfig().polymarket, ...overrides };
+}
+
 // ============================================================
 // Unit Tests
 // ============================================================
 
 describe("PolymarketClient - Unit Tests", () => {
   describe("Constructor", () => {
-    test("uses default hosts when no config provided", () => {
-      const client = new PolymarketClient();
+    test("uses default hosts from config", () => {
+      const client = new PolymarketClient(testConfig());
       // Client should be created without error
       expect(client).toBeDefined();
     });
 
     test("accepts custom hosts in config", () => {
-      const client = new PolymarketClient({
-        gammaHost: "https://custom-gamma.example.com",
-        clobHost: "https://custom-clob.example.com",
-      });
+      const client = new PolymarketClient(
+        testConfig({
+          gammaHost: "https://custom-gamma.example.com",
+          clobHost: "https://custom-clob.example.com",
+        }),
+      );
       expect(client).toBeDefined();
     });
 
     test("accepts custom chainId in config", () => {
-      const client = new PolymarketClient({
-        chainId: 80001, // Mumbai testnet
-      });
+      const client = new PolymarketClient(
+        testConfig({
+          chainId: 80001, // Mumbai testnet
+        }),
+      );
       expect(client).toBeDefined();
     });
   });
@@ -45,7 +57,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => [mockMarket],
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getMarket("test-market");
 
       expect(result.slug).toBe("test-market");
@@ -62,7 +74,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => mockMarket,
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getMarket("direct-market");
 
       expect(result.slug).toBe("direct-market");
@@ -76,7 +88,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => [],
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
 
       await expect(client.getMarket("nonexistent")).rejects.toThrow(
         "Market not found",
@@ -94,7 +106,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => [mockEvent],
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getEvent("test-event");
 
       expect(result.slug).toBe("test-event");
@@ -109,7 +121,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => [],
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
 
       await expect(client.getEvent("nonexistent")).rejects.toThrow(
         "Event not found",
@@ -130,7 +142,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => mockMarkets,
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.listMarkets();
 
       expect(result.markets.length).toBe(2);
@@ -146,7 +158,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => null,
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.listMarkets();
 
       expect(result.markets).toEqual([]);
@@ -166,7 +178,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => ({ history: mockHistory }),
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getPriceHistory({ tokenId: "test-token" });
 
       expect(result.history).toEqual(mockHistory);
@@ -184,7 +196,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => mockHistory,
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getPriceHistory({ tokenId: "test-token" });
 
       expect(result.history).toEqual(mockHistory);
@@ -198,7 +210,7 @@ describe("PolymarketClient - Unit Tests", () => {
         json: async () => ({ unexpected: "format" }),
       } as Response);
 
-      const client = new PolymarketClient();
+      const client = new PolymarketClient(testConfig());
       const result = await client.getPriceHistory({ tokenId: "test-token" });
 
       expect(result.history).toEqual([]);
@@ -216,7 +228,7 @@ describe("PolymarketClient - Integration Tests", () => {
   let client: PolymarketClient;
 
   beforeAll(() => {
-    client = new PolymarketClient();
+    client = new PolymarketClient(testConfig());
   });
 
   describe("Gamma API", () => {

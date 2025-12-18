@@ -15,8 +15,9 @@ export const KALSHI_PRODUCTION_URL =
   "https://api.elections.kalshi.com/trade-api/v2";
 export const KALSHI_DEMO_URL = "https://demo-api.kalshi.co/trade-api/v2";
 
-/** Config for KalshiClient constructor (all fields optional, adds basePath for testing) */
-export interface KalshiClientConfig extends Partial<KalshiConfig> {
+/** Config for KalshiClient constructor (adds optional basePath for testing) */
+export interface KalshiClientConfig extends KalshiConfig {
+  /** Override API base URL (for testing only) */
   basePath?: string;
 }
 
@@ -29,7 +30,7 @@ export function resolveKalshiBasePath(config: KalshiClientConfig): {
   shouldWarn: boolean;
   explicitBasePath: string | undefined;
 } {
-  const useDemo = config.useDemo ?? false;
+  const useDemo = config.useDemo;
   const explicitBasePath = config.basePath;
   const shouldWarn = useDemo && !!explicitBasePath;
   const basePath =
@@ -51,7 +52,7 @@ export class KalshiClient {
   private portfolioApi: PortfolioApi;
   private eventsApi: EventsApi;
 
-  constructor(config: KalshiClientConfig = {}) {
+  constructor(config: KalshiClientConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
       resolveKalshiBasePath(config);
 
