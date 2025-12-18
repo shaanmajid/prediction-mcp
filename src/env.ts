@@ -14,8 +14,7 @@ import pino from "pino";
 
 /**
  * Strict boolean env var validator.
- * Only accepts explicit boolean strings - rejects typos like "tru" or "yes".
- * Note: Empty strings are converted to undefined by emptyStringAsUndefined option.
+ * Only accepts explicit boolean strings — rejects typos like "TRUE" or "yes".
  */
 const booleanString = z
   .enum(["true", "false", "1", "0"])
@@ -139,44 +138,24 @@ export const env = createEnv({
 });
 
 // ============================================================
-// Nested Config Objects (Convenience Layer)
+// Nested Config Objects
 // ============================================================
 
-/**
- * Kalshi client configuration derived from env vars.
- */
+/** Kalshi client configuration. */
 export const kalshiConfig = {
-  get apiKey() {
-    return env.KALSHI_API_KEY;
-  },
-  get privateKeyPath() {
-    return env.KALSHI_PRIVATE_KEY_PATH;
-  },
-  get privateKeyPem() {
-    return env.KALSHI_PRIVATE_KEY_PEM;
-  },
-  get useDemo() {
-    return env.KALSHI_USE_DEMO;
-  },
-  get basePath() {
-    return env.KALSHI_BASE_PATH;
-  },
-} as const;
+  apiKey: env.KALSHI_API_KEY,
+  privateKeyPath: env.KALSHI_PRIVATE_KEY_PATH,
+  privateKeyPem: env.KALSHI_PRIVATE_KEY_PEM,
+  useDemo: env.KALSHI_USE_DEMO,
+  basePath: env.KALSHI_BASE_PATH,
+};
 
-/**
- * Polymarket client configuration derived from env vars.
- */
+/** Polymarket client configuration. */
 export const polymarketConfig = {
-  get gammaHost() {
-    return env.POLYMARKET_GAMMA_HOST;
-  },
-  get clobHost() {
-    return env.POLYMARKET_CLOB_HOST;
-  },
-  get chainId() {
-    return env.POLYMARKET_CHAIN_ID;
-  },
-} as const;
+  gammaHost: env.POLYMARKET_GAMMA_HOST,
+  clobHost: env.POLYMARKET_CLOB_HOST,
+  chainId: env.POLYMARKET_CHAIN_ID,
+};
 
 // ============================================================
 // Type Exports

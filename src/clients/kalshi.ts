@@ -19,7 +19,7 @@ export interface KalshiConfig {
   privateKeyPem?: string;
   privateKeyPath?: string;
   basePath?: string;
-  useDemo?: boolean;
+  useDemo: boolean;
 }
 
 /**
@@ -28,13 +28,12 @@ export interface KalshiConfig {
  *
  * @returns Object with resolved basePath and whether a warning should be logged
  */
-export function resolveKalshiBasePath(config: KalshiConfig = {}): {
+export function resolveKalshiBasePath(config: KalshiConfig): {
   basePath: string;
   shouldWarn: boolean;
   explicitBasePath: string | undefined;
 } {
-  const useDemo = config.useDemo ?? false;
-  const explicitBasePath = config.basePath;
+  const { useDemo, basePath: explicitBasePath } = config;
   const shouldWarn = useDemo && !!explicitBasePath;
   const basePath =
     explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
@@ -55,7 +54,7 @@ export class KalshiClient {
   private portfolioApi: PortfolioApi;
   private eventsApi: EventsApi;
 
-  constructor(config: KalshiConfig = {}) {
+  constructor(config: KalshiConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
       resolveKalshiBasePath(config);
 

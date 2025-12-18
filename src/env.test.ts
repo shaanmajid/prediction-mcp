@@ -2,13 +2,7 @@ import { describe, test, expect } from "bun:test";
 import { z } from "zod";
 import { env, kalshiConfig, polymarketConfig } from "./env.js";
 
-/**
- * Environment validation tests.
- *
- * Tests custom validators and the integration of env with config objects.
- * Note: We don't test Zod's built-in validators (url, enum, coerce) — Zod handles that.
- * Documentation extraction tests are in scripts/env-docs.test.ts.
- */
+/** Environment validation tests. */
 
 // ============================================================
 // Custom Boolean Validator Tests

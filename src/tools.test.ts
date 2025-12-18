@@ -3,17 +3,9 @@ import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
 import { SearchService } from "./search/index.js";
 import { TOOLS, getToolsList, type ToolContext } from "./tools.js";
+import { kalshiConfig, polymarketConfig } from "./env.js";
 
-/**
- * Tests for MCP tools module
- *
- * Organized into:
- * - Unit Tests: Test getToolsList() and tool registration
- * - Integration Tests: Test Kalshi tool handlers against live API
- *
- * Note: Polymarket integration tests are in polymarket.test.ts
- * Note: Search integration tests are in search/integration.test.ts (require ~7s cache warmup)
- */
+/** Tests for MCP tools module. */
 
 // ============================================================
 // Unit Tests
@@ -94,13 +86,9 @@ describe("getToolsList()", () => {
 
 describe("Polymarket Tool Handler Integration Tests", () => {
   const ctx: ToolContext = {
-    kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient({
-      gammaHost: "https://gamma-api.polymarket.com",
-      clobHost: "https://clob.polymarket.com",
-      chainId: 137,
-    }),
-    searchService: new SearchService(new KalshiClient()),
+    kalshi: new KalshiClient(kalshiConfig),
+    polymarket: new PolymarketClient(polymarketConfig),
+    searchService: new SearchService(new KalshiClient(kalshiConfig)),
   };
 
   test("polymarket_get_price returns price and midpoint", async () => {
@@ -169,13 +157,9 @@ describe("Polymarket Tool Handler Integration Tests", () => {
 
 describe("Kalshi Tool Integration Tests", () => {
   const ctx: ToolContext = {
-    kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient({
-      gammaHost: "https://gamma-api.polymarket.com",
-      clobHost: "https://clob.polymarket.com",
-      chainId: 137,
-    }),
-    searchService: new SearchService(new KalshiClient()),
+    kalshi: new KalshiClient(kalshiConfig),
+    polymarket: new PolymarketClient(polymarketConfig),
+    searchService: new SearchService(new KalshiClient(kalshiConfig)),
   };
 
   test("kalshi_list_markets returns markets array", async () => {
