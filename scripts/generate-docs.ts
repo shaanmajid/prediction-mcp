@@ -8,81 +8,12 @@
  */
 
 import { getToolsList } from "../src/tools.js";
+import { ENV_VAR_DOCS } from "./env-docs.js";
 import * as fs from "fs";
 import * as path from "path";
 
 const DOCS_DIR = path.join(import.meta.dir, "../docs");
 const TOOLS_DIR = path.join(DOCS_DIR, "tools");
-
-interface EnvVar {
-  name: string;
-  description: string;
-  required: boolean;
-  default?: string;
-}
-
-const ENV_VARS: EnvVar[] = [
-  // Kalshi
-  {
-    name: "KALSHI_API_KEY",
-    description:
-      "Your Kalshi API key ID. Not required for public market data (current tools)",
-    required: false,
-  },
-  {
-    name: "KALSHI_PRIVATE_KEY_PATH",
-    description:
-      "Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM`",
-    required: false,
-  },
-  {
-    name: "KALSHI_PRIVATE_KEY_PEM",
-    description:
-      "RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH`",
-    required: false,
-  },
-  {
-    name: "KALSHI_USE_DEMO",
-    description:
-      "Set to `true` to use Kalshi demo environment. Requires demo credentials from https://demo.kalshi.co/",
-    required: false,
-    default: "false",
-  },
-  {
-    name: "KALSHI_BASE_PATH",
-    description:
-      "API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set",
-    required: false,
-    default: "https://api.elections.kalshi.com/trade-api/v2",
-  },
-  // Polymarket
-  {
-    name: "POLYMARKET_GAMMA_HOST",
-    description: "Polymarket Gamma API host for market discovery",
-    required: false,
-    default: "https://gamma-api.polymarket.com",
-  },
-  {
-    name: "POLYMARKET_CLOB_HOST",
-    description: "Polymarket CLOB API host for orderbook/trading data",
-    required: false,
-    default: "https://clob.polymarket.com",
-  },
-  {
-    name: "POLYMARKET_CHAIN_ID",
-    description: "Polygon chain ID for Polymarket CLOB client",
-    required: false,
-    default: "137",
-  },
-  // Logging
-  {
-    name: "LOG_LEVEL",
-    description:
-      "Logging verbosity level. Options: trace, debug, info, warn, error, fatal",
-    required: false,
-    default: "info",
-  },
-];
 
 function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) {
@@ -171,7 +102,7 @@ function generateConfiguration(): string {
     "",
   ];
 
-  for (const env of ENV_VARS) {
+  for (const env of ENV_VAR_DOCS) {
     const reqStr = env.required ? "**required**" : "optional";
     lines.push(`### ${env.name}`);
     lines.push("");

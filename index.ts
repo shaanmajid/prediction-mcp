@@ -5,6 +5,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { SearchService } from "./src/search/index.js";
@@ -70,9 +71,9 @@ const server = new Server(
   },
 );
 
-// Initialize clients and services
-const kalshiClient = new KalshiClient();
-const polymarketClient = new PolymarketClient();
+// Initialize clients with validated config
+const kalshiClient = new KalshiClient(kalshiConfig);
+const polymarketClient = new PolymarketClient(polymarketConfig);
 const searchService = new SearchService(kalshiClient);
 
 const toolContext: ToolContext = {

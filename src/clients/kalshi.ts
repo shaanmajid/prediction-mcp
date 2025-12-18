@@ -19,22 +19,21 @@ export interface KalshiConfig {
   privateKeyPem?: string;
   privateKeyPath?: string;
   basePath?: string;
-  useDemo?: boolean;
+  useDemo: boolean;
 }
 
 /**
- * Resolve the Kalshi API base path from config and environment variables.
- * Priority: explicit basePath > KALSHI_BASE_PATH env > useDemo flag > production default
+ * Resolve the Kalshi API base path from config.
+ * Priority: explicit basePath > useDemo flag > production default
  *
  * @returns Object with resolved basePath and whether a warning should be logged
  */
-export function resolveKalshiBasePath(config: KalshiConfig = {}): {
+export function resolveKalshiBasePath(config: KalshiConfig): {
   basePath: string;
   shouldWarn: boolean;
   explicitBasePath: string | undefined;
 } {
-  const useDemo = config.useDemo ?? process.env.KALSHI_USE_DEMO === "true";
-  const explicitBasePath = config.basePath || process.env.KALSHI_BASE_PATH;
+  const { useDemo, basePath: explicitBasePath } = config;
   const shouldWarn = useDemo && !!explicitBasePath;
   const basePath =
     explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
@@ -73,7 +72,7 @@ export class KalshiClient {
   private portfolioApi: PortfolioApi;
   private eventsApi: EventsApi;
 
-  constructor(config: KalshiConfig = {}) {
+  constructor(config: KalshiConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
       resolveKalshiBasePath(config);
 
@@ -85,10 +84,9 @@ export class KalshiClient {
     }
 
     const configuration = new Configuration({
-      apiKey: config.apiKey || process.env.KALSHI_API_KEY,
-      privateKeyPem: config.privateKeyPem || process.env.KALSHI_PRIVATE_KEY_PEM,
-      privateKeyPath:
-        config.privateKeyPath || process.env.KALSHI_PRIVATE_KEY_PATH,
+      apiKey: config.apiKey,
+      privateKeyPem: config.privateKeyPem,
+      privateKeyPath: config.privateKeyPath,
       basePath,
     });
 

@@ -16,10 +16,11 @@ import { KalshiClient } from "../clients/kalshi.js";
 import { PolymarketClient } from "../clients/polymarket.js";
 import { SearchService } from "./index.js";
 import { TOOLS, type ToolContext } from "../tools.js";
+import { kalshiConfig, polymarketConfig } from "../env.js";
 
 describe("Search Integration Tests", () => {
-  const kalshi = new KalshiClient();
-  const polymarket = new PolymarketClient();
+  const kalshi = new KalshiClient(kalshiConfig);
+  const polymarket = new PolymarketClient(polymarketConfig);
   const searchService = new SearchService(kalshi);
   const ctx: ToolContext = { kalshi, polymarket, searchService };
 
