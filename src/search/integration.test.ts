@@ -19,7 +19,11 @@ import { TOOLS, type ToolContext } from "../tools.js";
 
 describe("Search Integration Tests", () => {
   const kalshi = new KalshiClient();
-  const polymarket = new PolymarketClient();
+  const polymarket = new PolymarketClient({
+    gammaHost: "https://gamma-api.polymarket.com",
+    clobHost: "https://clob.polymarket.com",
+    chainId: 137,
+  });
   const searchService = new SearchService(kalshi);
   const ctx: ToolContext = { kalshi, polymarket, searchService };
 

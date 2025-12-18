@@ -95,7 +95,11 @@ describe("getToolsList()", () => {
 describe("Polymarket Tool Handler Integration Tests", () => {
   const ctx: ToolContext = {
     kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient(),
+    polymarket: new PolymarketClient({
+      gammaHost: "https://gamma-api.polymarket.com",
+      clobHost: "https://clob.polymarket.com",
+      chainId: 137,
+    }),
     searchService: new SearchService(new KalshiClient()),
   };
 
@@ -166,7 +170,11 @@ describe("Polymarket Tool Handler Integration Tests", () => {
 describe("Kalshi Tool Integration Tests", () => {
   const ctx: ToolContext = {
     kalshi: new KalshiClient(),
-    polymarket: new PolymarketClient(),
+    polymarket: new PolymarketClient({
+      gammaHost: "https://gamma-api.polymarket.com",
+      clobHost: "https://clob.polymarket.com",
+      chainId: 137,
+    }),
     searchService: new SearchService(new KalshiClient()),
   };
 

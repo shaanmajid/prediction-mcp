@@ -6,27 +6,25 @@
 
 ### KALSHI_API_KEY
 
-Your Kalshi API key ID. Not required for public market data (current tools) (optional)
+Your Kalshi API key ID. Required for authenticated operations (optional)
 
 ### KALSHI_PRIVATE_KEY_PATH
 
-Path to RSA private key PEM file. Provide this OR `KALSHI_PRIVATE_KEY_PEM` (optional)
+Path to RSA private key PEM file. Use this OR KALSHI_PRIVATE_KEY_PEM (optional)
 
 ### KALSHI_PRIVATE_KEY_PEM
 
-RSA private key as PEM string. Provide this OR `KALSHI_PRIVATE_KEY_PATH` (optional)
+RSA private key as PEM string. Use this OR KALSHI_PRIVATE_KEY_PATH (optional)
 
 ### KALSHI_USE_DEMO
 
-Set to `true` to use Kalshi demo environment. Requires demo credentials from https://demo.kalshi.co/ (optional)
+Use Kalshi demo environment (demo.kalshi.co). Accepts: true, false, 1, 0 (optional)
 
 Default: `false`
 
 ### KALSHI_BASE_PATH
 
-API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set (optional)
-
-Default: `https://api.elections.kalshi.com/trade-api/v2`
+API endpoint override (advanced). Overrides KALSHI_USE_DEMO if set (optional)
 
 ### POLYMARKET_GAMMA_HOST
 
@@ -48,7 +46,7 @@ Default: `137`
 
 ### LOG_LEVEL
 
-Logging verbosity level. Options: trace, debug, info, warn, error, fatal (optional)
+Logging verbosity: trace, debug, info, warn, error, fatal (optional)
 
 Default: `info`
 

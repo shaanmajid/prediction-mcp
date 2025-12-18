@@ -36,12 +36,12 @@ const RETRY_OPTIONS = {
  * Configuration for PolymarketClient
  */
 export interface PolymarketConfig {
-  /** Gamma API host (default: https://gamma-api.polymarket.com) */
-  gammaHost?: string;
-  /** CLOB API host (default: https://clob.polymarket.com) */
-  clobHost?: string;
-  /** Polygon chain ID (default: 137 for mainnet) */
-  chainId?: number;
+  /** Gamma API host */
+  gammaHost: string;
+  /** CLOB API host */
+  clobHost: string;
+  /** Polygon chain ID */
+  chainId: number;
 }
 
 /**
@@ -154,25 +154,12 @@ export class PolymarketClient {
   private clobHost: string;
   private clobClient: ClobClient;
 
-  constructor(config: PolymarketConfig = {}) {
-    this.gammaHost =
-      config.gammaHost ||
-      process.env.POLYMARKET_GAMMA_HOST ||
-      "https://gamma-api.polymarket.com";
-
-    this.clobHost =
-      config.clobHost ||
-      process.env.POLYMARKET_CLOB_HOST ||
-      "https://clob.polymarket.com";
-
-    const chainId =
-      config.chainId ||
-      (process.env.POLYMARKET_CHAIN_ID
-        ? parseInt(process.env.POLYMARKET_CHAIN_ID)
-        : 137);
+  constructor(config: PolymarketConfig) {
+    this.gammaHost = config.gammaHost;
+    this.clobHost = config.clobHost;
 
     // Initialize CLOB client for public operations (no signer needed for reads)
-    this.clobClient = new ClobClient(this.clobHost, chainId);
+    this.clobClient = new ClobClient(this.clobHost, config.chainId);
   }
 
   // ============================================================

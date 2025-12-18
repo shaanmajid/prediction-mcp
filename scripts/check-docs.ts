@@ -12,27 +12,11 @@
  */
 
 import { getToolsList } from "../src/tools.js";
+import { ENV_VAR_DOCS } from "../src/env.js";
 import * as fs from "fs";
 import * as path from "path";
 
 const DOCS_DIR = path.join(import.meta.dir, "../docs");
-const SRC_DIR = path.join(import.meta.dir, "../src");
-
-// Env vars that are documented in generate-docs.ts
-const DOCUMENTED_ENV_VARS = [
-  // Kalshi
-  "KALSHI_API_KEY",
-  "KALSHI_PRIVATE_KEY_PATH",
-  "KALSHI_PRIVATE_KEY_PEM",
-  "KALSHI_USE_DEMO",
-  "KALSHI_BASE_PATH",
-  // Polymarket
-  "POLYMARKET_GAMMA_HOST",
-  "POLYMARKET_CLOB_HOST",
-  "POLYMARKET_CHAIN_ID",
-  // Logging
-  "LOG_LEVEL",
-];
 
 function checkToolsInReference(): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -133,52 +117,24 @@ function checkIndexToolList(): { valid: boolean; errors: string[] } {
   return { valid: errors.length === 0, errors };
 }
 
-function findEnvVarsInSource(): Set<string> {
-  const envVars = new Set<string>();
-  const envVarPattern = /process\.env\.([A-Z_][A-Z0-9_]*)/g;
-
-  function scanDir(dir: string) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        scanDir(fullPath);
-      } else if (
-        entry.name.endsWith(".ts") &&
-        !entry.name.endsWith(".test.ts")
-      ) {
-        const content = fs.readFileSync(fullPath, "utf-8");
-        let match;
-        while ((match = envVarPattern.exec(content)) !== null) {
-          if (match[1]) envVars.add(match[1]);
-        }
-      }
-    }
-  }
-
-  scanDir(SRC_DIR);
-  return envVars;
-}
-
-function checkEnvVarsInSource(): { valid: boolean; errors: string[] } {
+function checkEnvVarsInDocs(): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  const sourceEnvVars = findEnvVarsInSource();
-  const documentedSet = new Set(DOCUMENTED_ENV_VARS);
+  const configPath = path.join(DOCS_DIR, "configuration.md");
 
-  // Check for undocumented env vars in source
-  for (const envVar of sourceEnvVars) {
-    if (!documentedSet.has(envVar)) {
-      errors.push(
-        `Env var '${envVar}' found in source but not documented. Add it to ENV_VARS in generate-docs.ts`,
-      );
-    }
+  if (!fs.existsSync(configPath)) {
+    return {
+      valid: false,
+      errors: ["configuration.md does not exist. Run `bun run docs:generate`."],
+    };
   }
 
-  // Check for documented env vars not in source (stale docs)
-  for (const envVar of DOCUMENTED_ENV_VARS) {
-    if (!sourceEnvVars.has(envVar)) {
+  const content = fs.readFileSync(configPath, "utf-8");
+
+  // Check all env vars from ENV_VAR_DOCS are documented
+  for (const envVar of ENV_VAR_DOCS) {
+    if (!content.includes(`### ${envVar.name}`)) {
       errors.push(
-        `Env var '${envVar}' documented but not found in source. Remove from ENV_VARS in generate-docs.ts`,
+        `Env var '${envVar.name}' defined in env.ts but not documented in configuration.md`,
       );
     }
   }
@@ -214,7 +170,7 @@ async function main() {
   const checks = [
     { name: "Tools in reference.md", fn: checkToolsInReference },
     { name: "Env vars in configuration.md", fn: checkEnvVarsInConfig },
-    { name: "Env vars match source code", fn: checkEnvVarsInSource },
+    { name: "Env vars match env.ts", fn: checkEnvVarsInDocs },
     { name: "Tools in index.md", fn: checkIndexToolList },
     { name: "Auto-generation markers", fn: checkAutoGenMarkers },
   ];
