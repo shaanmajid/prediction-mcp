@@ -10,21 +10,21 @@ Your Kalshi API key ID. Required for authenticated operations (optional)
 
 ### KALSHI_PRIVATE_KEY_PATH
 
-Path to RSA private key PEM file. Use this OR KALSHI_PRIVATE_KEY_PEM (optional)
+Path to RSA private key PEM file. Use this OR `KALSHI_PRIVATE_KEY_PEM` (optional)
 
 ### KALSHI_PRIVATE_KEY_PEM
 
-RSA private key as PEM string. Use this OR KALSHI_PRIVATE_KEY_PATH (optional)
+RSA private key as PEM string. Use this OR `KALSHI_PRIVATE_KEY_PATH` (optional)
 
 ### KALSHI_USE_DEMO
 
-Use Kalshi demo environment (demo.kalshi.co). Accepts: true, false, 1, 0 (optional)
+Use Kalshi demo environment. Set to `true` to connect to demo.kalshi.co (optional)
 
 Default: `false`
 
 ### KALSHI_BASE_PATH
 
-API endpoint override (advanced). Overrides KALSHI_USE_DEMO if set (optional)
+API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set (optional)
 
 ### POLYMARKET_GAMMA_HOST
 

@@ -65,7 +65,7 @@ export const serverSchema = {
     .optional()
     .meta({
       description:
-        "Path to RSA private key PEM file. Use this OR KALSHI_PRIVATE_KEY_PEM",
+        "Path to RSA private key PEM file. Use this OR `KALSHI_PRIVATE_KEY_PEM`",
     } satisfies DocMeta),
 
   KALSHI_PRIVATE_KEY_PEM: z
@@ -74,12 +74,12 @@ export const serverSchema = {
     .optional()
     .meta({
       description:
-        "RSA private key as PEM string. Use this OR KALSHI_PRIVATE_KEY_PATH",
+        "RSA private key as PEM string. Use this OR `KALSHI_PRIVATE_KEY_PATH`",
     } satisfies DocMeta),
 
   KALSHI_USE_DEMO: booleanString.default(false).meta({
     description:
-      "Use Kalshi demo environment (demo.kalshi.co). Accepts: true, false, 1, 0",
+      "Use Kalshi demo environment. Set to `true` to connect to demo.kalshi.co",
     docDefault: "false",
   } satisfies DocMeta),
 
@@ -89,7 +89,7 @@ export const serverSchema = {
     .optional()
     .meta({
       description:
-        "API endpoint override (advanced). Overrides KALSHI_USE_DEMO if set",
+        "API endpoint override (advanced). Overrides `KALSHI_USE_DEMO` if set",
     } satisfies DocMeta),
 
   // Polymarket
