@@ -10,6 +10,7 @@ import { PolymarketClient } from "./src/clients/polymarket.js";
 import { SearchService } from "./src/search/index.js";
 import { TOOLS, getToolsList, type ToolContext } from "./src/tools.js";
 import { logger } from "./src/logger.js";
+import { loadConfig } from "./src/config.js";
 
 /**
  * Error classification result
@@ -70,9 +71,12 @@ const server = new Server(
   },
 );
 
-// Initialize clients and services
-const kalshiClient = new KalshiClient();
-const polymarketClient = new PolymarketClient();
+// Load and validate configuration (exits on invalid config)
+const config = loadConfig();
+
+// Initialize clients and services with validated config
+const kalshiClient = new KalshiClient(config.kalshi);
+const polymarketClient = new PolymarketClient(config.polymarket);
 const searchService = new SearchService(kalshiClient);
 
 const toolContext: ToolContext = {
