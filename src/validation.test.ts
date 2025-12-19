@@ -7,6 +7,7 @@ import {
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
   ListMarketsArgsSchema,
+  PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
   PolymarketGetMarketArgsSchema,
   PolymarketGetOrderbookArgsSchema,
@@ -15,6 +16,7 @@ import {
   PolymarketListEventsArgsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketListTagsArgsSchema,
+  PolymarketSearchQuerySchema,
   SearchQuerySchema,
   toMCPSchema,
 } from "./validation.js";
@@ -478,6 +480,121 @@ describe("Polymarket Schemas", () => {
       const result = PolymarketGetPriceHistoryArgsSchema.safeParse({
         token_id: "12345",
         startTs: 1700000000.5,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("PolymarketSearchQuerySchema", () => {
+    test("accepts valid query and limit", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "election",
+        limit: 10,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts query with default limit", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({ query: "trump" });
+      expect(result.success).toBe(true);
+      expect(result.data?.limit).toBe(20);
+    });
+
+    test("rejects empty query", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "",
+        limit: 10,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing query", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({ limit: 10 });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts limit within bounds (1-100)", () => {
+      expect(
+        PolymarketSearchQuerySchema.safeParse({ query: "test", limit: 1 })
+          .success,
+      ).toBe(true);
+      expect(
+        PolymarketSearchQuerySchema.safeParse({ query: "test", limit: 50 })
+          .success,
+      ).toBe(true);
+      expect(
+        PolymarketSearchQuerySchema.safeParse({ query: "test", limit: 100 })
+          .success,
+      ).toBe(true);
+    });
+
+    test("rejects limit below minimum", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "test",
+        limit: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit above maximum", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "test",
+        limit: 101,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects non-integer limit", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "test",
+        limit: 10.5,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = PolymarketSearchQuerySchema.safeParse({
+        query: "test",
+        limit: 10,
+        extra: "field",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("PolymarketCacheStatsSchema", () => {
+    test("accepts empty object (defaults refresh to false)", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({});
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(false);
+    });
+
+    test("accepts explicit refresh true", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({ refresh: true });
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(true);
+    });
+
+    test("accepts explicit refresh false", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({ refresh: false });
+      expect(result.success).toBe(true);
+      expect(result.data?.refresh).toBe(false);
+    });
+
+    test("rejects non-boolean refresh", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({ refresh: "yes" });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects non-boolean refresh as number", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({ refresh: 1 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = PolymarketCacheStatsSchema.safeParse({
+        refresh: true,
+        extra: "field",
       });
       expect(result.success).toBe(false);
     });
