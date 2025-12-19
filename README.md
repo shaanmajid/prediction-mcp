@@ -27,7 +27,7 @@ Once connected, try these natural language queries:
 - _"What are the current odds on Polymarket for the next Fed rate decision?"_
 - _"Show me all open Kalshi markets about the 2024 election"_
 - _"Search Kalshi for markets about climate change"_
-- _"Get the orderbook for KXINXFED-25JAN on Kalshi"_
+- _"Show me the orderbook for the next Fed rate decision on Kalshi"_
 
 ## Quick Start
 
