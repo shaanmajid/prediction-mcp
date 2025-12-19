@@ -4,16 +4,43 @@
 [![codecov](https://codecov.io/gh/shaanmajid/prediction-mcp/graph/badge.svg)](https://codecov.io/gh/shaanmajid/prediction-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An MCP server providing unified access to prediction market data from Kalshi and Polymarket.
+An MCP server providing unified access to prediction market data from [Kalshi](https://kalshi.com) and [Polymarket](https://polymarket.com).
 
 > [!WARNING]
 > This project is in early development. APIs may change without notice.
 
-## Features
+## Why Use This?
 
-- **Kalshi and Polymarket** — Query markets, orderbooks, prices, and trade history
-- **Full-text search** — Find Kalshi events and markets by keyword
-- **Rate limit handling** — Automatic retry with exponential backoff
+Prediction markets aggregate crowd wisdom into real-time probabilities. This MCP server lets you:
+
+- **Unify platforms** — Query Kalshi and Polymarket through one interface
+- **Use natural language** — Ask "What are the odds?" instead of parsing JSON APIs
+- **Get real-time data** — Access prices, orderbooks, and trade history instantly
+- **Search efficiently** — Full-text search across thousands of markets in <1ms
+
+Instead of manually browsing market websites or writing API integration code, ask your AI assistant directly.
+
+## What Can You Ask?
+
+Once connected, try these natural language queries:
+
+- _"What are the current odds on Polymarket for the next Fed rate decision?"_
+- _"Show me all open Kalshi markets about the 2024 election"_
+- _"Search Kalshi for markets about climate change"_
+- _"Get the orderbook for KXINXFED-25JAN on Kalshi"_
+
+## Quick Start
+
+```bash
+git clone https://github.com/shaanmajid/prediction-mcp.git
+cd prediction-mcp
+bun install
+bun run scripts/bootstrap.ts --interactive
+```
+
+After running bootstrap, restart your MCP client to load the server.
+
+📖 **[Full documentation](https://shaanmajid.github.io/prediction-mcp/)** — Setup guides for 7 MCP clients, troubleshooting, and more.
 
 ## Installation
 
@@ -21,7 +48,7 @@ This server follows the standard [MCP configuration format](https://modelcontext
 
 ### Configuration Format
 
-All MCP clients use the same JSON structure:
+Most MCP clients use the same JSON structure:
 
 ```json
 {
@@ -44,21 +71,10 @@ All MCP clients use the same JSON structure:
 | ----------------- | ------------------------------------------------------------------------- |
 | Claude Code       | `.mcp.json` (project root) or `~/.claude.json` (global)                   |
 | Claude Desktop    | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) |
-| VS Code (Copilot) | `.vscode/mcp.json` or VS Code settings                                    |
+| VS Code (Copilot) | `.vscode/mcp.json` (uses `"servers"` key instead of `"mcpServers"`)       |
 | Cursor            | `.cursor/mcp.json` or Cursor settings                                     |
 
-### Quick Setup (Claude Code)
-
-For Claude Code users, a bootstrap script generates the configuration:
-
-```bash
-bun install
-bun run scripts/bootstrap.ts              # Creates .mcp.json in project root
-bun run scripts/bootstrap.ts --global     # Adds to ~/.claude.json
-bun run scripts/bootstrap.ts --interactive # Prompts for Kalshi credentials
-```
-
-**Note:** After adding or updating MCP configuration, restart your MCP client to load the changes.
+See the [Getting Started guide](docs/getting-started.md) for detailed setup instructions for all supported clients.
 
 ## Credentials
 
@@ -89,7 +105,12 @@ Polymarket tools work without authentication—all read operations are public.
 
 ## Available Tools
 
-See [docs/tools/reference.md](docs/tools/reference.md) for the full tool reference with parameters.
+| Platform   | Tools                                                                                                          |
+| ---------- | -------------------------------------------------------------------------------------------------------------- |
+| Kalshi     | `kalshi_list_markets`, `kalshi_get_market`, `kalshi_get_orderbook`, `kalshi_get_trades`, `kalshi_search`, etc. |
+| Polymarket | `polymarket_list_markets`, `polymarket_get_market`, `polymarket_get_orderbook`, `polymarket_get_price`, etc.   |
+
+See [Tools Reference](docs/reference/tools.md) for the full tool reference with parameters.
 
 Run `bun run docs:generate` after modifying tools to keep documentation in sync.
 
@@ -127,13 +148,14 @@ src/
   validation.ts       # Zod schemas
 scripts/
   bootstrap.ts        # MCP registration helper
-  generate-docs.ts    # Doc generator
-  check-docs.ts       # Doc freshness check
+  docs.ts             # Doc generator CLI
 ```
 
 ## Links
 
-- [Tool Reference](docs/tools/reference.md)
+- [Documentation](https://shaanmajid.github.io/prediction-mcp/) (hosted) · [docs/](docs/) (source)
+- [Tools Reference](docs/reference/tools.md)
+- [Configuration](docs/reference/configuration.md)
 - [Kalshi API](https://docs.kalshi.com/api-reference)
 - [Polymarket API](https://docs.polymarket.com)
 - [MCP Protocol](https://modelcontextprotocol.io)
