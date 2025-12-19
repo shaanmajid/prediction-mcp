@@ -1,35 +1,45 @@
-site_name: Prediction Markets MCP Server
-site_description: MCP server for fetching data from prediction markets (Kalshi, Polymarket)
+site_name: Prediction Markets MCP
+site_description: MCP server for unified access to prediction market data from Kalshi and Polymarket
 site_url: https://shaanmajid.github.io/prediction-mcp/
 
 repo_name: shaanmajid/prediction-mcp
 repo_url: https://github.com/shaanmajid/prediction-mcp
+edit_uri: edit/main/docs/
 
 theme:
   name: material
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: indigo
       accent: indigo
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: indigo
       accent: indigo
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.instant
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.footer
+    - navigation.path
     - search.highlight
-    - search.share
+    - search.suggest
     - content.code.copy
+    - content.code.annotate
     - content.tabs.link
+    - toc.follow
 
 markdown_extensions:
   - admonition
@@ -37,12 +47,21 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - tables
   - attr_list
   - md_in_html
+  - def_list
+  - toc:
+      permalink: true
+      toc_depth: 3
 
 plugins:
   - search
@@ -50,10 +69,13 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - Configuration: configuration.md
-  - Tools Reference: tools/reference.md
+  - Troubleshooting: troubleshooting.md
+  - Reference:
+      - Configuration: reference/configuration.md
+      - Tools: reference/tools.md
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/shaanmajid/prediction-mcp
+      name: GitHub

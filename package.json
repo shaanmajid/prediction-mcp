@@ -30,8 +30,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "docs:generate": "bun run scripts/generate-docs.ts",
-    "docs:check": "bun run scripts/check-docs.ts",
+    "docs:generate": "bun run scripts/docs.ts generate",
+    "docs:check": "bun run scripts/docs.ts check",
     "docs:serve": "mkdocs serve",
     "docs:build": "mkdocs build"
   },
