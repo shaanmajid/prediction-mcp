@@ -9,7 +9,7 @@ import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { logger } from "./src/logger.js";
-import { SearchService } from "./src/search/index.js";
+import { PolymarketSearchService, SearchService } from "./src/search/index.js";
 import { getToolsList, TOOLS, type ToolContext } from "./src/tools.js";
 
 /**
@@ -75,11 +75,13 @@ const server = new Server(
 const kalshiClient = new KalshiClient(kalshiConfig);
 const polymarketClient = new PolymarketClient(polymarketConfig);
 const searchService = new SearchService(kalshiClient);
+const polymarketSearchService = new PolymarketSearchService(polymarketClient);
 
 const toolContext: ToolContext = {
   kalshi: kalshiClient,
   polymarket: polymarketClient,
   searchService,
+  polymarketSearchService,
 };
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -128,11 +130,54 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
+/**
+ * Background prefetch both search caches on server startup.
+ * Non-blocking: server starts immediately, caches populate in background.
+ * Uses Promise.allSettled to handle failures independently.
+ */
+async function prefetchSearchCaches(): Promise<void> {
+  logger.info("Starting background prefetch of search caches...");
+
+  const [kalshiResult, polymarketResult] = await Promise.allSettled([
+    searchService.ensurePopulated(),
+    polymarketSearchService.ensurePopulated(),
+  ]);
+
+  if (kalshiResult.status === "fulfilled") {
+    const stats = searchService.getStats();
+    logger.info(
+      { events: stats.events_count, markets: stats.markets_count },
+      "Kalshi search cache populated",
+    );
+  } else {
+    logger.error(
+      { err: kalshiResult.reason },
+      "Failed to populate Kalshi search cache",
+    );
+  }
+
+  if (polymarketResult.status === "fulfilled") {
+    const stats = polymarketSearchService.getStats();
+    logger.info(
+      { events: stats.events_count, markets: stats.markets_count },
+      "Polymarket search cache populated",
+    );
+  } else {
+    logger.error(
+      { err: polymarketResult.reason },
+      "Failed to populate Polymarket search cache",
+    );
+  }
+}
+
 // Start server
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   logger.info("Prediction Markets MCP Server running on stdio");
+
+  // Start background prefetch (non-blocking)
+  prefetchSearchCaches();
 }
 
 main().catch((error) => {

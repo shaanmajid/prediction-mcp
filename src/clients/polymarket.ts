@@ -362,6 +362,64 @@ export class PolymarketClient {
     return result.price;
   }
 
+  // ============================================================
+  // Bulk Fetch Methods (for Search Cache Population)
+  // ============================================================
+
+  /**
+   * Fetch all open events with their nested markets in paginated calls.
+   * Gamma API returns events with nested markets by default.
+   *
+   * @returns Object containing events array (without nested markets) and markets array
+   */
+  async fetchAllEventsWithMarkets(): Promise<{
+    events: PolymarketEvent[];
+    markets: PolymarketMarket[];
+  }> {
+    const allEvents: PolymarketEvent[] = [];
+    const allMarkets: PolymarketMarket[] = [];
+    let offset = 0;
+    const limit = 100;
+
+    while (true) {
+      let events: PolymarketEvent[];
+      try {
+        const response = await this.listEvents({
+          closed: false,
+          limit,
+          offset,
+        });
+        events = response.events;
+      } catch (error) {
+        // Return partial results on error rather than failing entirely
+        logger.warn(
+          { offset, eventsSoFar: allEvents.length, error },
+          "Page fetch failed during bulk retrieval, returning partial results",
+        );
+        break;
+      }
+
+      for (const event of events) {
+        // Extract markets from event
+        const markets = event.markets || [];
+        allMarkets.push(...markets);
+
+        // Store event without nested markets to save memory
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { markets: _, ...eventWithoutMarkets } = event;
+        allEvents.push(eventWithoutMarkets as PolymarketEvent);
+      }
+
+      if (events.length < limit) break;
+      offset += limit;
+
+      // Rate limiting delay between pages (conservative: 100ms)
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    return { events: allEvents, markets: allMarkets };
+  }
+
   /**
    * Get price history for a token
    * Returns wrapped object for consistency with other list methods

@@ -5,3 +5,4 @@ export type {
 } from "./cache.js";
 export { SearchCache } from "./cache.js";
 export { SearchService } from "./service.js";
+export { PolymarketSearchService } from "./polymarket-service.js";

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
-import { SearchService } from "./search/index.js";
+import { SearchService, PolymarketSearchService } from "./search/index.js";
 import {
   CacheStatsSchema,
   GetEventArgsSchema,
@@ -10,6 +10,7 @@ import {
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
   ListMarketsArgsSchema,
+  PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
   PolymarketGetMarketArgsSchema,
   PolymarketGetOrderbookArgsSchema,
@@ -18,6 +19,7 @@ import {
   PolymarketListEventsArgsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketListTagsArgsSchema,
+  PolymarketSearchQuerySchema,
   SearchQuerySchema,
   toMCPSchema,
 } from "./validation.js";
@@ -29,6 +31,7 @@ export interface ToolContext {
   kalshi: KalshiClient;
   polymarket: PolymarketClient;
   searchService: SearchService;
+  polymarketSearchService: PolymarketSearchService;
 }
 
 export interface ToolDefinition {
@@ -298,6 +301,85 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
         endTs: params.endTs,
       });
       return result;
+    },
+  },
+
+  polymarket_search: {
+    name: "polymarket_search",
+    description:
+      "Search across Polymarket events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market questions, and outcome names.",
+    schema: PolymarketSearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = PolymarketSearchQuerySchema.parse(args);
+      const results = await ctx.polymarketSearchService.search(
+        params.query,
+        params.limit,
+      );
+      return {
+        results,
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  polymarket_search_events: {
+    name: "polymarket_search_events",
+    description:
+      "Search Polymarket events by keyword. Returns events ranked by relevance based on title, slug, and description matches.",
+    schema: PolymarketSearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = PolymarketSearchQuerySchema.parse(args);
+      const results = await ctx.polymarketSearchService.searchEvents(
+        params.query,
+        params.limit,
+      );
+      return {
+        results: results.map((r) => ({
+          type: "event" as const,
+          score: r.score,
+          item: r.item,
+        })),
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  polymarket_search_markets: {
+    name: "polymarket_search_markets",
+    description:
+      "Search Polymarket markets by keyword. Returns markets ranked by relevance. Searches question, groupItemTitle (outcome/candidate names), slug, description, and outcomes.",
+    schema: PolymarketSearchQuerySchema,
+    handler: async (ctx, args) => {
+      const params = PolymarketSearchQuerySchema.parse(args);
+      const results = await ctx.polymarketSearchService.searchMarkets(
+        params.query,
+        params.limit,
+      );
+      return {
+        results: results.map((r) => ({
+          type: "market" as const,
+          score: r.score,
+          item: r.item,
+        })),
+        total: results.length,
+        query: params.query,
+      };
+    },
+  },
+
+  polymarket_cache_stats: {
+    name: "polymarket_cache_stats",
+    description:
+      "Get Polymarket search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.",
+    schema: PolymarketCacheStatsSchema,
+    handler: async (ctx, args) => {
+      const params = PolymarketCacheStatsSchema.parse(args || {});
+      if (params.refresh) {
+        await ctx.polymarketSearchService.refresh();
+      }
+      return ctx.polymarketSearchService.getStats();
     },
   },
 };
