@@ -1,8 +1,13 @@
 # Prediction Markets MCP Server
 
-> **⚠️ Early Development:** This project is under active development. APIs may change without notice. Not recommended for production use.
+[![CI](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/shaanmajid/prediction-mcp/graph/badge.svg)](https://codecov.io/gh/shaanmajid/prediction-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An MCP server providing unified access to prediction market data from Kalshi and Polymarket.
+
+> [!WARNING]
+> This project is in early development. APIs may change without notice.
 
 ## Features
 
