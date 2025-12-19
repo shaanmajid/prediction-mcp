@@ -2,15 +2,15 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-  ListToolsRequestSchema,
   CallToolRequestSchema,
+  ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
-import { SearchService } from "./src/search/index.js";
-import { TOOLS, getToolsList, type ToolContext } from "./src/tools.js";
+import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { logger } from "./src/logger.js";
+import { SearchService } from "./src/search/index.js";
+import { getToolsList, TOOLS, type ToolContext } from "./src/tools.js";
 
 /**
  * Error classification result

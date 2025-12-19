@@ -5,8 +5,8 @@
  * Documentation metadata is attached via .meta() and extracted in scripts/env-docs.ts.
  */
 import { createEnv } from "@t3-oss/env-core";
-import { z } from "zod";
 import pino from "pino";
+import { z } from "zod";
 
 // ============================================================
 // Custom Validators

@@ -1,9 +1,9 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
-import { SearchService } from "./search/index.js";
-import { TOOLS, getToolsList, type ToolContext } from "./tools.js";
 import { kalshiConfig, polymarketConfig } from "./env.js";
+import { SearchService } from "./search/index.js";
+import { getToolsList, TOOLS, type ToolContext } from "./tools.js";
 
 /** Tests for MCP tools module. */
 

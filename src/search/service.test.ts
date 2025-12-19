@@ -1,7 +1,7 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import type { Market } from "kalshi-typescript";
-import { SearchService } from "./service.js";
 import { KalshiClient } from "../clients/kalshi.js";
+import { SearchService } from "./service.js";
 
 describe("SearchService", () => {
   describe("cache lifecycle", () => {

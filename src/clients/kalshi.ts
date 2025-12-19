@@ -1,24 +1,24 @@
-import { isAxiosError } from 'axios'
-import { backOff } from 'exponential-backoff'
+import { isAxiosError } from "axios";
+import { backOff } from "exponential-backoff";
 import {
   Configuration,
   type EventData,
   EventsApi,
   type Market,
   MarketApi,
-} from 'kalshi-typescript'
-import { logger } from '../logger.js'
+} from "kalshi-typescript";
+import { logger } from "../logger.js";
 
 export const KALSHI_PRODUCTION_URL =
-  'https://api.elections.kalshi.com/trade-api/v2'
-export const KALSHI_DEMO_URL = 'https://demo-api.kalshi.co/trade-api/v2'
+  "https://api.elections.kalshi.com/trade-api/v2";
+export const KALSHI_DEMO_URL = "https://demo-api.kalshi.co/trade-api/v2";
 
 export interface KalshiConfig {
-  apiKey?: string
-  privateKeyPem?: string
-  privateKeyPath?: string
-  basePath?: string
-  useDemo: boolean
+  apiKey?: string;
+  privateKeyPem?: string;
+  privateKeyPath?: string;
+  basePath?: string;
+  useDemo: boolean;
 }
 
 /**
@@ -28,30 +28,30 @@ export interface KalshiConfig {
  * @returns Object with resolved basePath and whether a warning should be logged
  */
 export function resolveKalshiBasePath(config: KalshiConfig): {
-  basePath: string
-  shouldWarn: boolean
-  explicitBasePath: string | undefined
+  basePath: string;
+  shouldWarn: boolean;
+  explicitBasePath: string | undefined;
 } {
-  const { useDemo, basePath: explicitBasePath } = config
-  const shouldWarn = useDemo && !!explicitBasePath
+  const { useDemo, basePath: explicitBasePath } = config;
+  const shouldWarn = useDemo && !!explicitBasePath;
   const basePath =
-    explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL)
+    explicitBasePath || (useDemo ? KALSHI_DEMO_URL : KALSHI_PRODUCTION_URL);
 
-  return { basePath, shouldWarn, explicitBasePath }
+  return { basePath, shouldWarn, explicitBasePath };
 }
 
-const MAX_RETRY_ATTEMPTS = 4
+const MAX_RETRY_ATTEMPTS = 4;
 
 const isRateLimited = (err: unknown): boolean =>
-  isAxiosError(err) && err.response?.status === 429
+  isAxiosError(err) && err.response?.status === 429;
 
 /** Retry options for rate-limited API calls */
 const RETRY_OPTIONS = {
   numOfAttempts: MAX_RETRY_ATTEMPTS,
   startingDelay: 100,
-  jitter: 'full' as const,
+  jitter: "full" as const,
   retry: (err: unknown, attemptNumber: number) => {
-    const shouldRetry = isRateLimited(err)
+    const shouldRetry = isRateLimited(err);
     if (shouldRetry) {
       logger.warn(
         {
@@ -59,26 +59,26 @@ const RETRY_OPTIONS = {
           maxAttempts: MAX_RETRY_ATTEMPTS,
           status: 429,
         },
-        'Kalshi rate limited, retrying',
-      )
+        "Kalshi rate limited, retrying",
+      );
     }
-    return shouldRetry
+    return shouldRetry;
   },
-}
+};
 
 export class KalshiClient {
-  private marketApi: MarketApi
-  private eventsApi: EventsApi
+  private marketApi: MarketApi;
+  private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
-      resolveKalshiBasePath(config)
+      resolveKalshiBasePath(config);
 
     if (shouldWarn) {
       logger.warn(
         { basePath: explicitBasePath },
-        'Both KALSHI_USE_DEMO and KALSHI_BASE_PATH are set; KALSHI_BASE_PATH takes precedence',
-      )
+        "Both KALSHI_USE_DEMO and KALSHI_BASE_PATH are set; KALSHI_BASE_PATH takes precedence",
+      );
     }
 
     const configuration = new Configuration({
@@ -86,10 +86,10 @@ export class KalshiClient {
       privateKeyPem: config.privateKeyPem,
       privateKeyPath: config.privateKeyPath,
       basePath,
-    })
+    });
 
-    this.marketApi = new MarketApi(configuration)
-    this.eventsApi = new EventsApi(configuration)
+    this.marketApi = new MarketApi(configuration);
+    this.eventsApi = new EventsApi(configuration);
   }
 
   /**
@@ -97,11 +97,11 @@ export class KalshiClient {
    * @param params - Optional filters (status, limit, cursor, etc.)
    */
   async listMarkets(params?: {
-    status?: 'open' | 'closed' | 'settled'
-    limit?: number
-    cursor?: string
-    eventTicker?: string
-    seriesTicker?: string
+    status?: "open" | "closed" | "settled";
+    limit?: number;
+    cursor?: string;
+    eventTicker?: string;
+    seriesTicker?: string;
   }) {
     return backOff(
       () =>
@@ -119,7 +119,7 @@ export class KalshiClient {
           params?.status,
         ),
       RETRY_OPTIONS,
-    )
+    );
   }
 
   /**
@@ -127,7 +127,7 @@ export class KalshiClient {
    * @param ticker - Market ticker symbol
    */
   async getMarketDetails(ticker: string) {
-    return backOff(() => this.marketApi.getMarket(ticker), RETRY_OPTIONS)
+    return backOff(() => this.marketApi.getMarket(ticker), RETRY_OPTIONS);
   }
 
   /**
@@ -138,7 +138,7 @@ export class KalshiClient {
     return backOff(
       () => this.marketApi.getMarketOrderbook(ticker),
       RETRY_OPTIONS,
-    )
+    );
   }
 
   /**
@@ -146,11 +146,11 @@ export class KalshiClient {
    * @param params - Optional filters (ticker, limit, cursor, etc.)
    */
   async getTrades(params?: {
-    ticker?: string
-    limit?: number
-    cursor?: string
-    minTs?: number
-    maxTs?: number
+    ticker?: string;
+    limit?: number;
+    cursor?: string;
+    minTs?: number;
+    maxTs?: number;
   }) {
     return backOff(
       () =>
@@ -162,7 +162,7 @@ export class KalshiClient {
           params?.maxTs,
         ),
       RETRY_OPTIONS,
-    )
+    );
   }
 
   /**
@@ -170,7 +170,7 @@ export class KalshiClient {
    * @param seriesTicker - Series ticker symbol
    */
   async getSeries(seriesTicker: string) {
-    return backOff(() => this.marketApi.getSeries(seriesTicker), RETRY_OPTIONS)
+    return backOff(() => this.marketApi.getSeries(seriesTicker), RETRY_OPTIONS);
   }
 
   /**
@@ -178,7 +178,7 @@ export class KalshiClient {
    * @param eventTicker - Event ticker symbol
    */
   async getEvent(eventTicker: string) {
-    return backOff(() => this.eventsApi.getEvent(eventTicker), RETRY_OPTIONS)
+    return backOff(() => this.eventsApi.getEvent(eventTicker), RETRY_OPTIONS);
   }
 
   /**
@@ -186,11 +186,11 @@ export class KalshiClient {
    * @param params - Optional filters (status, limit, cursor, etc.)
    */
   async listEvents(params?: {
-    status?: 'open' | 'closed' | 'settled'
-    limit?: number
-    cursor?: string
-    seriesTicker?: string
-    withNestedMarkets?: boolean
+    status?: "open" | "closed" | "settled";
+    limit?: number;
+    cursor?: string;
+    seriesTicker?: string;
+    withNestedMarkets?: boolean;
   }) {
     return backOff(
       () =>
@@ -204,7 +204,7 @@ export class KalshiClient {
           undefined, // minCloseTs
         ),
       RETRY_OPTIONS,
-    )
+    );
   }
 
   /**
@@ -213,41 +213,41 @@ export class KalshiClient {
    * @returns Object containing events array and markets array
    */
   async fetchAllEventsWithMarkets(): Promise<{
-    events: EventData[]
-    markets: Market[]
+    events: EventData[];
+    markets: Market[];
   }> {
-    const allEvents: EventData[] = []
-    const allMarkets: Market[] = []
-    let cursor: string | undefined = undefined
+    const allEvents: EventData[] = [];
+    const allMarkets: Market[] = [];
+    let cursor: string | undefined = undefined;
 
     do {
       const response = await this.listEvents({
-        status: 'open',
+        status: "open",
         limit: 200,
         cursor,
         withNestedMarkets: true,
-      })
+      });
 
       for (const event of response.data.events) {
         // Extract markets from event before storing
-        const markets = event.markets || []
-        allMarkets.push(...markets)
+        const markets = event.markets || [];
+        allMarkets.push(...markets);
 
         // Store event without nested markets to save memory
-        const { markets: _markets, ...eventWithoutMarkets } = event
-        void _markets // Explicitly mark as intentionally unused
-        allEvents.push(eventWithoutMarkets as EventData)
+        const { markets: _markets, ...eventWithoutMarkets } = event;
+        void _markets; // Explicitly mark as intentionally unused
+        allEvents.push(eventWithoutMarkets as EventData);
       }
 
-      cursor = response.data.cursor || undefined
+      cursor = response.data.cursor || undefined;
 
       // Rate limiting delay between pages (conservative for basic tier: 20 req/sec)
       if (cursor) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
-    } while (cursor)
+    } while (cursor);
 
-    return { events: allEvents, markets: allMarkets }
+    return { events: allEvents, markets: allMarkets };
   }
 
   /**
@@ -257,32 +257,32 @@ export class KalshiClient {
    * @returns Array of all Market objects
    */
   async fetchAllMarkets(eventTickers?: string[]): Promise<Market[]> {
-    const allMarkets: Market[] = []
-    let cursor: string | undefined = undefined
-    const eventTickerSet = eventTickers ? new Set(eventTickers) : null
+    const allMarkets: Market[] = [];
+    let cursor: string | undefined = undefined;
+    const eventTickerSet = eventTickers ? new Set(eventTickers) : null;
 
     do {
       const response = await this.listMarkets({
         limit: 1000,
         cursor,
-      })
+      });
 
       // Filter to only include markets for specified events if provided
       const markets = eventTickerSet
         ? response.data.markets.filter((m) =>
             eventTickerSet.has(m.event_ticker),
           )
-        : response.data.markets
+        : response.data.markets;
 
-      allMarkets.push(...markets)
-      cursor = response.data.cursor || undefined
+      allMarkets.push(...markets);
+      cursor = response.data.cursor || undefined;
 
       // Rate limiting delay between pages
       if (cursor) {
-        await new Promise((resolve) => setTimeout(resolve, 200))
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
-    } while (cursor)
+    } while (cursor);
 
-    return allMarkets
+    return allMarkets;
   }
 }

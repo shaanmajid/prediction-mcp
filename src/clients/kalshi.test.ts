@@ -1,8 +1,8 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  resolveKalshiBasePath,
-  KALSHI_PRODUCTION_URL,
   KALSHI_DEMO_URL,
+  KALSHI_PRODUCTION_URL,
+  resolveKalshiBasePath,
 } from "./kalshi.js";
 
 /**
