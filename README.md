@@ -1,5 +1,7 @@
 # Prediction Markets MCP Server
 
+> **⚠️ Early Development:** This project is under active development. APIs may change without notice. Not recommended for production use.
+
 An MCP server providing unified access to prediction market data from Kalshi and Polymarket.
 
 ## Features
