@@ -1,21 +1,21 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  ListMarketsArgsSchema,
+  CacheStatsSchema,
+  GetEventArgsSchema,
   GetMarketArgsSchema,
   GetOrderbookArgsSchema,
-  GetTradesArgsSchema,
   GetSeriesArgsSchema,
-  GetEventArgsSchema,
-  SearchQuerySchema,
-  CacheStatsSchema,
-  PolymarketListMarketsArgsSchema,
-  PolymarketGetMarketArgsSchema,
-  PolymarketListEventsArgsSchema,
+  GetTradesArgsSchema,
+  ListMarketsArgsSchema,
   PolymarketGetEventArgsSchema,
-  PolymarketListTagsArgsSchema,
+  PolymarketGetMarketArgsSchema,
   PolymarketGetOrderbookArgsSchema,
   PolymarketGetPriceArgsSchema,
   PolymarketGetPriceHistoryArgsSchema,
+  PolymarketListEventsArgsSchema,
+  PolymarketListMarketsArgsSchema,
+  PolymarketListTagsArgsSchema,
+  SearchQuerySchema,
   toMCPSchema,
 } from "./validation.js";
 

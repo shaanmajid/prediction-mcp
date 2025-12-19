@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { SearchCache } from "./cache.js";
+import { describe, expect, test } from "bun:test";
 import type { EventData, Market } from "kalshi-typescript";
+import { SearchCache } from "./cache.js";
 
 // Minimal mock data for testing - using Partial types since we only need searchable fields
 const mockEvent = (ticker: string, title: string, subTitle = ""): EventData =>

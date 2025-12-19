@@ -1,13 +1,12 @@
+import { isAxiosError } from "axios";
+import { backOff } from "exponential-backoff";
 import {
   Configuration,
-  MarketApi,
-  PortfolioApi,
-  EventsApi,
   type EventData,
+  EventsApi,
   type Market,
+  MarketApi,
 } from "kalshi-typescript";
-import { backOff } from "exponential-backoff";
-import { isAxiosError } from "axios";
 import { logger } from "../logger.js";
 
 export const KALSHI_PRODUCTION_URL =
@@ -69,7 +68,6 @@ const RETRY_OPTIONS = {
 
 export class KalshiClient {
   private marketApi: MarketApi;
-  private portfolioApi: PortfolioApi;
   private eventsApi: EventsApi;
 
   constructor(config: KalshiConfig) {
@@ -91,7 +89,6 @@ export class KalshiClient {
     });
 
     this.marketApi = new MarketApi(configuration);
-    this.portfolioApi = new PortfolioApi(configuration);
     this.eventsApi = new EventsApi(configuration);
   }
 

@@ -1,12 +1,12 @@
 import type { EventData, Market } from "kalshi-typescript";
 import { KalshiClient } from "../clients/kalshi.js";
+import { logger } from "../logger.js";
 import {
+  type CacheStats,
+  type CombinedSearchResult,
   SearchCache,
   type SearchResult,
-  type CombinedSearchResult,
-  type CacheStats,
 } from "./cache.js";
-import { logger } from "../logger.js";
 
 /**
  * Service that manages the search cache lifecycle and provides search operations.

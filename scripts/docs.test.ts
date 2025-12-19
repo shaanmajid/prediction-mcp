@@ -1,14 +1,14 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { z } from "zod";
-import {
-  AUTO_GENERATED_FILES,
-  generateToolReference,
-  generateConfiguration,
-  getEnvVarDocs,
-  extractSchemaDoc,
-} from "./docs.js";
 import { serverSchema } from "../src/env.js";
 import { getToolsList } from "../src/tools.js";
+import {
+  AUTO_GENERATED_FILES,
+  extractSchemaDoc,
+  generateConfiguration,
+  generateToolReference,
+  getEnvVarDocs,
+} from "./docs.js";
 
 /**
  * Documentation generator tests.

@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-/* eslint-disable no-console */
 /**
  * Bootstrap script for registering the prediction-markets MCP server with MCP clients.
  *
@@ -11,8 +10,8 @@
  */
 
 import * as fs from "fs";
-import * as path from "path";
 import * as os from "os";
+import * as path from "path";
 import * as readline from "readline";
 
 // ANSI colors for terminal output

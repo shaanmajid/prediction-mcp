@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-/* eslint-disable no-console */
 /**
  * Documentation CLI
  *
@@ -10,11 +9,11 @@
  *   bun run scripts/docs.ts check      # Validate docs match source (CI)
  */
 
-import { z, type ZodTypeAny } from "zod";
-import { serverSchema, type DocMeta } from "../src/env.js";
-import { getToolsList } from "../src/tools.js";
 import * as fs from "fs";
 import * as path from "path";
+import { type ZodTypeAny, z } from "zod";
+import { type DocMeta, serverSchema } from "../src/env.js";
+import { getToolsList } from "../src/tools.js";
 
 // ============================================================
 // Constants

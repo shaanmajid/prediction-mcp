@@ -11,12 +11,12 @@
  * - Search performance is <500ms after cache is populated (typically <10ms locally)
  */
 
-import { describe, test, expect, beforeAll } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { KalshiClient } from "../clients/kalshi.js";
 import { PolymarketClient } from "../clients/polymarket.js";
-import { SearchService } from "./index.js";
-import { TOOLS, type ToolContext } from "../tools.js";
 import { kalshiConfig, polymarketConfig } from "../env.js";
+import { TOOLS, type ToolContext } from "../tools.js";
+import { SearchService } from "./index.js";
 
 describe("Search Integration Tests", () => {
   const kalshi = new KalshiClient(kalshiConfig);

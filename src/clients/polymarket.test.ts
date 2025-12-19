@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, spyOn } from "bun:test";
+import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { PolymarketClient } from "./polymarket.js";
 
 /**
