@@ -47,7 +47,7 @@ Once connected, try these natural language queries:
 
 **Price & Orderbook Analysis**
 
-- _"Get the orderbook for KXINXFED-25JAN on Kalshi"_
+- _"Show me the orderbook for the next Fed rate decision on Kalshi"_
 - _"What's the current price for 'Yes' on this Polymarket market?"_
 - _"Show me the price history for this market over the last week"_
 
