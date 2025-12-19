@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "./env.js";
-import { PolymarketSearchService, SearchService } from "./search/index.js";
+import { KalshiSearchService, PolymarketSearchService } from "./search/index.js";
 import { getToolsList, TOOLS, type ToolContext } from "./tools.js";
 
 /** Tests for MCP tools module. */
@@ -90,7 +90,7 @@ describe("Polymarket Tool Handler Integration Tests", () => {
   const ctx: ToolContext = {
     kalshi,
     polymarket,
-    searchService: new SearchService(kalshi),
+    kalshiSearchService: new KalshiSearchService(kalshi),
     polymarketSearchService: new PolymarketSearchService(polymarket),
   };
 
@@ -164,7 +164,7 @@ describe("Kalshi Tool Integration Tests", () => {
   const ctx: ToolContext = {
     kalshi,
     polymarket,
-    searchService: new SearchService(kalshi),
+    kalshiSearchService: new KalshiSearchService(kalshi),
     polymarketSearchService: new PolymarketSearchService(polymarket),
   };
 

@@ -9,19 +9,14 @@ import {
 } from "./cache.js";
 
 /**
- * Service that manages the search cache lifecycle and provides search operations.
+ * Service that manages the Kalshi search cache lifecycle and provides search operations.
  *
  * Handles:
  * - Initial cache population from Kalshi API
  * - Merge-based cache refresh (full fetch, add/update/remove)
  * - Search operations delegated to the cache
- *
- * @note Future: Support for Polymarket search would likely be implemented as a separate
- * PolymarketSearchService, following the same pattern as this class but using the
- * PolymarketClient. This allows maintaining platform-specific optimizations while
- * keeping the interface consistent.
  */
-export class SearchService {
+export class KalshiSearchService {
   private cache: SearchCache;
   private client: KalshiClient;
   private populatePromise: Promise<void> | null = null;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
-import { SearchService, PolymarketSearchService } from "./search/index.js";
+import { KalshiSearchService, PolymarketSearchService } from "./search/index.js";
 import {
   CacheStatsSchema,
   GetEventArgsSchema,
@@ -30,7 +30,7 @@ import {
 export interface ToolContext {
   kalshi: KalshiClient;
   polymarket: PolymarketClient;
-  searchService: SearchService;
+  kalshiSearchService: KalshiSearchService;
   polymarketSearchService: PolymarketSearchService;
 }
 
@@ -125,7 +125,7 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     schema: SearchQuerySchema,
     handler: async (ctx, args) => {
       const params = SearchQuerySchema.parse(args);
-      const results = await ctx.searchService.search(
+      const results = await ctx.kalshiSearchService.search(
         params.query,
         params.limit,
       );
@@ -144,7 +144,7 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     schema: SearchQuerySchema,
     handler: async (ctx, args) => {
       const params = SearchQuerySchema.parse(args);
-      const results = await ctx.searchService.searchEvents(
+      const results = await ctx.kalshiSearchService.searchEvents(
         params.query,
         params.limit,
       );
@@ -167,7 +167,7 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     schema: SearchQuerySchema,
     handler: async (ctx, args) => {
       const params = SearchQuerySchema.parse(args);
-      const results = await ctx.searchService.searchMarkets(
+      const results = await ctx.kalshiSearchService.searchMarkets(
         params.query,
         params.limit,
       );
@@ -191,9 +191,9 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
     handler: async (ctx, args) => {
       const params = CacheStatsSchema.parse(args || {});
       if (params.refresh) {
-        await ctx.searchService.refresh();
+        await ctx.kalshiSearchService.refresh();
       }
-      return ctx.searchService.getStats();
+      return ctx.kalshiSearchService.getStats();
     },
   },
 };

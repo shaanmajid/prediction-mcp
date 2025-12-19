@@ -16,23 +16,23 @@ import { KalshiClient } from "../clients/kalshi.js";
 import { PolymarketClient } from "../clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "../env.js";
 import { TOOLS, type ToolContext } from "../tools.js";
-import { PolymarketSearchService, SearchService } from "./index.js";
+import { KalshiSearchService, PolymarketSearchService } from "./index.js";
 
 describe("Search Integration Tests", () => {
   const kalshi = new KalshiClient(kalshiConfig);
   const polymarket = new PolymarketClient(polymarketConfig);
-  const searchService = new SearchService(kalshi);
+  const kalshiSearchService = new KalshiSearchService(kalshi);
   const polymarketSearchService = new PolymarketSearchService(polymarket);
   const ctx: ToolContext = {
     kalshi,
     polymarket,
-    searchService,
+    kalshiSearchService,
     polymarketSearchService,
   };
 
   // Populate cache once before all tests (~7s with withNestedMarkets)
   beforeAll(async () => {
-    await searchService.search("test", 1); // Triggers ensurePopulated()
+    await kalshiSearchService.search("test", 1); // Triggers ensurePopulated()
   }, 900000); // Safety timeout for slow networks
 
   describe("kalshi_search", () => {

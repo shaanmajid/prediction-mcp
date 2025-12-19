@@ -9,7 +9,7 @@ import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { logger } from "./src/logger.js";
-import { PolymarketSearchService, SearchService } from "./src/search/index.js";
+import { KalshiSearchService, PolymarketSearchService } from "./src/search/index.js";
 import { getToolsList, TOOLS, type ToolContext } from "./src/tools.js";
 
 /**
@@ -74,13 +74,13 @@ const server = new Server(
 // Initialize clients with validated config
 const kalshiClient = new KalshiClient(kalshiConfig);
 const polymarketClient = new PolymarketClient(polymarketConfig);
-const searchService = new SearchService(kalshiClient);
+const kalshiSearchService = new KalshiSearchService(kalshiClient);
 const polymarketSearchService = new PolymarketSearchService(polymarketClient);
 
 const toolContext: ToolContext = {
   kalshi: kalshiClient,
   polymarket: polymarketClient,
-  searchService,
+  kalshiSearchService,
   polymarketSearchService,
 };
 
@@ -139,12 +139,12 @@ async function prefetchSearchCaches(): Promise<void> {
   logger.info("Starting background prefetch of search caches...");
 
   const [kalshiResult, polymarketResult] = await Promise.allSettled([
-    searchService.ensurePopulated(),
+    kalshiSearchService.ensurePopulated(),
     polymarketSearchService.ensurePopulated(),
   ]);
 
   if (kalshiResult.status === "fulfilled") {
-    const stats = searchService.getStats();
+    const stats = kalshiSearchService.getStats();
     logger.info(
       { events: stats.events_count, markets: stats.markets_count },
       "Kalshi search cache populated",
