@@ -1,53 +1,121 @@
-<!-- AUTO-GENERATED. Run `bun run docs:generate` to update. -->
+# Prediction Markets MCP
 
-# Prediction Markets MCP Server
+[![License](https://img.shields.io/github/license/shaanmajid/prediction-mcp)](https://github.com/shaanmajid/prediction-mcp/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/shaanmajid/prediction-mcp/ci.yml?label=CI)](https://github.com/shaanmajid/prediction-mcp/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-MCP server for fetching prediction market data from Kalshi and Polymarket.
+An MCP server providing unified access to prediction market data from [Kalshi](https://kalshi.com) and [Polymarket](https://polymarket.com).
 
-## Features
+---
 
-- Query markets by status, event, category, or series
-- Get market details, orderbooks, and trade history
-- Retrieve price history and market metadata
-- Cross-platform market discovery (Kalshi + Polymarket)
+## Why Use This?
 
-## Kalshi Tools
+Prediction markets aggregate crowd wisdom into real-time probabilities. This MCP server lets you:
 
-- **kalshi_list_markets** - List available markets on Kalshi. Filter by status (open/closed/settled), event, or series.
-- **kalshi_get_market** - Get detailed information about a specific Kalshi market including prices, volume, and settlement terms.
-- **kalshi_get_orderbook** - Get the current orderbook for a Kalshi market. Note: Only returns bids (no asks) due to binary market reciprocity.
-- **kalshi_get_trades** - Get recent trade history for Kalshi markets. Can filter by specific market ticker.
-- **kalshi_get_series** - Get series metadata including title for URL construction. Series represent categories of related markets (e.g., endorsements, elections).
-- **kalshi_get_event** - Get event metadata including title for URL construction. Events represent specific occurrences that can be traded on.
-- **kalshi_search** - Search across Kalshi events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market titles, and candidate/outcome names (yes_sub_title).
-- **kalshi_search_events** - Search Kalshi events by keyword. Returns events ranked by relevance based on title, subtitle, and ticker matches.
-- **kalshi_search_markets** - Search Kalshi markets by keyword. Returns markets ranked by relevance. Searches title, yes_sub_title (candidate/outcome names), no_sub_title, and ticker.
-- **kalshi_cache_stats** - Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
+- **Unify platforms** — Query Kalshi and Polymarket through one interface
+- **Use natural language** — Ask "What are the odds?" instead of parsing JSON APIs
+- **Get real-time data** — Access prices, orderbooks, and trade history instantly
+- **Search efficiently** — Full-text search across thousands of markets in <1ms
 
-## Polymarket Tools
+Instead of manually browsing market websites or writing API integration code, ask your AI assistant directly.
 
-- **polymarket_list_markets** - List available markets on Polymarket. Filter by status (open/closed) and category tags. Returns market metadata including question, prices, volume, and token IDs for CLOB operations.
-- **polymarket_get_market** - Get detailed information about a specific Polymarket market by slug. Returns question, description, resolution criteria, current prices, volume, and token IDs.
-- **polymarket_list_events** - List events on Polymarket. Events group related markets (e.g., '2024 Election' may contain multiple market questions).
-- **polymarket_get_event** - Get detailed event information by slug. Events contain metadata and may include nested markets.
-- **polymarket_list_tags** - List available category tags on Polymarket. Tags can be used to filter markets and events by category (e.g., Politics, Sports, Crypto).
-- **polymarket_get_orderbook** - Get the current orderbook for a Polymarket outcome token. Returns both bids and asks with price and size. Use token_id from market's clobTokenIds field.
-- **polymarket_get_price** - Get the current best price for a Polymarket outcome token. Specify BUY or SELL side.
-- **polymarket_get_price_history** - Get historical price data for a Polymarket outcome token. Returns time series of price points. Defaults to last 24 hours with hourly resolution.
-
-See [Tools Reference](tools/reference.md) for parameters and usage.
+---
 
 ## Quick Start
 
 ```bash
+git clone https://github.com/shaanmajid/prediction-mcp.git
+cd prediction-mcp
 bun install
-cp .env.example .env  # Add your Kalshi credentials (Polymarket is public)
 bun run scripts/bootstrap.ts --interactive
 ```
 
+After running bootstrap, restart your MCP client to load the server.
+
+---
+
+## What Can You Ask?
+
+Once connected, try these natural language queries:
+
+**Market Discovery**
+
+- _"What are the current odds on Polymarket for the next Fed rate decision?"_
+- _"Show me all open Kalshi markets about the 2024 election"_
+- _"What are the top trending markets on Polymarket right now?"_
+- _"Find Polymarket events tagged with Politics"_
+
+**Price & Orderbook Analysis**
+
+- _"Get the orderbook for KXINXFED-25JAN on Kalshi"_
+- _"What's the current price for 'Yes' on this Polymarket market?"_
+- _"Show me the price history for this market over the last week"_
+
+**Search & Research**
+
+- _"Search Kalshi for markets about climate change"_
+- _"Find all markets related to the Federal Reserve"_
+- _"What prediction markets exist for tech company earnings?"_
+
+See [Tools Reference](reference/tools.md) for the complete list of available operations.
+
+---
+
+## Platforms
+
+### Kalshi
+
+US-regulated prediction exchange with event contracts on politics, economics, weather, and more.
+
+- **Auth required**: API key + RSA private key ([get credentials](https://kalshi.com/account/profile))
+- **Demo environment**: Test with mock funds at [demo.kalshi.co](https://demo.kalshi.co)
+
+### Polymarket
+
+Decentralized prediction market on Polygon with deep liquidity on major events.
+
+- **No auth required**: All read operations are public
+
+---
+
+## Tools
+
+### Kalshi
+
+| Tool                                                                | Description                                 |
+| ------------------------------------------------------------------- | ------------------------------------------- |
+| [`kalshi_list_markets`](reference/tools.md#kalshi_list_markets)     | List markets, filter by status/event/series |
+| [`kalshi_get_market`](reference/tools.md#kalshi_get_market)         | Get market details, prices, volume          |
+| [`kalshi_get_orderbook`](reference/tools.md#kalshi_get_orderbook)   | Current bids for a market                   |
+| [`kalshi_get_trades`](reference/tools.md#kalshi_get_trades)         | Recent trade history                        |
+| [`kalshi_search`](reference/tools.md#kalshi_search)                 | Full-text search across events and markets  |
+| [`kalshi_search_events`](reference/tools.md#kalshi_search_events)   | Search events only                          |
+| [`kalshi_search_markets`](reference/tools.md#kalshi_search_markets) | Search markets only                         |
+| [`kalshi_get_event`](reference/tools.md#kalshi_get_event)           | Event metadata                              |
+| [`kalshi_get_series`](reference/tools.md#kalshi_get_series)         | Series metadata                             |
+| [`kalshi_cache_stats`](reference/tools.md#kalshi_cache_stats)       | Search cache stats, trigger refresh         |
+
+### Polymarket
+
+| Tool                                                                              | Description                         |
+| --------------------------------------------------------------------------------- | ----------------------------------- |
+| [`polymarket_list_markets`](reference/tools.md#polymarket_list_markets)           | List markets, filter by status/tags |
+| [`polymarket_get_market`](reference/tools.md#polymarket_get_market)               | Get market by slug                  |
+| [`polymarket_list_events`](reference/tools.md#polymarket_list_events)             | List events (grouped markets)       |
+| [`polymarket_get_event`](reference/tools.md#polymarket_get_event)                 | Event details                       |
+| [`polymarket_list_tags`](reference/tools.md#polymarket_list_tags)                 | Available category tags             |
+| [`polymarket_get_orderbook`](reference/tools.md#polymarket_get_orderbook)         | Full orderbook (bids + asks)        |
+| [`polymarket_get_price`](reference/tools.md#polymarket_get_price)                 | Current best price                  |
+| [`polymarket_get_price_history`](reference/tools.md#polymarket_get_price_history) | Historical price time series        |
+
+See [Tools Reference](reference/tools.md) for full parameter documentation.
+
+---
+
 ## Links
 
-- [Configuration](configuration.md)
-- [Kalshi API Docs](https://docs.kalshi.com)
-- [Polymarket API Docs](https://docs.polymarket.com)
-- [MCP Specification](https://modelcontextprotocol.io)
+- [Getting Started](getting-started.md) — Installation and setup
+- [Configuration](reference/configuration.md) — Environment variables and MCP client config
+- [Tools Reference](reference/tools.md) — Complete tool documentation
+- [Troubleshooting](troubleshooting.md) — Common issues and solutions
+- [GitHub](https://github.com/shaanmajid/prediction-mcp) — Source code and issues

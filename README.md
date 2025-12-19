@@ -71,7 +71,7 @@ KALSHI_API_KEY=your-api-key-id
 KALSHI_PRIVATE_KEY_PATH=/path/to/private-key.pem
 ```
 
-Get credentials at [kalshi.com/profile/api](https://kalshi.com/profile/api).
+Get credentials at [kalshi.com/account/profile](https://kalshi.com/account/profile).
 
 #### Demo Environment
 
