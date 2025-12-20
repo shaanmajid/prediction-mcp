@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import type { Market } from "kalshi-typescript";
 import { KalshiClient } from "../clients/kalshi.js";
-import { SearchService } from "./service.js";
+import { KalshiSearchService } from "./service.js";
 
-describe("SearchService", () => {
+describe("KalshiSearchService", () => {
   describe("cache lifecycle", () => {
     test("concurrent ensurePopulated() calls only trigger one API call", async () => {
       let callCount = 0;
@@ -27,7 +27,7 @@ describe("SearchService", () => {
         },
       } as unknown as KalshiClient;
 
-      const service = new SearchService(mockClient);
+      const service = new KalshiSearchService(mockClient);
 
       // Fire 3 concurrent calls
       await Promise.all([
@@ -68,7 +68,7 @@ describe("SearchService", () => {
         },
       } as unknown as KalshiClient;
 
-      const service = new SearchService(mockClient);
+      const service = new KalshiSearchService(mockClient);
 
       // First call populates cache
       await service.ensurePopulated();
@@ -99,7 +99,7 @@ describe("SearchService", () => {
         },
       } as unknown as KalshiClient;
 
-      const service = new SearchService(mockClient);
+      const service = new KalshiSearchService(mockClient);
 
       // Initial population
       await service.ensurePopulated();
@@ -120,7 +120,7 @@ describe("SearchService", () => {
         }),
       } as unknown as KalshiClient;
 
-      const service = new SearchService(mockClient);
+      const service = new KalshiSearchService(mockClient);
       const stats = service.getStats();
 
       expect(stats.status).toBe("empty");
@@ -151,7 +151,7 @@ describe("SearchService", () => {
         }),
       } as unknown as KalshiClient;
 
-      const service = new SearchService(mockClient);
+      const service = new KalshiSearchService(mockClient);
       await service.ensurePopulated();
 
       const stats = service.getStats();

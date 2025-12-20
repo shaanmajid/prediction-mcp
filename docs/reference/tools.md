@@ -215,3 +215,48 @@ Get historical price data for a Polymarket outcome token. Returns time series of
 
 - `endTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
   - End timestamp in Unix seconds. Defaults to now if not provided.
+
+## `polymarket_search`
+
+Search across Polymarket events and markets using keyword matching. Returns results ranked by relevance. Searches event titles, market questions, and outcome names.
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  - Search terms to find events or markets on Polymarket
+
+- `limit` (integer (min: 1, max: 100), required)
+  - Maximum number of results to return
+
+## `polymarket_search_events`
+
+Search Polymarket events by keyword. Returns events ranked by relevance based on title, slug, and description matches.
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  - Search terms to find events or markets on Polymarket
+
+- `limit` (integer (min: 1, max: 100), required)
+  - Maximum number of results to return
+
+## `polymarket_search_markets`
+
+Search Polymarket markets by keyword. Returns markets ranked by relevance. Searches question, groupItemTitle (outcome/candidate names), slug, description, and outcomes.
+
+**Parameters:**
+
+- `query` (string (minLength: 1), required)
+  - Search terms to find events or markets on Polymarket
+
+- `limit` (integer (min: 1, max: 100), required)
+  - Maximum number of results to return
+
+## `polymarket_cache_stats`
+
+Get Polymarket search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
+
+**Parameters:**
+
+- `refresh` (boolean, required)
+  - If true, trigger a cache refresh before returning stats

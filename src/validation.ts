@@ -294,6 +294,34 @@ export const PolymarketGetPriceHistoryArgsSchema = z
   })
   .strict();
 
+// Schema for polymarket_search, polymarket_search_events, polymarket_search_markets
+export const PolymarketSearchQuerySchema = z
+  .object({
+    query: z
+      .string()
+      .min(1)
+      .describe("Search terms to find events or markets on Polymarket"),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe("Maximum number of results to return"),
+  })
+  .strict();
+
+// Schema for polymarket_cache_stats
+// Design note: refresh defaults to false because it's a write operation with side effects (~40s delay).
+export const PolymarketCacheStatsSchema = z
+  .object({
+    refresh: z
+      .boolean()
+      .default(false)
+      .describe("If true, trigger a cache refresh before returning stats"),
+  })
+  .strict();
+
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
  *
@@ -345,4 +373,10 @@ export type PolymarketGetPriceArgs = z.infer<
 >;
 export type PolymarketGetPriceHistoryArgs = z.infer<
   typeof PolymarketGetPriceHistoryArgsSchema
+>;
+export type PolymarketSearchQueryArgs = z.infer<
+  typeof PolymarketSearchQuerySchema
+>;
+export type PolymarketCacheStatsArgs = z.infer<
+  typeof PolymarketCacheStatsSchema
 >;

@@ -107,6 +107,10 @@ Decentralized prediction market on Polygon with deep liquidity on major events.
 | [`polymarket_get_orderbook`](reference/tools.md#polymarket_get_orderbook)         | Full orderbook (bids + asks)        |
 | [`polymarket_get_price`](reference/tools.md#polymarket_get_price)                 | Current best price                  |
 | [`polymarket_get_price_history`](reference/tools.md#polymarket_get_price_history) | Historical price time series        |
+| [`polymarket_search`](reference/tools.md#polymarket_search)                       | Full-text search across events and markets |
+| [`polymarket_search_events`](reference/tools.md#polymarket_search_events)         | Search events only                  |
+| [`polymarket_search_markets`](reference/tools.md#polymarket_search_markets)       | Search markets only                 |
+| [`polymarket_cache_stats`](reference/tools.md#polymarket_cache_stats)             | Search cache stats, trigger refresh |
 
 See [Tools Reference](reference/tools.md) for full parameter documentation.
 

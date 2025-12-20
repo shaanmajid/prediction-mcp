@@ -1,39 +1,38 @@
-import type { EventData, Market } from "kalshi-typescript";
-import { KalshiClient } from "../clients/kalshi.js";
-import { logger } from "../logger.js";
+/**
+ * Service that manages the Polymarket search cache lifecycle and provides search operations.
+ */
+import type {
+  PolymarketClient,
+  PolymarketEvent,
+  PolymarketMarket,
+} from "../clients/polymarket.js";
 import {
-  type CacheStats,
-  type CombinedSearchResult,
-  SearchCache,
-  type SearchResult,
-} from "./cache.js";
+  type PolymarketCombinedSearchResult,
+  PolymarketSearchCache,
+} from "./polymarket-cache.js";
+import type { CacheStats, SearchResult } from "./scoring.js";
 
 /**
- * Service that manages the Kalshi search cache lifecycle and provides search operations.
+ * Service that manages the Polymarket search cache lifecycle and provides search operations.
  *
  * Handles:
- * - Initial cache population from Kalshi API
+ * - Initial cache population from Polymarket Gamma API
  * - Merge-based cache refresh (full fetch, add/update/remove)
  * - Search operations delegated to the cache
  */
-export class KalshiSearchService {
-  private cache: SearchCache;
-  private client: KalshiClient;
+export class PolymarketSearchService {
+  private cache: PolymarketSearchCache;
+  private client: PolymarketClient;
   private populatePromise: Promise<void> | null = null;
 
-  constructor(client: KalshiClient) {
-    this.cache = new SearchCache();
+  constructor(client: PolymarketClient) {
+    this.cache = new PolymarketSearchCache();
     this.client = client;
   }
 
   /**
    * Ensures the cache is populated before performing operations.
    * Safe to call multiple times - will only populate once.
-   *
-   * @note Future: Consider adding cache TTL (time-to-live) for long-running servers.
-   * Currently, the cache persists indefinitely. A time-based expiry would help keep
-   * data fresh without requiring manual refresh() calls. Target: ~1 hour TTL with
-   * background refresh during idle time.
    */
   async ensurePopulated(): Promise<void> {
     if (this.cache.getStats().status === "ready") {
@@ -49,44 +48,18 @@ export class KalshiSearchService {
   }
 
   private async doPopulate(): Promise<void> {
-    logger.info("Populating search cache from Kalshi API...");
-    const startTime = Date.now();
-
+    // Single efficient call - events come with nested markets by default
     const { events, markets } = await this.client.fetchAllEventsWithMarkets();
-
     this.cache.populate(events, markets);
-
-    const elapsedMs = Date.now() - startTime;
-    logger.info(
-      {
-        events: events.length,
-        markets: markets.length,
-        elapsedMs,
-      },
-      "Search cache populated",
-    );
   }
 
   /**
-   * Refreshes the cache with current data from Kalshi API.
+   * Refreshes the cache with current data from Polymarket API.
    * Adds new items, updates existing, and prunes removed.
    */
   async refresh(): Promise<void> {
-    logger.info("Refreshing search cache...");
-    const startTime = Date.now();
-
     const { events, markets } = await this.client.fetchAllEventsWithMarkets();
     this.cache.refresh(events, markets);
-
-    const elapsedMs = Date.now() - startTime;
-    logger.info(
-      {
-        events: events.length,
-        markets: markets.length,
-        elapsedMs,
-      },
-      "Search cache refreshed",
-    );
   }
 
   /**
@@ -95,7 +68,7 @@ export class KalshiSearchService {
   async searchEvents(
     query: string,
     limit: number,
-  ): Promise<SearchResult<EventData>[]> {
+  ): Promise<SearchResult<PolymarketEvent>[]> {
     await this.ensurePopulated();
     return this.cache.searchEvents(query, limit);
   }
@@ -106,7 +79,7 @@ export class KalshiSearchService {
   async searchMarkets(
     query: string,
     limit: number,
-  ): Promise<SearchResult<Market>[]> {
+  ): Promise<SearchResult<PolymarketMarket>[]> {
     await this.ensurePopulated();
     return this.cache.searchMarkets(query, limit);
   }
@@ -114,7 +87,10 @@ export class KalshiSearchService {
   /**
    * Search for both events and markets matching the query.
    */
-  async search(query: string, limit: number): Promise<CombinedSearchResult[]> {
+  async search(
+    query: string,
+    limit: number,
+  ): Promise<PolymarketCombinedSearchResult[]> {
     await this.ensurePopulated();
     return this.cache.search(query, limit);
   }
