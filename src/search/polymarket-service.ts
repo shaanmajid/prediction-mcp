@@ -7,10 +7,10 @@ import type {
   PolymarketMarket,
 } from "../clients/polymarket.js";
 import {
-  PolymarketSearchCache,
   type PolymarketCombinedSearchResult,
+  PolymarketSearchCache,
 } from "./polymarket-cache.js";
-import type { SearchResult, CacheStats } from "./scoring.js";
+import type { CacheStats, SearchResult } from "./scoring.js";
 
 /**
  * Service that manages the Polymarket search cache lifecycle and provides search operations.

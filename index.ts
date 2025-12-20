@@ -9,7 +9,10 @@ import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "./src/env.js";
 import { logger } from "./src/logger.js";
-import { KalshiSearchService, PolymarketSearchService } from "./src/search/index.js";
+import {
+  KalshiSearchService,
+  PolymarketSearchService,
+} from "./src/search/index.js";
 import { getToolsList, TOOLS, type ToolContext } from "./src/tools.js";
 
 /**

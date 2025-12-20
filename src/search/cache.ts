@@ -1,13 +1,13 @@
 import type { EventData, Market } from "kalshi-typescript";
 import {
-  tokenize,
-  scoreItem,
-  type SearchResult,
   type CacheStats,
+  type SearchResult,
+  scoreItem,
+  tokenize,
 } from "./scoring.js";
 
 // Re-export types for backwards compatibility
-export type { SearchResult, CacheStats } from "./scoring.js";
+export type { CacheStats, SearchResult } from "./scoring.js";
 
 /**
  * Combined search result that can contain either an event or a market.

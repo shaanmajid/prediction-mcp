@@ -6,10 +6,10 @@ import type {
   PolymarketMarket,
 } from "../clients/polymarket.js";
 import {
-  tokenize,
-  scoreItem,
-  type SearchResult,
   type CacheStats,
+  type SearchResult,
+  scoreItem,
+  tokenize,
 } from "./scoring.js";
 
 /**

@@ -1,9 +1,9 @@
-import { describe, test, expect } from "bun:test";
-import { PolymarketSearchCache } from "./polymarket-cache.js";
+import { describe, expect, test } from "bun:test";
 import type {
   PolymarketEvent,
   PolymarketMarket,
 } from "../clients/polymarket.js";
+import { PolymarketSearchCache } from "./polymarket-cache.js";
 
 // Helper to create mock events with only searchable fields
 const mockEvent = (

@@ -1,10 +1,10 @@
-import { describe, test, expect } from "bun:test";
-import { PolymarketSearchService } from "./polymarket-service.js";
+import { describe, expect, test } from "bun:test";
 import type {
   PolymarketClient,
   PolymarketEvent,
   PolymarketMarket,
 } from "../clients/polymarket.js";
+import { PolymarketSearchService } from "./polymarket-service.js";
 
 describe("PolymarketSearchService", () => {
   describe("cache lifecycle", () => {

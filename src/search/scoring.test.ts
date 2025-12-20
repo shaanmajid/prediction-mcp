@@ -1,13 +1,13 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  tokenize,
-  escapeRegex,
-  countSubstringOccurrences,
-  scoreItem,
-  EXACT_WORD_MATCH_SCORE,
-  WORD_PREFIX_MATCH_SCORE,
-  SUBSTRING_MATCH_SCORE,
   ALL_TOKENS_BONUS,
+  countSubstringOccurrences,
+  EXACT_WORD_MATCH_SCORE,
+  escapeRegex,
+  SUBSTRING_MATCH_SCORE,
+  scoreItem,
+  tokenize,
+  WORD_PREFIX_MATCH_SCORE,
 } from "./scoring.js";
 
 describe("scoring utilities", () => {

@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
-import { KalshiSearchService, PolymarketSearchService } from "./search/index.js";
+import {
+  KalshiSearchService,
+  PolymarketSearchService,
+} from "./search/index.js";
 import {
   CacheStatsSchema,
   GetEventArgsSchema,
