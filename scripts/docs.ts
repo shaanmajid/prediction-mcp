@@ -22,11 +22,15 @@ import { getToolsList } from "../src/tools.js";
 const DOCS_DIR = path.join(import.meta.dir, "../docs");
 const REFERENCE_DIR = path.join(DOCS_DIR, "reference");
 
-/** Files that are auto-generated (and safe to overwrite) */
+/** Files that are fully auto-generated (safe to overwrite) */
 export const AUTO_GENERATED_FILES = [
   "reference/configuration.md",
   "reference/tools.md",
 ];
+
+/** Markers for partial auto-generation within manual files */
+export const INDEX_TOOLS_START = "<!-- TOOLS_TABLE_START -->";
+export const INDEX_TOOLS_END = "<!-- TOOLS_TABLE_END -->";
 
 // ============================================================
 // Types
@@ -211,6 +215,100 @@ function generateConfiguration(): string {
   return lines.join("\n");
 }
 
+/**
+ * Generate the tools table section for index.md.
+ * This creates a markdown table with tool names and descriptions.
+ */
+function generateIndexToolsTable(): string {
+  const tools = getToolsList();
+
+  // Group tools by platform
+  const kalshiTools = tools.filter((t) => t.name.startsWith("kalshi_"));
+  const polymarketTools = tools.filter((t) => t.name.startsWith("polymarket_"));
+
+  // Helper to create a short description (first sentence or truncated)
+  const shortDesc = (desc: string): string => {
+    const firstSentence = desc.split(/\.\s/)[0] ?? desc;
+    return firstSentence.length > 60
+      ? `${firstSentence.slice(0, 57)}...`
+      : firstSentence;
+  };
+
+  const lines: string[] = [
+    "## Tools",
+    "",
+    "### Kalshi",
+    "",
+    "| Tool | Description |",
+    "| ---- | ----------- |",
+  ];
+
+  for (const tool of kalshiTools) {
+    const link = `[\`${tool.name}\`](reference/tools.md#${tool.name})`;
+    lines.push(`| ${link} | ${shortDesc(tool.description)} |`);
+  }
+
+  lines.push("");
+  lines.push("### Polymarket");
+  lines.push("");
+  lines.push("| Tool | Description |");
+  lines.push("| ---- | ----------- |");
+
+  for (const tool of polymarketTools) {
+    const link = `[\`${tool.name}\`](reference/tools.md#${tool.name})`;
+    lines.push(`| ${link} | ${shortDesc(tool.description)} |`);
+  }
+
+  lines.push("");
+  lines.push(
+    "See [Tools Reference](reference/tools.md) for full parameter documentation.",
+  );
+
+  return lines.join("\n");
+}
+
+/**
+ * Update the tools table section in index.md.
+ * Replaces content between TOOLS_TABLE_START and TOOLS_TABLE_END markers.
+ */
+function updateIndexToolsTable(): boolean {
+  const indexPath = path.join(DOCS_DIR, "index.md");
+
+  if (!fs.existsSync(indexPath)) {
+    console.error("  [error] index.md does not exist");
+    return false;
+  }
+
+  const content = fs.readFileSync(indexPath, "utf-8");
+
+  // Check for markers
+  if (
+    !content.includes(INDEX_TOOLS_START) ||
+    !content.includes(INDEX_TOOLS_END)
+  ) {
+    console.error(
+      `  [error] index.md is missing ${INDEX_TOOLS_START} / ${INDEX_TOOLS_END} markers`,
+    );
+    return false;
+  }
+
+  const startIdx = content.indexOf(INDEX_TOOLS_START);
+  const endIdx = content.indexOf(INDEX_TOOLS_END);
+
+  if (startIdx >= endIdx) {
+    console.error("  [error] Invalid marker positions in index.md");
+    return false;
+  }
+
+  const before = content.slice(0, startIdx + INDEX_TOOLS_START.length);
+  const after = content.slice(endIdx);
+
+  const newContent = `${before}\n${generateIndexToolsTable()}\n${after}`;
+
+  fs.writeFileSync(indexPath, newContent);
+  return true;
+}
+
 // ============================================================
 // Checkers
 // ============================================================
@@ -273,11 +371,42 @@ function checkIndexToolList(): CheckResult {
   }
 
   const content = fs.readFileSync(indexPath, "utf-8");
-  const tools = getToolsList();
 
-  for (const tool of tools) {
-    if (!content.includes(tool.name)) {
-      errors.push(`Tool '${tool.name}' not listed in index.md`);
+  // Check for markers
+  if (!content.includes(INDEX_TOOLS_START)) {
+    errors.push(`index.md is missing ${INDEX_TOOLS_START} marker`);
+    return { valid: false, errors };
+  }
+  if (!content.includes(INDEX_TOOLS_END)) {
+    errors.push(`index.md is missing ${INDEX_TOOLS_END} marker`);
+    return { valid: false, errors };
+  }
+
+  // Extract current tools section and compare with generated
+  const startIdx = content.indexOf(INDEX_TOOLS_START);
+  const endIdx = content.indexOf(INDEX_TOOLS_END);
+
+  if (startIdx >= endIdx) {
+    errors.push("Invalid marker positions in index.md");
+    return { valid: false, errors };
+  }
+
+  const currentSection = content.slice(
+    startIdx + INDEX_TOOLS_START.length + 1, // +1 for newline after marker
+    endIdx - 1, // -1 for newline before marker
+  );
+  const expectedSection = generateIndexToolsTable();
+
+  if (currentSection !== expectedSection) {
+    // Find which tools are missing for a helpful error message
+    const tools = getToolsList();
+    for (const tool of tools) {
+      if (!content.includes(tool.name)) {
+        errors.push(`Tool '${tool.name}' not listed in index.md`);
+      }
+    }
+    if (errors.length === 0) {
+      errors.push("Tools table in index.md does not match generated output");
     }
   }
 
@@ -379,6 +508,11 @@ function runGenerate(): void {
     console.log(`  [ok] ${path.relative(process.cwd(), file.path)}`);
   }
 
+  // Update tools table in index.md (partial auto-generation)
+  if (updateIndexToolsTable()) {
+    console.log(`  [ok] docs/index.md (tools table)`);
+  }
+
   console.log("\nDone.");
 }
 
@@ -432,6 +566,7 @@ function runCheck(): void {
 export {
   generateToolReference,
   generateConfiguration,
+  generateIndexToolsTable,
   getEnvVarDocs,
   extractSchemaDoc,
 };

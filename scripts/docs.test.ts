@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import * as fs from "fs";
 import * as path from "path";
-import { describe, expect, test } from "bun:test";
 import { z } from "zod";
 import { serverSchema } from "../src/env.js";
 import { getToolsList } from "../src/tools.js";
@@ -8,8 +8,11 @@ import {
   AUTO_GENERATED_FILES,
   extractSchemaDoc,
   generateConfiguration,
+  generateIndexToolsTable,
   generateToolReference,
   getEnvVarDocs,
+  INDEX_TOOLS_END,
+  INDEX_TOOLS_START,
 } from "./docs.js";
 
 const DOCS_DIR = path.join(import.meta.dir, "../docs");
@@ -107,6 +110,39 @@ describe("generateConfiguration", () => {
   });
 });
 
+describe("generateIndexToolsTable", () => {
+  test("includes all tools from source", () => {
+    const output = generateIndexToolsTable();
+    const tools = getToolsList();
+
+    for (const tool of tools) {
+      expect(output).toContain(tool.name);
+    }
+  });
+
+  test("generates markdown table format", () => {
+    const output = generateIndexToolsTable();
+
+    expect(output).toContain("## Tools");
+    expect(output).toContain("### Kalshi");
+    expect(output).toContain("### Polymarket");
+    expect(output).toContain("| Tool | Description |");
+    expect(output).toContain("| ---- | ----------- |");
+  });
+
+  test("includes links to tools reference", () => {
+    const output = generateIndexToolsTable();
+
+    expect(output).toContain("(reference/tools.md#kalshi_list_markets)");
+    expect(output).toContain("(reference/tools.md#polymarket_list_markets)");
+  });
+
+  test("does NOT include AUTO-GENERATED marker", () => {
+    const output = generateIndexToolsTable();
+    expect(output).not.toContain("AUTO-GENERATED");
+  });
+});
+
 // ============================================================
 // Env Var Extraction Tests
 // ============================================================
@@ -192,5 +228,55 @@ describe("idempotency", () => {
     const committed = fs.readFileSync(committedPath, "utf-8");
 
     expect(generated).toBe(committed);
+  });
+
+  test("generateIndexToolsTable matches committed index.md section", () => {
+    const generated = generateIndexToolsTable();
+    const indexPath = path.join(DOCS_DIR, "index.md");
+    const indexContent = fs.readFileSync(indexPath, "utf-8");
+
+    // Extract the section between markers
+    const startIdx = indexContent.indexOf(INDEX_TOOLS_START);
+    const endIdx = indexContent.indexOf(INDEX_TOOLS_END);
+
+    expect(startIdx).toBeGreaterThan(-1);
+    expect(endIdx).toBeGreaterThan(startIdx);
+
+    const committedSection = indexContent.slice(
+      startIdx + INDEX_TOOLS_START.length + 1, // +1 for newline
+      endIdx - 1, // -1 for newline before marker
+    );
+
+    expect(generated).toBe(committedSection);
+  });
+});
+
+// ============================================================
+// Index.md Marker Tests
+// ============================================================
+
+describe("index.md markers", () => {
+  test("index.md contains TOOLS_TABLE_START marker", () => {
+    const indexPath = path.join(DOCS_DIR, "index.md");
+    const content = fs.readFileSync(indexPath, "utf-8");
+
+    expect(content).toContain(INDEX_TOOLS_START);
+  });
+
+  test("index.md contains TOOLS_TABLE_END marker", () => {
+    const indexPath = path.join(DOCS_DIR, "index.md");
+    const content = fs.readFileSync(indexPath, "utf-8");
+
+    expect(content).toContain(INDEX_TOOLS_END);
+  });
+
+  test("markers are in correct order", () => {
+    const indexPath = path.join(DOCS_DIR, "index.md");
+    const content = fs.readFileSync(indexPath, "utf-8");
+
+    const startIdx = content.indexOf(INDEX_TOOLS_START);
+    const endIdx = content.indexOf(INDEX_TOOLS_END);
+
+    expect(startIdx).toBeLessThan(endIdx);
   });
 });
