@@ -23,14 +23,26 @@ Instead of manually browsing market websites or writing API integration code, as
 
 ## Quick Start
 
-```bash
-git clone https://github.com/shaanmajid/prediction-mcp.git
-cd prediction-mcp
-bun install
-bun run scripts/bootstrap.ts --interactive
+Add to your MCP client configuration (e.g., `~/.claude.json` for Claude Code):
+
+```json
+{
+  "mcpServers": {
+    "prediction-markets": {
+      "command": "npx",
+      "args": ["-y", "prediction-mcp"],
+      "env": {
+        "KALSHI_API_KEY": "your-api-key",
+        "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
+      }
+    }
+  }
+}
 ```
 
-After running bootstrap, restart your MCP client to load the server.
+> **Note:** Polymarket works without credentials. Kalshi credentials are optional.
+
+Restart your MCP client to load the server.
 
 ---
 

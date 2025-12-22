@@ -1,5 +1,9 @@
 # Prediction Markets MCP Server
 
+> **For users:** Install via npm with `npx prediction-mcp`. See [README.md](README.md) for setup instructions.
+>
+> **This file is for contributors** developing the server itself.
+
 ## API Reference
 
 Always consult these docs when working with platform APIs:

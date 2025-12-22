@@ -4,16 +4,12 @@ Get up and running with Prediction Markets MCP in under 5 minutes.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) v1.0+ — required to run TypeScript directly
+- [Node.js](https://nodejs.org/) v18+ (for `npx`) or [Bun](https://bun.sh/) v1.0+ (for `bunx`)
 - An MCP-compatible client (see supported clients below)
 
 ## Installation
 
-```bash
-git clone https://github.com/shaanmajid/prediction-mcp.git
-cd prediction-mcp
-bun install
-```
+This server is published on npm. No cloning or building required—just configure your MCP client to run it via `npx`.
 
 ## Register with Your MCP Client
 
@@ -27,26 +23,14 @@ Most MCP clients load servers at startup. After adding or updating configuration
 
 === "Claude Code"
 
-    Run the bootstrap script to automatically configure:
-
-    ```bash
-    bun run scripts/bootstrap.ts --interactive
-    ```
-
-    This creates `.mcp.json` in the project root. For global access across all projects:
-
-    ```bash
-    bun run scripts/bootstrap.ts --global --interactive
-    ```
-
-    **Manual configuration:** Add to `.mcp.json` in your project or `~/.claude.json` for global:
+    Add to `.mcp.json` in your project or `~/.claude.json` for global access:
 
     ```json
     {
       "mcpServers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -55,6 +39,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
       }
     }
     ```
+
+    **Using Bun?** Replace `"command": "npx", "args": ["-y", "prediction-mcp"]` with `"command": "bunx", "args": ["prediction-mcp"]`.
 
 === "Claude Desktop"
 
@@ -74,8 +60,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
     {
       "mcpServers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -84,9 +70,6 @@ Most MCP clients load servers at startup. After adding or updating configuration
       }
     }
     ```
-
-    !!! note "Windows users"
-        Use full paths with escaped backslashes: `"C:\\Users\\name\\prediction-mcp\\index.ts"`
 
 === "VS Code"
 
@@ -100,8 +83,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
     {
       "servers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -128,8 +111,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
     {
       "mcpServers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -156,8 +139,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
     {
       "mcpServers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -183,8 +166,8 @@ Most MCP clients load servers at startup. After adding or updating configuration
     {
       "context_servers": {
         "prediction-markets": {
-          "command": "bun",
-          "args": ["run", "/path/to/prediction-mcp/index.ts"],
+          "command": "npx",
+          "args": ["-y", "prediction-mcp"],
           "env": {
             "KALSHI_API_KEY": "your-api-key",
             "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -209,7 +192,7 @@ Most MCP clients load servers at startup. After adding or updating configuration
       "mcp": {
         "prediction-markets": {
           "type": "local",
-          "command": ["bun", "run", "/path/to/prediction-mcp/index.ts"],
+          "command": ["npx", "-y", "prediction-mcp"],
           "enabled": true,
           "environment": {
             "KALSHI_API_KEY": "your-api-key",
