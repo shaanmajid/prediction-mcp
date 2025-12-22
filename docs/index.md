@@ -1,8 +1,8 @@
-# Prediction Markets MCP
+# Prediction Markets MCP Server
 
-[![License](https://img.shields.io/github/license/shaanmajid/prediction-mcp)](https://github.com/shaanmajid/prediction-mcp/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/shaanmajid/prediction-mcp/ci.yml?label=CI)](https://github.com/shaanmajid/prediction-mcp/actions)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![CI](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/shaanmajid/prediction-mcp/graph/badge.svg)](https://codecov.io/gh/shaanmajid/prediction-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An MCP server providing unified access to prediction market data from [Kalshi](https://kalshi.com) and [Polymarket](https://polymarket.com).
 
