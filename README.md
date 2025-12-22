@@ -31,20 +31,32 @@ Once connected, try these natural language queries:
 
 ## Quick Start
 
-```bash
-git clone https://github.com/shaanmajid/prediction-mcp.git
-cd prediction-mcp
-bun install
-bun run scripts/bootstrap.ts --interactive
+Add to your MCP client configuration (e.g., `~/.claude.json` for Claude Code):
+
+```json
+{
+  "mcpServers": {
+    "prediction-markets": {
+      "command": "npx",
+      "args": ["-y", "prediction-mcp"],
+      "env": {
+        "KALSHI_API_KEY": "your-api-key",
+        "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
+      }
+    }
+  }
+}
 ```
 
-After running bootstrap, restart your MCP client to load the server.
+> **Note:** Polymarket works without credentials. Kalshi credentials are optional but required for authenticated operations.
+
+Restart your MCP client to load the server.
 
 📖 **[Full documentation](https://shaanmajid.github.io/prediction-mcp/)** — Setup guides for 7 MCP clients, troubleshooting, and more.
 
 ## Installation
 
-This server follows the standard [MCP configuration format](https://modelcontextprotocol.io/examples). Add it to your MCP client's configuration file.
+This server is published on npm and runs via `npx`. No cloning or building required.
 
 ### Configuration Format
 
@@ -54,8 +66,8 @@ Most MCP clients use the same JSON structure:
 {
   "mcpServers": {
     "prediction-markets": {
-      "command": "bun",
-      "args": ["run", "/path/to/prediction-mcp/index.ts"],
+      "command": "npx",
+      "args": ["-y", "prediction-mcp"],
       "env": {
         "KALSHI_API_KEY": "your-api-key",
         "KALSHI_PRIVATE_KEY_PATH": "/path/to/key.pem"
@@ -64,6 +76,8 @@ Most MCP clients use the same JSON structure:
   }
 }
 ```
+
+**Alternative runtimes:** If you prefer Bun, use `"command": "bunx"` and `"args": ["prediction-mcp"]`.
 
 ### Client-Specific Locations
 
@@ -116,7 +130,13 @@ Run `bun run docs:generate` after modifying tools to keep documentation in sync.
 
 ## Development
 
+For contributors working on this project:
+
 ```bash
+git clone https://github.com/shaanmajid/prediction-mcp.git
+cd prediction-mcp
+bun install
+
 bun test              # Run tests
 bun run typecheck     # Type check
 bun run lint          # Lint
