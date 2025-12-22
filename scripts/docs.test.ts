@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import { describe, expect, test } from "bun:test";
 import { z } from "zod";
 import { serverSchema } from "../src/env.js";
@@ -9,6 +11,8 @@ import {
   generateToolReference,
   getEnvVarDocs,
 } from "./docs.js";
+
+const DOCS_DIR = path.join(import.meta.dir, "../docs");
 
 /**
  * Documentation generator tests.
@@ -166,5 +170,27 @@ describe("extractSchemaDoc", () => {
 
     expect(doc.default).toBe("default-value");
     expect(doc.required).toBe(false); // Has default, so not required
+  });
+});
+
+// ============================================================
+// Idempotency Tests
+// ============================================================
+
+describe("idempotency", () => {
+  test("generateToolReference matches committed file exactly", () => {
+    const generated = generateToolReference();
+    const committedPath = path.join(DOCS_DIR, "reference/tools.md");
+    const committed = fs.readFileSync(committedPath, "utf-8");
+
+    expect(generated).toBe(committed);
+  });
+
+  test("generateConfiguration matches committed file exactly", () => {
+    const generated = generateConfiguration();
+    const committedPath = path.join(DOCS_DIR, "reference/configuration.md");
+    const committed = fs.readFileSync(committedPath, "utf-8");
+
+    expect(generated).toBe(committed);
   });
 });

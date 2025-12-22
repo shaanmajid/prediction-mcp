@@ -327,6 +327,32 @@ function checkAutoGenMarkers(): CheckResult {
   return { valid: errors.length === 0, errors };
 }
 
+function checkGeneratedFilesMatch(): CheckResult {
+  const errors: string[] = [];
+
+  const generators: { file: string; generate: () => string }[] = [
+    { file: "reference/tools.md", generate: generateToolReference },
+    { file: "reference/configuration.md", generate: generateConfiguration },
+  ];
+
+  for (const { file, generate } of generators) {
+    const filePath = path.join(DOCS_DIR, file);
+    if (!fs.existsSync(filePath)) {
+      errors.push(`${file} does not exist`);
+      continue;
+    }
+
+    const committed = fs.readFileSync(filePath, "utf-8");
+    const generated = generate();
+
+    if (committed !== generated) {
+      errors.push(`${file} does not match generated output`);
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 // ============================================================
 // Commands
 // ============================================================
@@ -360,6 +386,7 @@ function runCheck(): void {
   console.log("Checking documentation freshness...\n");
 
   const checks = [
+    { name: "Generated files match source", fn: checkGeneratedFilesMatch },
     { name: "Tools in reference.md", fn: checkToolsInReference },
     { name: "Env vars match env.ts", fn: checkEnvVarsMatchSchema },
     { name: "Tools in index.md", fn: checkIndexToolList },
