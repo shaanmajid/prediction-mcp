@@ -34,7 +34,7 @@
   },
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
-    "build": "bun build ./index.ts --outdir dist --target node --format esm && sed -i '' '1s|#!/usr/bin/env bun|#!/usr/bin/env node|' dist/index.js && tsc -p tsconfig.build.json",
+    "build": "bun build ./index.ts --outdir dist --target node --format esm && tsc -p tsconfig.build.json",
     "prepublishOnly": "bun run build",
     "release:patch": "bun run build && bun run test && npm version patch && git push --follow-tags",
     "release:minor": "bun run build && bun run test && npm version minor && git push --follow-tags",
