@@ -44,7 +44,7 @@ jobs:
         run: bun run build
 
       - name: Verify package contents
-        run: bun pm pack --dry-run
+        run: bun pm pack --dry-run --ignore-scripts
 
       - name: Extract version from tag
         id: version
