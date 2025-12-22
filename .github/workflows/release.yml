@@ -78,11 +78,12 @@ jobs:
           # Initialize gh-pages branch if it doesn't exist
           if ! git fetch origin gh-pages --depth=1 2>/dev/null; then
             echo "Initializing gh-pages branch..."
+            CURRENT_REF=$(git rev-parse HEAD)
             git checkout --orphan gh-pages
             git reset --hard
             git commit --allow-empty -m "Initialize gh-pages"
             git push origin gh-pages
-            git checkout -
+            git checkout "$CURRENT_REF"
           fi
 
           mike deploy --push --update-aliases "${{ steps.version.outputs.version }}" latest
