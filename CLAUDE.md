@@ -54,14 +54,19 @@ src/
     kalshi.ts               Kalshi SDK wrapper with bulk fetch
     polymarket.ts           Gamma API (REST) + CLOB SDK
   search/
-    cache.ts                Tokenized search with scoring
-    service.ts              Lazy initialization, refresh
+    index.ts                Exports for search module
+    cache.ts                Kalshi tokenized search with scoring
+    service.ts              Kalshi search: lazy init, refresh
+    polymarket-cache.ts     Polymarket tokenized search cache
+    polymarket-service.ts   Polymarket search service
+    scoring.ts              Shared scoring utilities
+  env.ts                    Environment config (Zod + t3-env)
+  logger.ts                 Pino logger configuration
   tools.ts                  MCP tool handlers
   validation.ts             Zod v4 schemas (generate JSON Schema)
 scripts/
   bootstrap.ts              Register server with MCP clients
-  generate-docs.ts          Generate docs/ from source
-  check-docs.ts             CI freshness check
+  docs.ts                   Generate/check docs (subcommands)
 docs/                       Auto-generated—do not edit
 ```
 
@@ -89,12 +94,18 @@ Set `KALSHI_USE_DEMO=true` to use the demo environment. Demo credentials are sep
 
 ## Search
 
-Kalshi search uses an in-memory cache:
+Both platforms use in-memory caches for fast tokenized search:
 
+### Kalshi
 - Populates on first search (~7 seconds, ~18 API calls)
 - Queries return in <1ms
 - Refresh via `kalshi_cache_stats` with `refresh: true`
 - Scores by field weight: titles (1.0), subtitles (0.8), tickers (0.5)
+
+### Polymarket
+- Populates on first search
+- Refresh via `polymarket_cache_stats` with `refresh: true`
+- Uses same scoring algorithm as Kalshi
 
 ## Scripts
 
@@ -109,25 +120,16 @@ bun run scripts/bootstrap.ts --interactive # Prompt for credentials
 bun run scripts/bootstrap.ts --demo       # Use Kalshi demo environment
 ```
 
-### generate-docs.ts
+### docs.ts
 
-Generates documentation from source:
-
-```bash
-bun run docs:generate
-```
-
-Run after changing `src/tools.ts`, `src/validation.ts`, or environment variables.
-
-### check-docs.ts
-
-Validates docs match source:
+Unified documentation CLI with subcommands:
 
 ```bash
-bun run docs:check
+bun run docs:generate    # Generate docs from source
+bun run docs:check       # Validate docs match source (CI)
 ```
 
-CI runs this to catch stale documentation.
+Run `docs:generate` after changing `src/tools.ts`, `src/validation.ts`, or `src/env.ts`.
 
 ## Environment Variables
 
@@ -151,15 +153,13 @@ POLYMARKET_CHAIN_ID=...      # default: 137 (Polygon)
 
 GitHub Actions runs on PRs and pushes to main:
 
-- `format` — Prettier
+- `format` — Biome format check
 - `typecheck` — TypeScript
-- `lint` — ESLint
+- `lint` — Biome lint
 - `test` — Bun test with coverage (uses Kalshi demo environment)
-- `security` — Dependency audit
-- `secrets` — Gitleaks
-- `docs` — Documentation freshness
+- `docs` — Documentation freshness check
 
-All must pass before merge.
+All jobs must pass before merge.
 
 ## Code Style
 
