@@ -51,7 +51,7 @@ jobs:
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
-        run: bun publish --access public --tag ${{ contains(steps.version.outputs.version, 'alpha') && 'alpha' || 'latest' }}
+        run: bun publish --access public --ignore-scripts --tag ${{ contains(steps.version.outputs.version, 'alpha') && 'alpha' || 'latest' }}
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
