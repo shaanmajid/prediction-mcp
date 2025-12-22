@@ -249,11 +249,19 @@ describe("MCP CallTool Handler", () => {
         },
         kalshiSearchService: {
           search: async () => [],
-          getStats: () => ({ status: "empty", events_count: 0, markets_count: 0 }),
+          getStats: () => ({
+            status: "empty",
+            events_count: 0,
+            markets_count: 0,
+          }),
         },
         polymarketSearchService: {
           search: async () => [],
-          getStats: () => ({ status: "empty", events_count: 0, markets_count: 0 }),
+          getStats: () => ({
+            status: "empty",
+            events_count: 0,
+            markets_count: 0,
+          }),
         },
       } as unknown as ToolContext;
 
@@ -371,11 +379,19 @@ describe("MCP CallTool Handler", () => {
 describe("prefetchSearchCaches pattern", () => {
   test("Promise.allSettled handles both services succeeding", async () => {
     const mockKalshiService = {
-      ensurePopulated: async () => {},
-      getStats: () => ({ status: "ready", events_count: 10, markets_count: 50 }),
+      ensurePopulated: async () => {
+        /* mock - resolves immediately */
+      },
+      getStats: () => ({
+        status: "ready",
+        events_count: 10,
+        markets_count: 50,
+      }),
     };
     const mockPolymarketService = {
-      ensurePopulated: async () => {},
+      ensurePopulated: async () => {
+        /* mock - resolves immediately */
+      },
       getStats: () => ({ status: "ready", events_count: 5, markets_count: 25 }),
     };
 
@@ -403,7 +419,9 @@ describe("prefetchSearchCaches pattern", () => {
       getStats: () => ({ status: "empty", events_count: 0, markets_count: 0 }),
     };
     const mockPolymarketService = {
-      ensurePopulated: async () => {},
+      ensurePopulated: async () => {
+        /* mock - resolves immediately */
+      },
       getStats: () => ({ status: "ready", events_count: 5, markets_count: 25 }),
     };
 
@@ -423,8 +441,14 @@ describe("prefetchSearchCaches pattern", () => {
 
   test("Promise.allSettled handles Polymarket failure gracefully", async () => {
     const mockKalshiService = {
-      ensurePopulated: async () => {},
-      getStats: () => ({ status: "ready", events_count: 10, markets_count: 50 }),
+      ensurePopulated: async () => {
+        /* mock - resolves immediately */
+      },
+      getStats: () => ({
+        status: "ready",
+        events_count: 10,
+        markets_count: 50,
+      }),
     };
     const mockPolymarketService = {
       ensurePopulated: async () => {
@@ -443,7 +467,9 @@ describe("prefetchSearchCaches pattern", () => {
     expect(polymarketResult.status).toBe("rejected");
 
     if (polymarketResult.status === "rejected") {
-      expect(polymarketResult.reason.message).toBe("Polymarket network timeout");
+      expect(polymarketResult.reason.message).toBe(
+        "Polymarket network timeout",
+      );
     }
   });
 
@@ -563,7 +589,7 @@ describe("Tool Registry Completeness", () => {
   });
 
   test("tool descriptions are non-empty and descriptive", () => {
-    for (const [name, tool] of Object.entries(TOOLS)) {
+    for (const [_name, tool] of Object.entries(TOOLS)) {
       expect(tool.description.length).toBeGreaterThan(20);
       // Descriptions should contain useful keywords
       expect(
