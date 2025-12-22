@@ -70,7 +70,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uv tool install mike --with mkdocs-material --with pymdown-extensions
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
@@ -86,5 +85,5 @@ jobs:
             git checkout "$CURRENT_REF"
           fi
 
-          mike deploy --push --update-aliases "${{ steps.version.outputs.version }}" latest
-          mike set-default --push latest
+          uvx --with mkdocs-material --with pymdown-extensions mike deploy --push --update-aliases "${{ steps.version.outputs.version }}" latest
+          uvx --with mkdocs-material --with pymdown-extensions mike set-default --push latest
