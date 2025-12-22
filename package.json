@@ -1,6 +1,6 @@
 {
   "name": "prediction-mcp",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "MCP server providing unified access to prediction market data from Kalshi and Polymarket",
   "author": "Shaan Majid",
   "license": "MIT",
