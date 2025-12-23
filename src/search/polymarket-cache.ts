@@ -6,7 +6,7 @@ import type {
   PolymarketMarket,
 } from "../clients/polymarket.js";
 import {
-  type CacheStats,
+  type CacheInternalStats,
   type SearchResult,
   scoreItem,
   tokenize,
@@ -301,8 +301,13 @@ export class PolymarketSearchCache {
   /**
    * Returns statistics about the current cache state.
    */
-  getStats(): CacheStats {
+  getStats(): CacheInternalStats {
     const isEmpty = this.events.size === 0 && this.markets.size === 0;
+
+    let cacheAgeSeconds: number | null = null;
+    if (this.lastRefresh) {
+      cacheAgeSeconds = (Date.now() - this.lastRefresh.getTime()) / 1000;
+    }
 
     return {
       status: isEmpty ? "empty" : "ready",
@@ -310,6 +315,7 @@ export class PolymarketSearchCache {
       markets_count: this.markets.size,
       last_refresh: this.lastRefresh ? this.lastRefresh.toISOString() : null,
       refresh_duration_ms: this.refreshDurationMs,
+      cache_age_seconds: cacheAgeSeconds,
     };
   }
 }

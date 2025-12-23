@@ -62,6 +62,25 @@ describe("SearchCache", () => {
       expect(stats.markets_count).toBe(2);
       expect(stats.last_refresh).not.toBeNull();
     });
+
+    test("getStats() includes cache age", () => {
+      const cache = new SearchCache();
+
+      // Before population
+      const emptyStats = cache.getStats();
+      expect(emptyStats.cache_age_seconds).toBeNull();
+
+      // After population
+      cache.populate(
+        [{ event_ticker: "TEST1", title: "Test" } as EventData],
+        [],
+      );
+
+      const stats = cache.getStats();
+      expect(typeof stats.cache_age_seconds).toBe("number");
+      expect(stats.cache_age_seconds).toBeGreaterThanOrEqual(0);
+      expect(stats.cache_age_seconds).toBeLessThan(1); // Just populated
+    });
   });
 
   describe("searchEvents", () => {
