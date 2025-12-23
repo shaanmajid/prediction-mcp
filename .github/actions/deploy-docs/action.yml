@@ -1,10 +1,7 @@
-name: Deploy Versioned Docs
-description: Deploy documentation using mike for version management
+name: Deploy Docs
+description: Build and deploy documentation using mkdocs gh-deploy
 
 inputs:
-  version:
-    description: Version to deploy (e.g., "0.1.8")
-    required: true
   github-token:
     description: GitHub token for pushing to gh-pages
     required: true
@@ -21,8 +18,7 @@ runs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git remote set-url origin https://x-access-token:${{ inputs.github-token }}@github.com/${{ github.repository }}.git
 
-    - name: Deploy with mike
+    - name: Deploy docs
       shell: bash
       run: |
-        uvx --with mkdocs-material --with pymdown-extensions mike deploy --push --update-aliases "${{ inputs.version }}" latest
-        uvx --with mkdocs-material --with pymdown-extensions mike set-default --push latest
+        uvx --with mkdocs-material --with pymdown-extensions mkdocs gh-deploy --force

@@ -2,11 +2,6 @@ name: Docs
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
 
 permissions:
   contents: write
@@ -20,17 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Get latest version
-        id: version
-        run: |
-          LATEST=$(git tag -l 'v*' | sort -V | tail -1 | sed 's/^v//')
-          echo "version=${LATEST}" >> "$GITHUB_OUTPUT"
 
       - name: Deploy docs
         uses: ./.github/actions/deploy-docs
         with:
-          version: ${{ steps.version.outputs.version }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

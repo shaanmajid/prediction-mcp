@@ -107,15 +107,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy versioned docs
+      - name: Deploy docs
         uses: ./.github/actions/deploy-docs
         with:
-          version: ${{ steps.version.outputs.version }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
