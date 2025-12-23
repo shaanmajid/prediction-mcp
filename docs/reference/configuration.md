@@ -49,3 +49,9 @@ Default: `137`
 Logging verbosity: trace, debug, info, warn, error, fatal (optional)
 
 Default: `info`
+
+### `CACHE_TTL_SECONDS`
+
+Search cache time-to-live in seconds. After this duration, searches trigger a background refresh. Applies to both Kalshi and Polymarket caches. Set to 0 to disable TTL. (optional)
+
+Default: `3600`

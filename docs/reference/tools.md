@@ -108,7 +108,7 @@ Search Kalshi markets by keyword. Returns markets ranked by relevance. Searches 
 
 ## `kalshi_cache_stats`
 
-Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
+Get search cache statistics including event/market counts, cache age, TTL expiry time, and last refresh time. Optionally trigger a cache refresh.
 
 **Parameters:**
 
@@ -275,7 +275,7 @@ Search Polymarket markets by keyword. Returns markets ranked by relevance. Searc
 
 ## `polymarket_cache_stats`
 
-Get Polymarket search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.
+Get Polymarket search cache statistics including event/market counts, cache age, TTL expiry time, and last refresh time. Optionally trigger a cache refresh.
 
 **Parameters:**
 
