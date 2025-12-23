@@ -125,7 +125,7 @@ Get historical candlestick (OHLCV) data for a Kalshi market. Returns price, volu
     - Series ticker containing the market (e.g., 'KXINX'). Find this via kalshi_get_market or kalshi_get_event.
 
 - `ticker` (string (minLength: 1), required)
-    - Market ticker symbol (e.g., 'KXINX-24DEC31-T2000'). The specific market to get candlestick data for.
+    - Market ticker symbol (e.g., 'KXINX-25DEC31-T2000'). The specific market to get candlestick data for.
 
 - `start_ts` (integer (min: -9007199254740991, max: 9007199254740991), optional)
     - Start timestamp in Unix seconds. Defaults to 24 hours ago if not provided.
@@ -133,7 +133,7 @@ Get historical candlestick (OHLCV) data for a Kalshi market. Returns price, volu
 - `end_ts` (integer (min: -9007199254740991, max: 9007199254740991), optional)
     - End timestamp in Unix seconds. Defaults to now if not provided.
 
-- `period_interval` (string, required)
+- `period_interval` (`1` | `60` | `1440`, required)
     - Candlestick period in minutes. Valid values: 1 (1 minute), 60 (1 hour), 1440 (1 day).
 
 ## Polymarket

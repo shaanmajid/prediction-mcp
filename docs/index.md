@@ -107,6 +107,7 @@ Decentralized prediction market on Polygon with deep liquidity on major events.
 | [`kalshi_search_events`](reference/tools.md#kalshi_search_events) | Search Kalshi events by keyword |
 | [`kalshi_search_markets`](reference/tools.md#kalshi_search_markets) | Search Kalshi markets by keyword |
 | [`kalshi_cache_stats`](reference/tools.md#kalshi_cache_stats) | Get search cache statistics including event/market counts... |
+| [`kalshi_get_price_history`](reference/tools.md#kalshi_get_price_history) | Get historical candlestick (OHLCV) data for a Kalshi market |
 
 ### Polymarket
 
