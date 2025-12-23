@@ -96,6 +96,20 @@ Set `KALSHI_USE_DEMO=true` to use the demo environment. Demo credentials are sep
 - Orderbook returns both bids and asks
 - No demo environment available (all operations are read-only)
 
+## Known Issues
+
+### Kalshi SDK Global State
+
+**⚠️ The `kalshi-typescript` SDK modifies the global axios instance.**
+
+When you instantiate `KalshiClient` (which uses the SDK internally), it adds request interceptors to the **global** axios instance for authentication. This means:
+
+1. **Never create test clients with fake credentials** — the interceptors will break all subsequent API calls in the same process, including integration tests
+2. **One client per process** — multiple clients with different credentials will conflict
+3. **Credential changes require process restart** — interceptors persist for the process lifetime
+
+See `src/clients/kalshi.test.ts` for the workaround pattern used in tests.
+
 ## Search
 
 Both platforms use in-memory caches for fast tokenized search:

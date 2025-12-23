@@ -1,11 +1,14 @@
 import { isAxiosError } from "axios";
 import { backOff } from "exponential-backoff";
 import {
+  ApiKeysApi,
   Configuration,
   type EventData,
   EventsApi,
+  type GetPositionsSettlementStatusEnum,
   type Market,
   MarketApi,
+  PortfolioApi,
 } from "kalshi-typescript";
 import { logger } from "../logger.js";
 
@@ -69,6 +72,8 @@ const RETRY_OPTIONS = {
 export class KalshiClient {
   private marketApi: MarketApi;
   private eventsApi: EventsApi;
+  private portfolioApi: PortfolioApi;
+  private apiKeysApi: ApiKeysApi;
 
   constructor(config: KalshiConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
@@ -90,6 +95,8 @@ export class KalshiClient {
 
     this.marketApi = new MarketApi(configuration);
     this.eventsApi = new EventsApi(configuration);
+    this.portfolioApi = new PortfolioApi(configuration);
+    this.apiKeysApi = new ApiKeysApi(configuration);
   }
 
   /**
@@ -308,5 +315,50 @@ export class KalshiClient {
         ),
       RETRY_OPTIONS,
     );
+  }
+
+  /**
+   * Get portfolio balance information
+   */
+  async getBalance() {
+    return backOff(() => this.portfolioApi.getBalance(), RETRY_OPTIONS);
+  }
+
+  /**
+   * Get portfolio positions
+   * @param params - Optional filters (ticker, eventTicker, settlementStatus, etc.)
+   */
+  async getPositions(params?: {
+    ticker?: string;
+    eventTicker?: string;
+    settlementStatus?: GetPositionsSettlementStatusEnum;
+    countFilter?: string;
+    limit?: number;
+    cursor?: string;
+  }) {
+    // Parameter order must match SDK's positional signature (auto-generated from OpenAPI)
+    return backOff(
+      () =>
+        this.portfolioApi.getPositions(
+          params?.cursor,
+          params?.limit,
+          params?.countFilter,
+          params?.settlementStatus,
+          params?.ticker,
+          params?.eventTicker,
+        ),
+      RETRY_OPTIONS,
+    );
+  }
+
+  /**
+   * Get API keys for the authenticated user.
+   *
+   * This method is primarily used for credential validation on startup.
+   * It verifies the API key and private key are valid by making an
+   * authenticated request that returns only key metadata (no sensitive data).
+   */
+  async getApiKeys() {
+    return backOff(() => this.apiKeysApi.getApiKeys(), RETRY_OPTIONS);
   }
 }

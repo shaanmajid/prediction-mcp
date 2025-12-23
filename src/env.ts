@@ -72,6 +72,7 @@ export const serverSchema = {
     .string()
     .min(1)
     .optional()
+    .transform((v) => v?.trim()) // Remove trailing whitespace/newlines
     .meta({
       description:
         "RSA private key as PEM string. Use this OR `KALSHI_PRIVATE_KEY_PATH`",

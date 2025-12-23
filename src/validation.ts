@@ -184,6 +184,45 @@ export const KalshiGetPriceHistoryArgsSchema = z
     { message: "end_ts must be greater than start_ts" },
   );
 
+// Schema for kalshi_get_balance (no arguments required)
+export const GetBalanceArgsSchema = z.object({}).strict();
+
+// Schema for kalshi_get_positions
+export const GetPositionsArgsSchema = z
+  .object({
+    ticker: z.string().optional().describe("Filter by specific market ticker."),
+    eventTicker: z
+      .string()
+      .optional()
+      .describe(
+        "Filter by event ticker. Multiple tickers can be comma-separated (max 10).",
+      ),
+    settlementStatus: z
+      .enum(["all", "unsettled", "settled"])
+      .optional()
+      .describe(
+        "Filter by settlement status. Defaults to 'unsettled' if not specified.",
+      ),
+    countFilter: z
+      .string()
+      .optional()
+      .describe(
+        "Restrict to positions with non-zero values. Accepts comma-separated values: 'position', 'total_traded'.",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe("Maximum number of positions to return. Defaults to 100."),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Pagination cursor from previous response."),
+  })
+  .strict();
+
 // ============================================================
 // Polymarket Schemas
 // ============================================================
@@ -393,6 +432,8 @@ export type CacheStatsArgs = z.infer<typeof CacheStatsSchema>;
 export type KalshiGetPriceHistoryArgs = z.infer<
   typeof KalshiGetPriceHistoryArgsSchema
 >;
+export type GetBalanceArgs = z.infer<typeof GetBalanceArgsSchema>;
+export type GetPositionsArgs = z.infer<typeof GetPositionsArgsSchema>;
 
 /**
  * Type inference helpers - Polymarket
