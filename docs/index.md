@@ -99,36 +99,38 @@ Decentralized prediction market on Polygon with deep liquidity on major events.
 
 ### Kalshi
 
-| Tool | Description |
-| ---- | ----------- |
-| [`kalshi_list_markets`](reference/tools.md#kalshi_list_markets) | List available markets on Kalshi |
-| [`kalshi_get_market`](reference/tools.md#kalshi_get_market) | Get detailed information about a specific Kalshi market i... |
-| [`kalshi_get_orderbook`](reference/tools.md#kalshi_get_orderbook) | Get the current orderbook for a Kalshi market |
-| [`kalshi_get_trades`](reference/tools.md#kalshi_get_trades) | Get recent trade history for Kalshi markets |
-| [`kalshi_get_series`](reference/tools.md#kalshi_get_series) | Get series metadata including title for URL construction |
-| [`kalshi_get_event`](reference/tools.md#kalshi_get_event) | Get event metadata including title for URL construction |
-| [`kalshi_search`](reference/tools.md#kalshi_search) | Search across Kalshi events and markets using keyword mat... |
-| [`kalshi_search_events`](reference/tools.md#kalshi_search_events) | Search Kalshi events by keyword |
-| [`kalshi_search_markets`](reference/tools.md#kalshi_search_markets) | Search Kalshi markets by keyword |
-| [`kalshi_cache_stats`](reference/tools.md#kalshi_cache_stats) | Get search cache statistics including event/market counts... |
-| [`kalshi_get_price_history`](reference/tools.md#kalshi_get_price_history) | Get historical candlestick (OHLCV) data for a Kalshi market |
+| Tool | Description | Auth |
+| ---- | ----------- | ---- |
+| [`kalshi_list_markets`](reference/tools.md#kalshi_list_markets) | List available markets on Kalshi | — |
+| [`kalshi_get_market`](reference/tools.md#kalshi_get_market) | Get detailed information about a specific Kalshi market i... | — |
+| [`kalshi_get_orderbook`](reference/tools.md#kalshi_get_orderbook) | Get the current orderbook for a Kalshi market | — |
+| [`kalshi_get_trades`](reference/tools.md#kalshi_get_trades) | Get recent trade history for Kalshi markets | — |
+| [`kalshi_get_series`](reference/tools.md#kalshi_get_series) | Get series metadata including title for URL construction | — |
+| [`kalshi_get_event`](reference/tools.md#kalshi_get_event) | Get event metadata including title for URL construction | — |
+| [`kalshi_search`](reference/tools.md#kalshi_search) | Search across Kalshi events and markets using keyword mat... | — |
+| [`kalshi_search_events`](reference/tools.md#kalshi_search_events) | Search Kalshi events by keyword | — |
+| [`kalshi_search_markets`](reference/tools.md#kalshi_search_markets) | Search Kalshi markets by keyword | — |
+| [`kalshi_cache_stats`](reference/tools.md#kalshi_cache_stats) | Get search cache statistics including event/market counts... | — |
+| [`kalshi_get_price_history`](reference/tools.md#kalshi_get_price_history) | Get historical candlestick (OHLCV) data for a Kalshi market | — |
+| [`kalshi_get_balance`](reference/tools.md#kalshi_get_balance) | Get your Kalshi account balance and portfolio value | Required |
+| [`kalshi_get_positions`](reference/tools.md#kalshi_get_positions) | Get your current positions on Kalshi markets | Required |
 
 ### Polymarket
 
-| Tool | Description |
-| ---- | ----------- |
-| [`polymarket_list_markets`](reference/tools.md#polymarket_list_markets) | List available markets on Polymarket |
-| [`polymarket_get_market`](reference/tools.md#polymarket_get_market) | Get detailed information about a specific Polymarket mark... |
-| [`polymarket_list_events`](reference/tools.md#polymarket_list_events) | List events on Polymarket |
-| [`polymarket_get_event`](reference/tools.md#polymarket_get_event) | Get detailed event information by slug |
-| [`polymarket_list_tags`](reference/tools.md#polymarket_list_tags) | List available category tags on Polymarket |
-| [`polymarket_get_orderbook`](reference/tools.md#polymarket_get_orderbook) | Get the current orderbook for a Polymarket outcome token |
-| [`polymarket_get_price`](reference/tools.md#polymarket_get_price) | Get the current best price for a Polymarket outcome token |
-| [`polymarket_get_price_history`](reference/tools.md#polymarket_get_price_history) | Get historical price data for a Polymarket outcome token |
-| [`polymarket_search`](reference/tools.md#polymarket_search) | Search across Polymarket events and markets using keyword... |
-| [`polymarket_search_events`](reference/tools.md#polymarket_search_events) | Search Polymarket events by keyword |
-| [`polymarket_search_markets`](reference/tools.md#polymarket_search_markets) | Search Polymarket markets by keyword |
-| [`polymarket_cache_stats`](reference/tools.md#polymarket_cache_stats) | Get Polymarket search cache statistics including event/ma... |
+| Tool | Description | Auth |
+| ---- | ----------- | ---- |
+| [`polymarket_list_markets`](reference/tools.md#polymarket_list_markets) | List available markets on Polymarket | — |
+| [`polymarket_get_market`](reference/tools.md#polymarket_get_market) | Get detailed information about a specific Polymarket mark... | — |
+| [`polymarket_list_events`](reference/tools.md#polymarket_list_events) | List events on Polymarket | — |
+| [`polymarket_get_event`](reference/tools.md#polymarket_get_event) | Get detailed event information by slug | — |
+| [`polymarket_list_tags`](reference/tools.md#polymarket_list_tags) | List available category tags on Polymarket | — |
+| [`polymarket_get_orderbook`](reference/tools.md#polymarket_get_orderbook) | Get the current orderbook for a Polymarket outcome token | — |
+| [`polymarket_get_price`](reference/tools.md#polymarket_get_price) | Get the current best price for a Polymarket outcome token | — |
+| [`polymarket_get_price_history`](reference/tools.md#polymarket_get_price_history) | Get historical price data for a Polymarket outcome token | — |
+| [`polymarket_search`](reference/tools.md#polymarket_search) | Search across Polymarket events and markets using keyword... | — |
+| [`polymarket_search_events`](reference/tools.md#polymarket_search_events) | Search Polymarket events by keyword | — |
+| [`polymarket_search_markets`](reference/tools.md#polymarket_search_markets) | Search Polymarket markets by keyword | — |
+| [`polymarket_cache_stats`](reference/tools.md#polymarket_cache_stats) | Get Polymarket search cache statistics including event/ma... | — |
 
 See [Tools Reference](reference/tools.md) for full parameter documentation.
 <!-- TOOLS_TABLE_END -->

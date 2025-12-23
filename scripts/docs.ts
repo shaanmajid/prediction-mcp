@@ -13,7 +13,11 @@ import * as fs from "fs";
 import * as path from "path";
 import { type ZodTypeAny, z } from "zod";
 import { type DocMeta, serverSchema } from "../src/env.js";
-import { getToolsList } from "../src/tools.js";
+import {
+  getToolsList,
+  KALSHI_AUTH_TOOLS,
+  POLYMARKET_AUTH_TOOLS,
+} from "../src/tools.js";
 
 // ============================================================
 // Constants
@@ -114,7 +118,11 @@ function ensureDir(dir: string): void {
 }
 
 function generateToolReference(): string {
-  const tools = getToolsList();
+  // Pass full auth context to get ALL tools including auth-required ones
+  const tools = getToolsList({
+    kalshi: { authenticated: true },
+    polymarket: { authenticated: true },
+  });
 
   // Group tools by platform
   const kalshiTools = tools.filter((t) => t.name.startsWith("kalshi_"));
@@ -128,12 +136,22 @@ function generateToolReference(): string {
   ];
 
   // Helper to render a single tool
-  const renderTool = (tool: (typeof tools)[0]) => {
+  const renderTool = (
+    tool: (typeof tools)[0],
+    requiresAuth?: { platform: string },
+  ) => {
     const schema = tool.inputSchema as JsonSchema;
     const required = new Set(schema.required || []);
 
     lines.push(`## \`${tool.name}\``);
     lines.push("");
+
+    // Add auth annotation if required
+    if (requiresAuth) {
+      lines.push(`> **Authentication:** Required (${requiresAuth.platform})`);
+      lines.push("");
+    }
+
     lines.push(tool.description);
     lines.push("");
 
@@ -185,14 +203,16 @@ function generateToolReference(): string {
   lines.push("## Kalshi");
   lines.push("");
   for (const tool of kalshiTools) {
-    renderTool(tool);
+    const authInfo = KALSHI_AUTH_TOOLS[tool.name]?.requiresAuth;
+    renderTool(tool, authInfo);
   }
 
   // Polymarket section
   lines.push("## Polymarket");
   lines.push("");
   for (const tool of polymarketTools) {
-    renderTool(tool);
+    const authInfo = POLYMARKET_AUTH_TOOLS[tool.name]?.requiresAuth;
+    renderTool(tool, authInfo);
   }
 
   return lines.join("\n");
@@ -229,7 +249,11 @@ function generateConfiguration(): string {
  * This creates a markdown table with tool names and descriptions.
  */
 function generateIndexToolsTable(): string {
-  const tools = getToolsList();
+  // Pass full auth context to get ALL tools including auth-required ones
+  const tools = getToolsList({
+    kalshi: { authenticated: true },
+    polymarket: { authenticated: true },
+  });
 
   // Group tools by platform
   const kalshiTools = tools.filter((t) => t.name.startsWith("kalshi_"));
@@ -248,24 +272,28 @@ function generateIndexToolsTable(): string {
     "",
     "### Kalshi",
     "",
-    "| Tool | Description |",
-    "| ---- | ----------- |",
+    "| Tool | Description | Auth |",
+    "| ---- | ----------- | ---- |",
   ];
 
   for (const tool of kalshiTools) {
     const link = `[\`${tool.name}\`](reference/tools.md#${tool.name})`;
-    lines.push(`| ${link} | ${shortDesc(tool.description)} |`);
+    const authInfo = KALSHI_AUTH_TOOLS[tool.name]?.requiresAuth;
+    const authCol = authInfo ? "Required" : "—";
+    lines.push(`| ${link} | ${shortDesc(tool.description)} | ${authCol} |`);
   }
 
   lines.push("");
   lines.push("### Polymarket");
   lines.push("");
-  lines.push("| Tool | Description |");
-  lines.push("| ---- | ----------- |");
+  lines.push("| Tool | Description | Auth |");
+  lines.push("| ---- | ----------- | ---- |");
 
   for (const tool of polymarketTools) {
     const link = `[\`${tool.name}\`](reference/tools.md#${tool.name})`;
-    lines.push(`| ${link} | ${shortDesc(tool.description)} |`);
+    const authInfo = POLYMARKET_AUTH_TOOLS[tool.name]?.requiresAuth;
+    const authCol = authInfo ? "Required" : "—";
+    lines.push(`| ${link} | ${shortDesc(tool.description)} | ${authCol} |`);
   }
 
   lines.push("");
