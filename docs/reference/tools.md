@@ -115,6 +115,27 @@ Get search cache statistics including event/market counts and last refresh time.
 - `refresh` (boolean, required)
     - If true, trigger a cache refresh before returning stats
 
+## `kalshi_get_price_history`
+
+Get historical candlestick (OHLCV) data for a Kalshi market. Returns price, volume, and open interest over time. Requires both series_ticker and market ticker.
+
+**Parameters:**
+
+- `series_ticker` (string (minLength: 1), required)
+    - Series ticker containing the market (e.g., 'KXINX'). Find this via kalshi_get_market or kalshi_get_event.
+
+- `ticker` (string (minLength: 1), required)
+    - Market ticker symbol (e.g., 'KXINX-25DEC31-T2000'). The specific market to get candlestick data for.
+
+- `start_ts` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Start timestamp in Unix seconds. Defaults to 24 hours ago if not provided.
+
+- `end_ts` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - End timestamp in Unix seconds. Defaults to now if not provided.
+
+- `period_interval` (`1` | `60` | `1440`, required)
+    - Candlestick period in minutes. Valid values: 1 (1 minute), 60 (1 hour), 1440 (1 day).
+
 ## Polymarket
 
 ## `polymarket_list_markets`

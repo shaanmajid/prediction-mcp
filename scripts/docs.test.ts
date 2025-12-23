@@ -92,6 +92,16 @@ describe("generateToolReference", () => {
       }
     }
   });
+
+  test("renders anyOf literals as union types", () => {
+    const output = generateToolReference();
+
+    // kalshi_get_price_history has period_interval: z.union([z.literal(1), z.literal(60), z.literal(1440)])
+    // Should render as `1` | `60` | `1440`, not as "string"
+    expect(output).toContain("period_interval");
+    expect(output).toContain("`1` | `60` | `1440`");
+    expect(output).not.toMatch(/period_interval.*\(string,/);
+  });
 });
 
 describe("generateConfiguration", () => {

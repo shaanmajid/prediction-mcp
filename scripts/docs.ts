@@ -50,6 +50,7 @@ interface JsonSchemaProperty {
   minimum?: number;
   maximum?: number;
   minLength?: number;
+  anyOf?: Array<{ const?: unknown }>;
 }
 
 interface JsonSchema {
@@ -146,6 +147,14 @@ function generateToolReference(): string {
 
         if (prop.enum) {
           typeInfo = prop.enum.map((e) => `\`"${e}"\``).join(" | ");
+        } else if (prop.anyOf) {
+          // Handle union of literals (e.g., z.union([z.literal(1), z.literal(60)]))
+          const literals = prop.anyOf
+            .filter((item) => item.const !== undefined)
+            .map((item) => `\`${item.const}\``);
+          if (literals.length > 0) {
+            typeInfo = literals.join(" | ");
+          }
         }
 
         const constraints: string[] = [];

@@ -140,6 +140,50 @@ export const CacheStatsSchema = z
   })
   .strict();
 
+// Schema for kalshi_get_price_history
+export const KalshiGetPriceHistoryArgsSchema = z
+  .object({
+    series_ticker: z
+      .string()
+      .min(1)
+      .describe(
+        "Series ticker containing the market (e.g., 'KXINX'). Find this via kalshi_get_market or kalshi_get_event.",
+      ),
+    ticker: z
+      .string()
+      .min(1)
+      .describe(
+        "Market ticker symbol (e.g., 'KXINX-25DEC31-T2000'). The specific market to get candlestick data for.",
+      ),
+    start_ts: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "Start timestamp in Unix seconds. Defaults to 24 hours ago if not provided.",
+      ),
+    end_ts: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "End timestamp in Unix seconds. Defaults to now if not provided.",
+      ),
+    period_interval: z
+      .union([z.literal(1), z.literal(60), z.literal(1440)])
+      .describe(
+        "Candlestick period in minutes. Valid values: 1 (1 minute), 60 (1 hour), 1440 (1 day).",
+      ),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      data.start_ts === undefined ||
+      data.end_ts === undefined ||
+      data.end_ts > data.start_ts,
+    { message: "end_ts must be greater than start_ts" },
+  );
+
 // ============================================================
 // Polymarket Schemas
 // ============================================================
@@ -346,6 +390,9 @@ export type GetSeriesArgs = z.infer<typeof GetSeriesArgsSchema>;
 export type GetEventArgs = z.infer<typeof GetEventArgsSchema>;
 export type SearchQueryArgs = z.infer<typeof SearchQuerySchema>;
 export type CacheStatsArgs = z.infer<typeof CacheStatsSchema>;
+export type KalshiGetPriceHistoryArgs = z.infer<
+  typeof KalshiGetPriceHistoryArgsSchema
+>;
 
 /**
  * Type inference helpers - Polymarket

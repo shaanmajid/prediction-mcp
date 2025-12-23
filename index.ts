@@ -183,7 +183,10 @@ async function main() {
   prefetchSearchCaches();
 }
 
-main().catch((error) => {
-  logger.error({ err: error }, "Fatal error");
-  process.exit(1);
-});
+// Only start server when run directly (not when imported for coverage/testing)
+if (import.meta.main) {
+  main().catch((error) => {
+    logger.error({ err: error }, "Fatal error");
+    process.exit(1);
+  });
+}
