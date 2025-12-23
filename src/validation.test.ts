@@ -6,6 +6,7 @@ import {
   GetOrderbookArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiGetPriceHistoryArgsSchema,
   ListMarketsArgsSchema,
   PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
@@ -291,6 +292,68 @@ describe("Kalshi Schemas", () => {
         extra: "field",
       });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe("KalshiGetPriceHistoryArgsSchema", () => {
+    test("validates valid input with all fields", () => {
+      const input = {
+        series_ticker: "KXINX",
+        ticker: "KXINX-24DEC31-T2000",
+        start_ts: 1703001600,
+        end_ts: 1703088000,
+        period_interval: 60,
+      };
+      const result = KalshiGetPriceHistoryArgsSchema.safeParse(input);
+      expect(result.success).toBe(true);
+    });
+
+    test("validates input with only required fields", () => {
+      const input = {
+        series_ticker: "KXINX",
+        ticker: "KXINX-24DEC31-T2000",
+        period_interval: 60,
+      };
+      const result = KalshiGetPriceHistoryArgsSchema.safeParse(input);
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects invalid period_interval", () => {
+      const input = {
+        series_ticker: "KXINX",
+        ticker: "KXINX-24DEC31-T2000",
+        period_interval: 30, // Invalid - must be 1, 60, or 1440
+      };
+      const result = KalshiGetPriceHistoryArgsSchema.safeParse(input);
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects unknown properties", () => {
+      const input = {
+        series_ticker: "KXINX",
+        ticker: "KXINX-24DEC31-T2000",
+        period_interval: 60,
+        unknown_field: "test",
+      };
+      const result = KalshiGetPriceHistoryArgsSchema.safeParse(input);
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects end_ts less than start_ts", () => {
+      const input = {
+        series_ticker: "KXINX",
+        ticker: "KXINX-24DEC31-T2000",
+        start_ts: 1703088000,
+        end_ts: 1703001600, // end_ts < start_ts
+        period_interval: 60,
+      };
+      const result = KalshiGetPriceHistoryArgsSchema.safeParse(input);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe(
+          "end_ts must be greater than start_ts",
+        );
+      }
     });
   });
 });
