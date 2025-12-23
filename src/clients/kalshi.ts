@@ -285,4 +285,28 @@ export class KalshiClient {
 
     return allMarkets;
   }
+
+  /**
+   * Get candlestick (OHLCV) data for a market
+   * @param params - Candlestick query parameters
+   */
+  async getMarketCandlesticks(params: {
+    seriesTicker: string;
+    ticker: string;
+    startTs: number;
+    endTs: number;
+    periodInterval: 1 | 60 | 1440;
+  }) {
+    return backOff(
+      () =>
+        this.marketApi.getMarketCandlesticks(
+          params.seriesTicker,
+          params.ticker,
+          params.startTs,
+          params.endTs,
+          params.periodInterval,
+        ),
+      RETRY_OPTIONS,
+    );
+  }
 }
