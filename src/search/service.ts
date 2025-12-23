@@ -10,6 +10,7 @@ import {
 import {
   BackgroundRefreshGuard,
   calculateExpiresIn,
+  DEFAULT_CACHE_TTL_SECONDS,
   isCacheExpired,
 } from "./ttl.js";
 
@@ -36,7 +37,7 @@ export class KalshiSearchService {
   constructor(client: KalshiClient, options: SearchServiceOptions = {}) {
     this.cache = new SearchCache();
     this.client = client;
-    this.ttlSeconds = options.ttlSeconds ?? 3600;
+    this.ttlSeconds = options.ttlSeconds ?? DEFAULT_CACHE_TTL_SECONDS;
   }
 
   /**

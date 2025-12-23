@@ -7,6 +7,7 @@
 import { createEnv } from "@t3-oss/env-core";
 import pino from "pino";
 import { z } from "zod";
+import { DEFAULT_CACHE_TTL_SECONDS } from "./search/ttl.js";
 
 // ============================================================
 // Custom Validators
@@ -127,7 +128,7 @@ export const serverSchema = {
     .number()
     .int()
     .min(0)
-    .default(3600)
+    .default(DEFAULT_CACHE_TTL_SECONDS)
     .meta({
       description:
         "Search cache time-to-live in seconds. After this duration, searches trigger a background refresh. Applies to both Kalshi and Polymarket caches. Set to 0 to disable TTL.",

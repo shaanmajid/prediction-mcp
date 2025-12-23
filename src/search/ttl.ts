@@ -5,6 +5,9 @@
  * deduplicating background refresh operations.
  */
 
+/** Default cache TTL: 1 hour. Used by env.ts and service constructors. */
+export const DEFAULT_CACHE_TTL_SECONDS = 3600;
+
 // ============================================================
 // Pure Functions
 // ============================================================

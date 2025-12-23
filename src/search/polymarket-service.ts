@@ -15,6 +15,7 @@ import type { CacheStats, SearchResult } from "./scoring.js";
 import {
   BackgroundRefreshGuard,
   calculateExpiresIn,
+  DEFAULT_CACHE_TTL_SECONDS,
   isCacheExpired,
 } from "./ttl.js";
 
@@ -44,7 +45,7 @@ export class PolymarketSearchService {
   ) {
     this.cache = new PolymarketSearchCache();
     this.client = client;
-    this.ttlSeconds = options.ttlSeconds ?? 3600;
+    this.ttlSeconds = options.ttlSeconds ?? DEFAULT_CACHE_TTL_SECONDS;
   }
 
   /**
