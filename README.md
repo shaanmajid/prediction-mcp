@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Prediction Markets MCP" width="200">
+</p>
+
 # Prediction Markets MCP Server
 
 [![CI](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/shaanmajid/prediction-mcp/actions/workflows/ci.yml)
