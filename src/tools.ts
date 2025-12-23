@@ -190,7 +190,7 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
   kalshi_cache_stats: {
     name: "kalshi_cache_stats",
     description:
-      "Get search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.",
+      "Get search cache statistics including event/market counts, cache age, TTL expiry time, and last refresh time. Optionally trigger a cache refresh.",
     schema: CacheStatsSchema,
     handler: async (ctx, args) => {
       const params = CacheStatsSchema.parse(args || {});
@@ -397,7 +397,7 @@ export const POLYMARKET_TOOLS: Record<string, ToolDefinition> = {
   polymarket_cache_stats: {
     name: "polymarket_cache_stats",
     description:
-      "Get Polymarket search cache statistics including event/market counts and last refresh time. Optionally trigger a cache refresh.",
+      "Get Polymarket search cache statistics including event/market counts, cache age, TTL expiry time, and last refresh time. Optionally trigger a cache refresh.",
     schema: PolymarketCacheStatsSchema,
     handler: async (ctx, args) => {
       const params = PolymarketCacheStatsSchema.parse(args || {});

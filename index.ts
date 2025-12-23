@@ -7,7 +7,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { KalshiClient } from "./src/clients/kalshi.js";
 import { PolymarketClient } from "./src/clients/polymarket.js";
-import { kalshiConfig, polymarketConfig } from "./src/env.js";
+import { cacheConfig, kalshiConfig, polymarketConfig } from "./src/env.js";
 import { logger } from "./src/logger.js";
 import {
   KalshiSearchService,
@@ -77,8 +77,12 @@ const server = new Server(
 // Initialize clients with validated config
 const kalshiClient = new KalshiClient(kalshiConfig);
 const polymarketClient = new PolymarketClient(polymarketConfig);
-const kalshiSearchService = new KalshiSearchService(kalshiClient);
-const polymarketSearchService = new PolymarketSearchService(polymarketClient);
+const kalshiSearchService = new KalshiSearchService(kalshiClient, {
+  ttlSeconds: cacheConfig.ttlSeconds,
+});
+const polymarketSearchService = new PolymarketSearchService(polymarketClient, {
+  ttlSeconds: cacheConfig.ttlSeconds,
+});
 
 const toolContext: ToolContext = {
   kalshi: kalshiClient,

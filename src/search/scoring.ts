@@ -12,14 +12,24 @@ export interface SearchResult<T> {
 }
 
 /**
- * Statistics about the current state of a search cache.
+ * Internal statistics from the cache layer.
+ * The cache knows about its own state but not about TTL policy.
  */
-export interface CacheStats {
+export interface CacheInternalStats {
   status: "empty" | "ready";
   events_count: number;
   markets_count: number;
   last_refresh: string | null;
   refresh_duration_ms: number;
+  cache_age_seconds: number | null;
+}
+
+/**
+ * Full statistics exposed by the service layer.
+ * Extends internal stats with TTL-aware expiry information.
+ */
+export interface CacheStats extends CacheInternalStats {
+  expires_in_seconds: number | null;
 }
 
 // Scoring algorithm constants - adjust to tune ranking behavior

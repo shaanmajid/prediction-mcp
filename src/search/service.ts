@@ -7,6 +7,15 @@ import {
   SearchCache,
   type SearchResult,
 } from "./cache.js";
+import {
+  BackgroundRefreshGuard,
+  calculateExpiresIn,
+  isCacheExpired,
+} from "./ttl.js";
+
+export interface SearchServiceOptions {
+  ttlSeconds?: number;
+}
 
 /**
  * Service that manages the Kalshi search cache lifecycle and provides search operations.
@@ -14,32 +23,39 @@ import {
  * Handles:
  * - Initial cache population from Kalshi API
  * - Merge-based cache refresh (full fetch, add/update/remove)
+ * - TTL-based background refresh to keep data fresh
  * - Search operations delegated to the cache
  */
 export class KalshiSearchService {
   private cache: SearchCache;
   private client: KalshiClient;
   private populatePromise: Promise<void> | null = null;
+  private ttlSeconds: number;
+  private refreshGuard = new BackgroundRefreshGuard();
 
-  constructor(client: KalshiClient) {
+  constructor(client: KalshiClient, options: SearchServiceOptions = {}) {
     this.cache = new SearchCache();
     this.client = client;
+    this.ttlSeconds = options.ttlSeconds ?? 3600;
   }
 
   /**
    * Ensures the cache is populated before performing operations.
    * Safe to call multiple times - will only populate once.
-   *
-   * @note Future: Consider adding cache TTL (time-to-live) for long-running servers.
-   * Currently, the cache persists indefinitely. A time-based expiry would help keep
-   * data fresh without requiring manual refresh() calls. Target: ~1 hour TTL with
-   * background refresh during idle time.
+   * If the cache has exceeded its TTL, triggers a non-blocking background refresh.
    */
   async ensurePopulated(): Promise<void> {
-    if (this.cache.getStats().status === "ready") {
+    const stats = this.cache.getStats();
+
+    // Cache is ready - check if TTL expired
+    if (stats.status === "ready") {
+      if (isCacheExpired(stats.cache_age_seconds, this.ttlSeconds)) {
+        this.triggerBackgroundRefresh();
+      }
       return;
     }
 
+    // Cache is empty - do initial population
     if (this.populatePromise) {
       return this.populatePromise;
     }
@@ -48,23 +64,41 @@ export class KalshiSearchService {
     return this.populatePromise;
   }
 
+  private triggerBackgroundRefresh(): void {
+    const triggered = this.refreshGuard.trigger(async () => {
+      try {
+        await this.refresh();
+      } catch {
+        // Error already logged in refresh(), swallow to prevent unhandled rejection
+      }
+    });
+    if (!triggered) {
+      logger.debug("Kalshi background refresh already in progress, skipping");
+    }
+  }
+
   private async doPopulate(): Promise<void> {
-    logger.info("Populating search cache from Kalshi API...");
+    logger.info("Populating Kalshi search cache...");
     const startTime = Date.now();
 
-    const { events, markets } = await this.client.fetchAllEventsWithMarkets();
+    try {
+      const { events, markets } = await this.client.fetchAllEventsWithMarkets();
+      this.cache.populate(events, markets);
 
-    this.cache.populate(events, markets);
-
-    const elapsedMs = Date.now() - startTime;
-    logger.info(
-      {
-        events: events.length,
-        markets: markets.length,
-        elapsedMs,
-      },
-      "Search cache populated",
-    );
+      const elapsedMs = Date.now() - startTime;
+      logger.info(
+        {
+          events: events.length,
+          markets: markets.length,
+          elapsedMs,
+          ttlSeconds: this.ttlSeconds,
+        },
+        "Kalshi search cache populated",
+      );
+    } catch (err) {
+      logger.error({ err }, "Failed to populate Kalshi search cache");
+      throw err;
+    }
   }
 
   /**
@@ -72,21 +106,26 @@ export class KalshiSearchService {
    * Adds new items, updates existing, and prunes removed.
    */
   async refresh(): Promise<void> {
-    logger.info("Refreshing search cache...");
+    logger.info("Refreshing Kalshi search cache...");
     const startTime = Date.now();
 
-    const { events, markets } = await this.client.fetchAllEventsWithMarkets();
-    this.cache.refresh(events, markets);
+    try {
+      const { events, markets } = await this.client.fetchAllEventsWithMarkets();
+      this.cache.refresh(events, markets);
 
-    const elapsedMs = Date.now() - startTime;
-    logger.info(
-      {
-        events: events.length,
-        markets: markets.length,
-        elapsedMs,
-      },
-      "Search cache refreshed",
-    );
+      const elapsedMs = Date.now() - startTime;
+      logger.info(
+        {
+          events: events.length,
+          markets: markets.length,
+          elapsedMs,
+        },
+        "Kalshi search cache refreshed",
+      );
+    } catch (err) {
+      logger.warn({ err }, "Kalshi background cache refresh failed");
+      throw err;
+    }
   }
 
   /**
@@ -123,6 +162,14 @@ export class KalshiSearchService {
    * Get cache statistics.
    */
   getStats(): CacheStats {
-    return this.cache.getStats();
+    const cacheStats = this.cache.getStats();
+
+    return {
+      ...cacheStats,
+      expires_in_seconds: calculateExpiresIn(
+        cacheStats.cache_age_seconds,
+        this.ttlSeconds,
+      ),
+    };
   }
 }

@@ -121,6 +121,17 @@ export const serverSchema = {
   LOG_LEVEL: logLevelSchema.default("info").meta({
     description: `Logging verbosity: ${LOG_LEVELS.join(", ")}`,
   } satisfies DocMeta),
+
+  // Cache
+  CACHE_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(3600)
+    .meta({
+      description:
+        "Search cache time-to-live in seconds. After this duration, searches trigger a background refresh. Applies to both Kalshi and Polymarket caches. Set to 0 to disable TTL.",
+    } satisfies DocMeta),
 } as const;
 
 // ============================================================
@@ -155,4 +166,9 @@ export const polymarketConfig = {
   gammaHost: env.POLYMARKET_GAMMA_HOST,
   clobHost: env.POLYMARKET_CLOB_HOST,
   chainId: env.POLYMARKET_CHAIN_ID,
+};
+
+/** Shared cache configuration. */
+export const cacheConfig = {
+  ttlSeconds: env.CACHE_TTL_SECONDS,
 };
