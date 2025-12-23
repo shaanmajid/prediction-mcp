@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="Prediction Markets MCP" width="400">
+  <img src="docs/assets/logo.png" alt="Prediction Markets MCP" width="200">
 </p>
 
 # Prediction Markets MCP Server
