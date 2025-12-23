@@ -12,6 +12,7 @@ import {
   GetOrderbookArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiGetPriceHistoryArgsSchema,
   ListMarketsArgsSchema,
   PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
@@ -197,6 +198,27 @@ export const KALSHI_TOOLS: Record<string, ToolDefinition> = {
         await ctx.kalshiSearchService.refresh();
       }
       return ctx.kalshiSearchService.getStats();
+    },
+  },
+
+  kalshi_get_price_history: {
+    name: "kalshi_get_price_history",
+    description:
+      "Get historical candlestick (OHLCV) data for a Kalshi market. Returns price, volume, and open interest over time. Requires both series_ticker and market ticker.",
+    schema: KalshiGetPriceHistoryArgsSchema,
+    handler: async (ctx, args) => {
+      const params = KalshiGetPriceHistoryArgsSchema.parse(args);
+      const now = Math.floor(Date.now() / 1000);
+      const oneDayAgo = now - 86400;
+
+      const result = await ctx.kalshi.getMarketCandlesticks({
+        seriesTicker: params.series_ticker,
+        ticker: params.ticker,
+        startTs: params.start_ts ?? oneDayAgo,
+        endTs: params.end_ts ?? now,
+        periodInterval: params.period_interval,
+      });
+      return result.data;
     },
   },
 };

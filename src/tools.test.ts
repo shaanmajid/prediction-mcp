@@ -301,6 +301,43 @@ describe("Kalshi Tool Integration Tests", () => {
     expect(result.event.event_ticker).toBe(eventTicker);
   });
 
+  test("kalshi_get_price_history returns candlestick data", async () => {
+    // First get a market and its event to find the series_ticker
+    const listTool = TOOLS.kalshi_list_markets!;
+    const listResult = (await listTool.handler(ctx, {
+      status: "open",
+      limit: 10,
+    })) as { markets: Array<{ ticker: string; event_ticker: string }> };
+
+    expect(listResult.markets.length).toBeGreaterThan(0);
+
+    const market = listResult.markets[0]!;
+
+    // Get the event to access series_ticker
+    const eventTool = TOOLS.kalshi_get_event!;
+    const eventResult = (await eventTool.handler(ctx, {
+      eventTicker: market.event_ticker,
+    })) as { event: { series_ticker?: string } };
+
+    expect(eventResult.event.series_ticker).toBeDefined();
+
+    const now = Math.floor(Date.now() / 1000);
+    const oneDayAgo = now - 86400;
+
+    const tool = TOOLS.kalshi_get_price_history!;
+    const result = (await tool.handler(ctx, {
+      series_ticker: eventResult.event.series_ticker!,
+      ticker: market.ticker,
+      start_ts: oneDayAgo,
+      end_ts: now,
+      period_interval: 60,
+    })) as { ticker: string; candlesticks: unknown[] };
+
+    expect(result).toBeDefined();
+    expect(result.ticker).toBe(market.ticker);
+    expect(Array.isArray(result.candlesticks)).toBe(true);
+  });
+
   // Search integration tests are in a separate file (search/integration.test.ts)
   // because they require cache population which takes ~7 seconds
 });
