@@ -149,6 +149,18 @@ bun run docs:check       # Validate docs match source (CI)
 
 Run `docs:generate` after changing `src/tools.ts`, `src/validation.ts`, or `src/env.ts`.
 
+### Documentation Deployment
+
+Docs are deployed to GitHub Pages via `mkdocs gh-deploy`. Deployment triggers:
+
+| Trigger | Behavior |
+|---------|----------|
+| Release tag pushed | Auto-deploys docs matching the release |
+| Manual dispatch | Run via Actions → Docs → Run workflow |
+| Merge to main | **No deployment** — changes wait for next release |
+
+This prevents docs from referencing unreleased features. For doc-only fixes that need immediate deployment, use manual dispatch.
+
 ## Environment Variables
 
 ### Kalshi
