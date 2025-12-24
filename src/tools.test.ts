@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { AuthContext } from "./auth/index.js";
 import { KalshiClient } from "./clients/kalshi.js";
 import { PolymarketClient } from "./clients/polymarket.js";
 import { kalshiConfig, polymarketConfig } from "./env.js";
@@ -6,13 +7,64 @@ import {
   KalshiSearchService,
   PolymarketSearchService,
 } from "./search/index.js";
-import { getToolsList, TOOLS, type ToolContext } from "./tools.js";
+import {
+  getToolsList,
+  KALSHI_PUBLIC_TOOLS,
+  KALSHI_TOOLS,
+  POLYMARKET_PUBLIC_TOOLS,
+  TOOLS,
+  type ToolContext,
+} from "./tools.js";
 
 /** Tests for MCP tools module. */
 
 // ============================================================
 // Unit Tests
 // ============================================================
+
+describe("getToolsList with AuthContext", () => {
+  const noAuth: AuthContext = {
+    kalshi: { authenticated: false, reason: "no_credentials" },
+    polymarket: { authenticated: false, reason: "no_credentials" },
+  };
+
+  const kalshiAuth: AuthContext = {
+    kalshi: { authenticated: true },
+    polymarket: { authenticated: false, reason: "no_credentials" },
+  };
+
+  test("excludes auth tools when no credentials", () => {
+    const tools = getToolsList(noAuth);
+    const names = tools.map((t) => t.name);
+
+    expect(names).not.toContain("kalshi_get_balance");
+    expect(names).not.toContain("kalshi_get_positions");
+  });
+
+  test("includes public tools when no credentials", () => {
+    const tools = getToolsList(noAuth);
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain("kalshi_list_markets");
+    expect(names).toContain("kalshi_get_market");
+    expect(names).toContain("polymarket_list_markets");
+  });
+
+  test("includes auth tools when Kalshi authenticated", () => {
+    const tools = getToolsList(kalshiAuth);
+    const names = tools.map((t) => t.name);
+
+    expect(names).toContain("kalshi_get_balance");
+    expect(names).toContain("kalshi_get_positions");
+  });
+
+  test("includes requiresAuth metadata on auth tools", () => {
+    const tools = getToolsList(kalshiAuth);
+    const balanceTool = tools.find((t) => t.name === "kalshi_get_balance");
+
+    expect(balanceTool).toBeDefined();
+  });
+});
 
 describe("getToolsList()", () => {
   test("returns array of all registered tools", () => {
@@ -75,8 +127,21 @@ describe("getToolsList()", () => {
     }
   });
 
-  test("tool count matches TOOLS registry", () => {
+  test("tool count matches public tools when no auth", () => {
     const tools = getToolsList();
+    const publicToolCount =
+      Object.keys(KALSHI_PUBLIC_TOOLS).length +
+      Object.keys(POLYMARKET_PUBLIC_TOOLS).length;
+
+    expect(tools.length).toBe(publicToolCount);
+  });
+
+  test("tool count matches all tools when authenticated", () => {
+    const authContext: AuthContext = {
+      kalshi: { authenticated: true },
+      polymarket: { authenticated: true },
+    };
+    const tools = getToolsList(authContext);
     const registeredToolCount = Object.keys(TOOLS).length;
 
     expect(tools.length).toBe(registeredToolCount);
@@ -340,4 +405,55 @@ describe("Kalshi Tool Integration Tests", () => {
 
   // Search integration tests are in a separate file (search/integration.test.ts)
   // because they require cache population which takes ~7 seconds
+});
+
+// ============================================================
+// Portfolio Tools Tests
+// ============================================================
+
+describe("Portfolio Tools", () => {
+  const kalshiAuth: AuthContext = {
+    kalshi: { authenticated: true },
+    polymarket: { authenticated: false, reason: "no_credentials" },
+  };
+
+  describe("kalshi_get_balance", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_balance).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_balance!;
+      expect(tool.name).toBe("kalshi_get_balance");
+      expect(tool.description).toContain("balance");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const balanceTool = tools.find((t) => t.name === "kalshi_get_balance");
+      expect(balanceTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_positions", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_positions).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_positions!;
+      expect(tool.name).toBe("kalshi_get_positions");
+      expect(tool.description).toContain("positions");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const positionsTool = tools.find(
+        (t) => t.name === "kalshi_get_positions",
+      );
+      expect(positionsTool).toBeDefined();
+    });
+  });
 });

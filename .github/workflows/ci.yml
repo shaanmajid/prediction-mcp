@@ -87,8 +87,10 @@ jobs:
       - name: Run tests with coverage
         run: bun test --coverage --coverage-reporter=lcov
         env:
-          # Use Kalshi demo environment to avoid production load
+          # Kalshi demo environment credentials for integration tests
           KALSHI_USE_DEMO: "true"
+          KALSHI_API_KEY: ${{ secrets.KALSHI_API_KEY_DEMO }}
+          KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM_DEMO }}
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5

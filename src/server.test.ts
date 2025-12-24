@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { classifyError } from "./index.js";
+import { classifyError } from "./server.js";
 
 /**
  * Unit tests for error classification logic
@@ -56,8 +56,18 @@ describe("classifyError()", () => {
       expect(result.code).toBe("AuthenticationError");
     });
 
+    test("classifies 'Unauthorized' (capitalized) as AuthenticationError", () => {
+      const result = classifyError(new Error("Unauthorized"));
+      expect(result.code).toBe("AuthenticationError");
+    });
+
     test("classifies 'forbidden' as AuthenticationError", () => {
       const result = classifyError(new Error("forbidden resource"));
+      expect(result.code).toBe("AuthenticationError");
+    });
+
+    test("classifies 'Forbidden' (capitalized) as AuthenticationError", () => {
+      const result = classifyError(new Error("403 Forbidden"));
       expect(result.code).toBe("AuthenticationError");
     });
   });

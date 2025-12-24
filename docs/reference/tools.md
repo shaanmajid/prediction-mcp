@@ -136,6 +136,40 @@ Get historical candlestick (OHLCV) data for a Kalshi market. Returns price, volu
 - `period_interval` (`1` | `60` | `1440`, required)
     - Candlestick period in minutes. Valid values: 1 (1 minute), 60 (1 hour), 1440 (1 day).
 
+## `kalshi_get_balance`
+
+> **Authentication:** Required (kalshi)
+
+Get your Kalshi account balance and portfolio value. Returns values in cents and dollars. Requires Kalshi authentication.
+
+No parameters.
+
+## `kalshi_get_positions`
+
+> **Authentication:** Required (kalshi)
+
+Get your current positions on Kalshi markets. Filter by ticker, event, or settlement status. Returns market positions with P&L and exposure data. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `ticker` (string, optional)
+    - Filter by specific market ticker.
+
+- `eventTicker` (string, optional)
+    - Filter by event ticker. Multiple tickers can be comma-separated (max 10).
+
+- `settlementStatus` (`"all"` | `"unsettled"` | `"settled"`, optional)
+    - Filter by settlement status. Defaults to 'unsettled' if not specified.
+
+- `countFilter` (string, optional)
+    - Restrict to positions with non-zero values. Accepts comma-separated values: 'position', 'total_traded'.
+
+- `limit` (integer (min: 1, max: 200), optional)
+    - Maximum number of positions to return. Defaults to 100.
+
+- `cursor` (string, optional)
+    - Pagination cursor from previous response.
+
 ## Polymarket
 
 ## `polymarket_list_markets`

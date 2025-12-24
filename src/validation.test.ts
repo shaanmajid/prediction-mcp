@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
   CacheStatsSchema,
+  GetBalanceArgsSchema,
   GetEventArgsSchema,
   GetMarketArgsSchema,
   GetOrderbookArgsSchema,
+  GetPositionsArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
@@ -354,6 +356,52 @@ describe("Kalshi Schemas", () => {
           "end_ts must be greater than start_ts",
         );
       }
+    });
+  });
+
+  describe("GetBalanceArgsSchema", () => {
+    test("accepts empty object", () => {
+      const result = GetBalanceArgsSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects unknown properties", () => {
+      const result = GetBalanceArgsSchema.safeParse({ unknown: "prop" });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("GetPositionsArgsSchema", () => {
+    test("accepts empty object", () => {
+      const result = GetPositionsArgsSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid filter parameters", () => {
+      const result = GetPositionsArgsSchema.safeParse({
+        ticker: "KXTEST",
+        eventTicker: "EVENT",
+        settlementStatus: "unsettled",
+        limit: 50,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects invalid settlementStatus", () => {
+      const result = GetPositionsArgsSchema.safeParse({
+        settlementStatus: "invalid",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit over 200", () => {
+      const result = GetPositionsArgsSchema.safeParse({ limit: 201 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects unknown properties", () => {
+      const result = GetPositionsArgsSchema.safeParse({ unknown: "prop" });
+      expect(result.success).toBe(false);
     });
   });
 });
