@@ -85,7 +85,6 @@ export const serverSchema = {
   } satisfies DocMeta),
 
   KALSHI_BASE_PATH: z
-    .string()
     .url()
     .optional()
     .meta({
@@ -95,7 +94,6 @@ export const serverSchema = {
 
   // Polymarket
   POLYMARKET_GAMMA_HOST: z
-    .string()
     .url()
     .default("https://gamma-api.polymarket.com")
     .meta({
@@ -103,7 +101,6 @@ export const serverSchema = {
     } satisfies DocMeta),
 
   POLYMARKET_CLOB_HOST: z
-    .string()
     .url()
     .default("https://clob.polymarket.com")
     .meta({

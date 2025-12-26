@@ -407,9 +407,6 @@ export const PolymarketCacheStatsSchema = z
 
 /**
  * Convert Zod schema to JSON Schema for MCP tool definitions
- *
- * Uses Zod v4's native toJSONSchema() which replaced the deprecated
- * zod-to-json-schema library.
  */
 export function toMCPSchema(schema: z.ZodType): Record<string, unknown> {
   return z.toJSONSchema(schema, {

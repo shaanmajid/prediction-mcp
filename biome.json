@@ -94,6 +94,9 @@
         "noWith": "error",
         "useGetterReturn": "error",
         "useNamespaceKeyword": "error"
+      },
+      "nursery": {
+        "noDeprecatedImports": "error"
       }
     }
   },
