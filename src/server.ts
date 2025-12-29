@@ -5,7 +5,7 @@
  * allowing for testing and programmatic use.
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
@@ -77,8 +77,8 @@ export function classifyError(error: unknown): ClassifiedError {
 /**
  * Create the MCP server instance.
  */
-function createServer(): Server {
-  return new Server(
+function createServer(): McpServer {
+  return new McpServer(
     {
       name: "prediction-markets",
       version: "1.0.0",
@@ -127,17 +127,17 @@ function createClients() {
  * Register tool handlers on the server.
  */
 function registerHandlers(
-  server: Server,
+  mcpServer: McpServer,
   toolContext: ToolContext,
   authContext: AuthContext,
 ): void {
-  server.setRequestHandler(ListToolsRequestSchema, async () => {
+  mcpServer.server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
       tools: getToolsList(authContext),
     };
   });
 
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  mcpServer.server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     try {
@@ -227,7 +227,7 @@ async function prefetchSearchCaches(
  * Throws AuthInitError on credential issues.
  */
 export async function startServer(): Promise<void> {
-  const server = createServer();
+  const mcpServer = createServer();
   const {
     kalshiClient,
     kalshiSearchService,
@@ -239,11 +239,11 @@ export async function startServer(): Promise<void> {
   const authContext = await initializeAuth(kalshiConfig, kalshiClient);
 
   // Register tool handlers
-  registerHandlers(server, toolContext, authContext);
+  registerHandlers(mcpServer, toolContext, authContext);
 
   // Connect transport
   const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await mcpServer.connect(transport);
 
   logger.info(
     {
