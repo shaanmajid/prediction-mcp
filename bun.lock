@@ -320,7 +320,7 @@
 
     "json-schema-typed": ["json-schema-typed@8.0.2", "", {}, "sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA=="],
 
-    "kalshi-typescript": ["kalshi-typescript@3.0.0", "", { "dependencies": { "axios": "^1.6.1" } }, "sha512-A4jNJF1ym2t8qqUAPel8ogWAMdZcDeI4ObaliRyu5aHtgw6PD3yWeSgWabuo8mRFWnNNQJBkq+8i0EmOiHwAsg=="],
+    "kalshi-typescript": ["kalshi-typescript@3.3.0", "", { "dependencies": { "axios": "^1.6.1" } }, "sha512-0L1q2I98d3BL2y1/dgDmRjigKhvx6NG5CHK8gc/lBGV2lgl6CxD2UgQJjCX1xSnmuqjveL7PFmNm2RIDz5HfKQ=="],
 
     "lint-staged": ["lint-staged@16.2.7", "", { "dependencies": { "commander": "^14.0.2", "listr2": "^9.0.5", "micromatch": "^4.0.8", "nano-spawn": "^2.0.0", "pidtree": "^0.6.0", "string-argv": "^0.3.2", "yaml": "^2.8.1" }, "bin": { "lint-staged": "bin/lint-staged.js" } }, "sha512-lDIj4RnYmK7/kXMya+qJsmkRFkGolciXjrsZ6PC25GdTfWOAWetR0ZbsNXRAj1EHHImRSalc+whZFg56F5DVow=="],
 
