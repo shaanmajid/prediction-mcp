@@ -147,7 +147,16 @@ function registerHandlers(
       }
 
       const data = await tool.handler(toolContext, args);
+      // Include both content and structuredContent for backwards compatibility.
+      // Many MCP clients don't yet support structuredContent (Claude Code, OpenCode,
+      // Vercel AI SDK, etc.) and only read the content field.
       return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data),
+          },
+        ],
         structuredContent: data,
       };
     } catch (error) {
