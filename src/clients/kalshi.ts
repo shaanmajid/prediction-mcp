@@ -449,4 +449,49 @@ export class KalshiClient {
       RETRY_OPTIONS,
     );
   }
+
+  /**
+   * Create a new order on Kalshi
+   * WARNING: This places a real order with real money. Ensure all parameters are correct.
+   * @param params - Order parameters
+   */
+  async createOrder(params: {
+    ticker: string;
+    action: "buy" | "sell";
+    side: "yes" | "no";
+    type?: "limit" | "market";
+    count: number;
+    yes_price?: number;
+    no_price?: number;
+    client_order_id?: string;
+    expiration_ts?: number;
+    sell_position_floor?: number;
+    buy_max_cost?: number;
+  }) {
+    return backOff(
+      () =>
+        this.ordersApi.createOrder({
+          ticker: params.ticker,
+          action: params.action,
+          side: params.side,
+          type: params.type,
+          count: params.count,
+          yes_price: params.yes_price,
+          no_price: params.no_price,
+          client_order_id: params.client_order_id,
+          expiration_ts: params.expiration_ts,
+          sell_position_floor: params.sell_position_floor,
+          buy_max_cost: params.buy_max_cost,
+        }),
+      RETRY_OPTIONS,
+    );
+  }
+
+  /**
+   * Cancel an existing order by ID
+   * @param orderId - The unique order ID to cancel
+   */
+  async cancelOrder(orderId: string) {
+    return backOff(() => this.ordersApi.cancelOrder(orderId), RETRY_OPTIONS);
+  }
 }

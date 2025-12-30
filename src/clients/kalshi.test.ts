@@ -120,6 +120,18 @@ describe("KalshiClient - Unit Tests", () => {
       expect(typeof KalshiClient.prototype.getSettlements).toBe("function");
     });
   });
+
+  describe("createOrder()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.createOrder).toBe("function");
+    });
+  });
+
+  describe("cancelOrder()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.cancelOrder).toBe("function");
+    });
+  });
 });
 
 // ============================================================

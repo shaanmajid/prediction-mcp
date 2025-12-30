@@ -56,6 +56,8 @@ describe("getToolsList with AuthContext", () => {
 
     expect(names).toContain("kalshi_get_balance");
     expect(names).toContain("kalshi_get_positions");
+    expect(names).toContain("kalshi_create_order");
+    expect(names).toContain("kalshi_cancel_order");
   });
 
   test("includes requiresAuth metadata on auth tools", () => {
@@ -145,6 +147,53 @@ describe("getToolsList()", () => {
     const registeredToolCount = Object.keys(TOOLS).length;
 
     expect(tools.length).toBe(registeredToolCount);
+  });
+});
+
+describe("Kalshi Order Lifecycle Tools", () => {
+  test("kalshi_create_order tool exists", () => {
+    expect(TOOLS.kalshi_create_order).toBeDefined();
+  });
+
+  test("kalshi_create_order has correct metadata", () => {
+    const tool = TOOLS.kalshi_create_order!;
+    expect(tool.name).toBe("kalshi_create_order");
+    expect(tool.description).toContain("WARNING");
+    expect(tool.description).toContain("real money");
+    expect(tool.platform).toBe("kalshi");
+  });
+
+  test("kalshi_create_order requires auth", () => {
+    const tool = TOOLS.kalshi_create_order!;
+    expect(tool.requiresAuth).toBeDefined();
+    expect(tool.requiresAuth?.platform).toBe("kalshi");
+  });
+
+  test("kalshi_create_order handler is a function", () => {
+    const tool = TOOLS.kalshi_create_order!;
+    expect(typeof tool.handler).toBe("function");
+  });
+
+  test("kalshi_cancel_order tool exists", () => {
+    expect(TOOLS.kalshi_cancel_order).toBeDefined();
+  });
+
+  test("kalshi_cancel_order has correct metadata", () => {
+    const tool = TOOLS.kalshi_cancel_order!;
+    expect(tool.name).toBe("kalshi_cancel_order");
+    expect(tool.description).toContain("Cancel");
+    expect(tool.platform).toBe("kalshi");
+  });
+
+  test("kalshi_cancel_order requires auth", () => {
+    const tool = TOOLS.kalshi_cancel_order!;
+    expect(tool.requiresAuth).toBeDefined();
+    expect(tool.requiresAuth?.platform).toBe("kalshi");
+  });
+
+  test("kalshi_cancel_order handler is a function", () => {
+    const tool = TOOLS.kalshi_cancel_order!;
+    expect(typeof tool.handler).toBe("function");
   });
 });
 
@@ -460,6 +509,103 @@ describe("Kalshi Tool Integration Tests", () => {
 
   // Search integration tests are in a separate file (search/integration.test.ts)
   // because they require cache population which takes ~7 seconds
+
+  describe("Order Lifecycle (create → verify → cancel)", () => {
+    test("creates limit order, verifies in list, cancels, and verifies canceled status", async () => {
+      // Step 1: Find an open market to place an order on
+      const listMarketsTool = TOOLS.kalshi_list_markets!;
+      const marketsResult = (await listMarketsTool.handler(ctx, {
+        status: "open",
+        limit: 1,
+      })) as { markets: Array<{ ticker: string }> };
+
+      expect(marketsResult.markets.length).toBeGreaterThan(0);
+      const ticker = marketsResult.markets[0]!.ticker;
+
+      // Step 2: Create a limit order at 1 cent (won't fill - too low)
+      const createTool = TOOLS.kalshi_create_order!;
+      const createResult = (await createTool.handler(ctx, {
+        ticker,
+        action: "buy",
+        side: "yes",
+        type: "limit",
+        count: 1,
+        yes_price: 1, // 1 cent - won't fill
+      })) as { order: { order_id: string; status: string; ticker: string } };
+
+      expect(createResult.order).toBeDefined();
+      expect(createResult.order.order_id).toBeDefined();
+      expect(createResult.order.status).toBe("resting");
+      expect(createResult.order.ticker).toBe(ticker);
+
+      const orderId = createResult.order.order_id;
+
+      // Step 3: Verify the order appears in list_orders
+      const listOrdersTool = TOOLS.kalshi_list_orders!;
+      const listResult = (await listOrdersTool.handler(ctx, {
+        status: "resting",
+        limit: 100,
+      })) as { orders: Array<{ order_id: string }> };
+
+      const foundOrder = listResult.orders.find((o) => o.order_id === orderId);
+      expect(foundOrder).toBeDefined();
+
+      // Step 4: Cancel the order
+      const cancelTool = TOOLS.kalshi_cancel_order!;
+      const cancelResult = (await cancelTool.handler(ctx, { orderId })) as {
+        order: { order_id: string; status: string };
+        reduced_by: number;
+      };
+
+      expect(cancelResult.order).toBeDefined();
+      expect(cancelResult.order.order_id).toBe(orderId);
+      expect(cancelResult.order.status).toBe("canceled");
+      expect(cancelResult.reduced_by).toBe(1);
+
+      // Step 5: Verify the order no longer appears in resting orders
+      const listAfterCancel = (await listOrdersTool.handler(ctx, {
+        status: "resting",
+        limit: 100,
+      })) as { orders: Array<{ order_id: string }> };
+
+      const stillResting = listAfterCancel.orders.find(
+        (o) => o.order_id === orderId,
+      );
+      expect(stillResting).toBeUndefined();
+
+      // Step 6: Verify we can retrieve the canceled order by ID
+      const getOrderTool = TOOLS.kalshi_get_order!;
+      const getResult = (await getOrderTool.handler(ctx, { orderId })) as {
+        order: { order_id: string; status: string };
+      };
+
+      expect(getResult.order.order_id).toBe(orderId);
+      expect(getResult.order.status).toBe("canceled");
+    });
+
+    test("cancel_order throws for non-existent order ID", async () => {
+      const cancelTool = TOOLS.kalshi_cancel_order!;
+
+      await expect(
+        cancelTool.handler(ctx, { orderId: "non-existent-order-id-12345" }),
+      ).rejects.toThrow();
+    });
+
+    test("create_order throws for non-existent market ticker", async () => {
+      const createTool = TOOLS.kalshi_create_order!;
+
+      await expect(
+        createTool.handler(ctx, {
+          ticker: "NON-EXISTENT-MARKET-TICKER-12345",
+          action: "buy",
+          side: "yes",
+          type: "limit",
+          count: 1,
+          yes_price: 50,
+        }),
+      ).rejects.toThrow();
+    });
+  });
 });
 
 // ============================================================

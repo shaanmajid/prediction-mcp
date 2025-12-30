@@ -8,6 +8,8 @@ import {
   GetPositionsArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiCancelOrderArgsSchema,
+  KalshiCreateOrderArgsSchema,
   KalshiGetFillsArgsSchema,
   KalshiGetOrderArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
@@ -712,6 +714,281 @@ describe("Kalshi Schemas", () => {
         maxTs: 1700000000,
       });
       expect(lessThanResult.success).toBe(false);
+    });
+  });
+
+  describe("KalshiCreateOrderArgsSchema", () => {
+    test("accepts valid limit buy order on yes side", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXPRESIDENT-2024",
+        action: "buy",
+        side: "yes",
+        type: "limit",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid limit sell order on no side", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "sell",
+        side: "no",
+        type: "limit",
+        count: 5,
+        no_price: 30,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts market order without price", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        type: "market",
+        count: 10,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts limit order with default type (limit)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts all optional parameters", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+        client_order_id: "my-order-123",
+        expiration_ts: 1700000000,
+        buy_max_cost: 1000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects limit order on yes side without yes_price", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        type: "limit",
+        count: 10,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit order on no side without no_price", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "no",
+        type: "limit",
+        count: 10,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects yes_price below minimum (1)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects yes_price above maximum (99)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 100,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects no_price below minimum (1)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "no",
+        count: 10,
+        no_price: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects no_price above maximum (99)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "no",
+        count: 10,
+        no_price: 100,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects count below minimum (1)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 0,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects non-integer count", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10.5,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects invalid action value", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "hold",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects invalid side value", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "maybe",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects invalid type value", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        type: "stop",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing ticker", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing action", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing side", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        count: 10,
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing count", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        yes_price: 50,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+        unknown_field: "value",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts non-integer expiration_ts", () => {
+      const result = KalshiCreateOrderArgsSchema.safeParse({
+        ticker: "KXTEST-2024",
+        action: "buy",
+        side: "yes",
+        count: 10,
+        yes_price: 50,
+        expiration_ts: 1700000000.5,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("KalshiCancelOrderArgsSchema", () => {
+    test("accepts valid order ID", () => {
+      const result = KalshiCancelOrderArgsSchema.safeParse({
+        orderId: "order-123456",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects empty order ID", () => {
+      const result = KalshiCancelOrderArgsSchema.safeParse({ orderId: "" });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing order ID", () => {
+      const result = KalshiCancelOrderArgsSchema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiCancelOrderArgsSchema.safeParse({
+        orderId: "order-123",
+        extra: "field",
+      });
+      expect(result.success).toBe(false);
     });
   });
 });

@@ -259,6 +259,58 @@ Get your settlement history for closed positions on Kalshi. Filter by ticker, ev
 - `maxTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
     - Filter settlements before this Unix timestamp.
 
+## `kalshi_create_order`
+
+> **Authentication:** Required (kalshi)
+
+Create a new order on Kalshi. WARNING: This places a real trade with real money. Supports limit and market orders on yes/no sides. Returns order confirmation with ID and fill status. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `ticker` (string (minLength: 1), required)
+    - Market ticker symbol (e.g., 'KXPRESIDENT-2024').
+
+- `action` (`"buy"` | `"sell"`, required)
+    - Order action: 'buy' to purchase contracts, 'sell' to sell contracts.
+
+- `side` (`"yes"` | `"no"`, required)
+    - Market side: 'yes' or 'no' outcome.
+
+- `type` (`"limit"` | `"market"`, optional)
+    - Order type: 'limit' (specific price) or 'market' (best available price). Defaults to 'limit'.
+
+- `count` (integer (min: 1, max: 9007199254740991), required)
+    - Number of contracts to trade.
+
+- `yes_price` (integer (min: 1, max: 99), optional)
+    - Limit price in cents for yes side (1-99). Required for limit orders on yes side.
+
+- `no_price` (integer (min: 1, max: 99), optional)
+    - Limit price in cents for no side (1-99). Required for limit orders on no side.
+
+- `client_order_id` (string, optional)
+    - Optional client-specified order ID for idempotency and tracking.
+
+- `expiration_ts` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Optional expiration timestamp in Unix seconds. Order will be canceled if not filled by this time.
+
+- `sell_position_floor` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Deprecated: Use reduce_only instead. Minimum position to maintain after sell. Only accepts value of 0.
+
+- `buy_max_cost` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Maximum cost in cents for buy orders. When specified, order automatically uses Fill-or-Kill behavior.
+
+## `kalshi_cancel_order`
+
+> **Authentication:** Required (kalshi)
+
+Cancel an existing order by ID. Only resting (open) orders can be canceled. Returns cancellation confirmation. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `orderId` (string (minLength: 1), required)
+    - The unique order ID to cancel. Found in order responses.
+
 ## Polymarket
 
 ## `polymarket_list_markets`
