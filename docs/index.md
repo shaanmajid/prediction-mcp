@@ -114,6 +114,10 @@ Decentralized prediction market on Polygon with deep liquidity on major events.
 | [`kalshi_get_price_history`](reference/tools.md#kalshi_get_price_history) | Get historical candlestick (OHLCV) data for a Kalshi market | — |
 | [`kalshi_get_balance`](reference/tools.md#kalshi_get_balance) | Get your Kalshi account balance and portfolio value | Required |
 | [`kalshi_get_positions`](reference/tools.md#kalshi_get_positions) | Get your open positions on Kalshi markets | Required |
+| [`kalshi_list_orders`](reference/tools.md#kalshi_list_orders) | List your orders on Kalshi | Required |
+| [`kalshi_get_order`](reference/tools.md#kalshi_get_order) | Get details about a specific order by ID | Required |
+| [`kalshi_get_fills`](reference/tools.md#kalshi_get_fills) | Get your trade execution history (fills) on Kalshi | Required |
+| [`kalshi_get_settlements`](reference/tools.md#kalshi_get_settlements) | Get your settlement history for closed positions on Kalshi | Required |
 
 ### Polymarket
 

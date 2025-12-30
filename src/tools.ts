@@ -15,7 +15,11 @@ import {
   GetPositionsArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiGetFillsArgsSchema,
+  KalshiGetOrderArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
+  KalshiGetSettlementsArgsSchema,
+  KalshiListOrdersArgsSchema,
   ListMarketsArgsSchema,
   PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
@@ -276,6 +280,80 @@ const ALL_TOOLS: ToolDefinition[] = [
         countFilter: params.countFilter,
         limit: params.limit,
         cursor: params.cursor,
+      });
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_list_orders",
+    description:
+      "List your orders on Kalshi. Filter by ticker, event, status, or time range. Returns order details including status, price, and fill information. Requires Kalshi authentication.",
+    schema: KalshiListOrdersArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiListOrdersArgsSchema.parse(args || {});
+      const result = await ctx.kalshi.listOrders({
+        ticker: params.ticker,
+        eventTicker: params.eventTicker,
+        minTs: params.minTs,
+        maxTs: params.maxTs,
+        status: params.status,
+        limit: params.limit,
+        cursor: params.cursor,
+      });
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_get_order",
+    description:
+      "Get details about a specific order by ID. Returns order status, price, fills, and timestamps. Requires Kalshi authentication.",
+    schema: KalshiGetOrderArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiGetOrderArgsSchema.parse(args);
+      const result = await ctx.kalshi.getOrder(params.orderId);
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_get_fills",
+    description:
+      "Get your trade execution history (fills) on Kalshi. Filter by ticker, order ID, or time range. Returns trade details including price, count, and P&L. Requires Kalshi authentication.",
+    schema: KalshiGetFillsArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiGetFillsArgsSchema.parse(args || {});
+      const result = await ctx.kalshi.getFills({
+        ticker: params.ticker,
+        orderId: params.orderId,
+        minTs: params.minTs,
+        maxTs: params.maxTs,
+        limit: params.limit,
+        cursor: params.cursor,
+      });
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_get_settlements",
+    description:
+      "Get your settlement history for closed positions on Kalshi. Filter by ticker, event, or time range. Returns settlement revenue and market outcome data. Requires Kalshi authentication.",
+    schema: KalshiGetSettlementsArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiGetSettlementsArgsSchema.parse(args || {});
+      const result = await ctx.kalshi.getSettlements({
+        limit: params.limit,
+        cursor: params.cursor,
+        ticker: params.ticker,
+        eventTicker: params.eventTicker,
+        minTs: params.minTs,
+        maxTs: params.maxTs,
       });
       return result.data;
     },

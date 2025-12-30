@@ -403,6 +403,61 @@ describe("Kalshi Tool Integration Tests", () => {
     expect(Array.isArray(result.candlesticks)).toBe(true);
   });
 
+  test("kalshi_list_orders returns orders array", async () => {
+    const tool = TOOLS.kalshi_list_orders!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      orders: unknown[];
+      cursor: string;
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.orders)).toBe(true);
+    expect(result.orders.length).toBeLessThanOrEqual(5);
+  });
+
+  test("kalshi_get_order returns order details", async () => {
+    // First get an order from the list
+    const listTool = TOOLS.kalshi_list_orders!;
+    const listResult = (await listTool.handler(ctx, { limit: 1 })) as {
+      orders: Array<{ order_id: string }>;
+    };
+
+    if (listResult.orders.length > 0) {
+      const orderId = listResult.orders[0]!.order_id;
+      const tool = TOOLS.kalshi_get_order!;
+      const result = (await tool.handler(ctx, { orderId })) as {
+        order: { order_id: string };
+      };
+
+      expect(result).toBeDefined();
+      expect(result.order).toBeDefined();
+      expect(result.order.order_id).toBe(orderId);
+    }
+    // If no orders, test still passes - account may have none
+  });
+
+  test("kalshi_get_fills returns fills array", async () => {
+    const tool = TOOLS.kalshi_get_fills!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      fills: unknown[];
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.fills)).toBe(true);
+    expect(result.fills.length).toBeLessThanOrEqual(5);
+  });
+
+  test("kalshi_get_settlements returns settlements array", async () => {
+    const tool = TOOLS.kalshi_get_settlements!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      settlements: unknown[];
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.settlements)).toBe(true);
+    expect(result.settlements.length).toBeLessThanOrEqual(5);
+  });
+
   // Search integration tests are in a separate file (search/integration.test.ts)
   // because they require cache population which takes ~7 seconds
 });
@@ -454,6 +509,84 @@ describe("Portfolio Tools", () => {
         (t) => t.name === "kalshi_get_positions",
       );
       expect(positionsTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_list_orders", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_list_orders).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_list_orders!;
+      expect(tool.name).toBe("kalshi_list_orders");
+      expect(tool.description).toContain("orders");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const ordersTool = tools.find((t) => t.name === "kalshi_list_orders");
+      expect(ordersTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_order", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_order).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_order!;
+      expect(tool.name).toBe("kalshi_get_order");
+      expect(tool.description).toContain("order");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const orderTool = tools.find((t) => t.name === "kalshi_get_order");
+      expect(orderTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_fills", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_fills).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_fills!;
+      expect(tool.name).toBe("kalshi_get_fills");
+      expect(tool.description).toContain("fill");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const fillsTool = tools.find((t) => t.name === "kalshi_get_fills");
+      expect(fillsTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_settlements", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_settlements).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_settlements!;
+      expect(tool.name).toBe("kalshi_get_settlements");
+      expect(tool.description).toContain("settlement");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const settlementsTool = tools.find(
+        (t) => t.name === "kalshi_get_settlements",
+      );
+      expect(settlementsTool).toBeDefined();
     });
   });
 });

@@ -96,6 +96,30 @@ describe("KalshiClient - Unit Tests", () => {
       );
     });
   });
+
+  describe("listOrders()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.listOrders).toBe("function");
+    });
+  });
+
+  describe("getOrder()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.getOrder).toBe("function");
+    });
+  });
+
+  describe("getFills()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.getFills).toBe("function");
+    });
+  });
+
+  describe("getSettlements()", () => {
+    test("method exists on prototype", () => {
+      expect(typeof KalshiClient.prototype.getSettlements).toBe("function");
+    });
+  });
 });
 
 // ============================================================
@@ -222,6 +246,146 @@ describeWithCredentials("KalshiClient - Integration Tests", () => {
       expect(result.data).toBeDefined();
       expect(result.data.ticker).toBe(market.ticker);
       expect(Array.isArray(result.data.candlesticks)).toBe(true);
+    });
+  });
+
+  describe("Orders API", () => {
+    test("listOrders returns orders array structure", async () => {
+      const result = await client.listOrders();
+
+      expect(result).toBeDefined();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data.orders)).toBe(true);
+
+      // Cursor should be string or null
+      if (result.data.cursor !== null && result.data.cursor !== undefined) {
+        expect(typeof result.data.cursor).toBe("string");
+      }
+    });
+
+    test("listOrders respects limit parameter", async () => {
+      const result = await client.listOrders({ limit: 5 });
+      const orders = result.data.orders ?? [];
+
+      expect(orders.length).toBeLessThanOrEqual(5);
+    });
+
+    test("listOrders filters by status", async () => {
+      const result = await client.listOrders({ status: "resting" });
+
+      expect(result).toBeDefined();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data.orders)).toBe(true);
+
+      // All returned orders should have resting status
+      for (const order of result.data.orders ?? []) {
+        expect(order.status).toBe("resting");
+      }
+    });
+
+    test("listOrders returns order details when orders exist", async () => {
+      const result = await client.listOrders({ limit: 1 });
+      const orders = result.data.orders ?? [];
+
+      if (orders.length > 0) {
+        const order = orders[0]!;
+
+        // Verify order has expected structure
+        expect(order.order_id).toBeDefined();
+        expect(typeof order.order_id).toBe("string");
+        expect(order.ticker).toBeDefined();
+        expect(typeof order.ticker).toBe("string");
+        expect(order.status).toBeDefined();
+      }
+      // If no orders, test still passes - demo account may have none
+    });
+
+    test("getOrder returns specific order by ID", async () => {
+      const listResult = await client.listOrders({ limit: 1 });
+      const orders = listResult.data.orders ?? [];
+
+      if (orders.length > 0) {
+        const orderId = orders[0]!.order_id;
+        const result = await client.getOrder(orderId);
+
+        expect(result.data.order).toBeDefined();
+        expect(result.data.order.order_id).toBe(orderId);
+        expect(result.data.order.ticker).toBeDefined();
+        expect(result.data.order.status).toBeDefined();
+      }
+      // If no orders, test still passes - demo account may have none
+    });
+
+    test("getOrder throws for non-existent order ID", async () => {
+      // Non-existent UUIDs should return 404, not trigger retries
+      await expect(
+        client.getOrder("00000000-0000-0000-0000-000000000000"),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("Fills API", () => {
+    test("getFills returns fills array structure", async () => {
+      const result = await client.getFills();
+
+      expect(result).toBeDefined();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data.fills)).toBe(true);
+    });
+
+    test("getFills respects limit parameter", async () => {
+      const result = await client.getFills({ limit: 5 });
+      const fills = result.data.fills ?? [];
+
+      expect(fills.length).toBeLessThanOrEqual(5);
+    });
+
+    test("getFills returns fill details when fills exist", async () => {
+      const result = await client.getFills({ limit: 1 });
+      const fills = result.data.fills ?? [];
+
+      if (fills.length > 0) {
+        const fill = fills[0]!;
+
+        // Verify fill has expected structure
+        expect(fill.trade_id).toBeDefined();
+        expect(fill.ticker).toBeDefined();
+        expect(typeof fill.count).toBe("number");
+        expect(typeof fill.yes_price).toBe("number");
+      }
+      // If no fills, test still passes - demo account may have none
+    });
+  });
+
+  describe("Settlements API", () => {
+    test("getSettlements returns settlements array structure", async () => {
+      const result = await client.getSettlements();
+
+      expect(result).toBeDefined();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data.settlements)).toBe(true);
+    });
+
+    test("getSettlements respects limit parameter", async () => {
+      const result = await client.getSettlements({ limit: 5 });
+      const settlements = result.data.settlements ?? [];
+
+      expect(settlements.length).toBeLessThanOrEqual(5);
+    });
+
+    test("getSettlements returns settlement details when settlements exist", async () => {
+      const result = await client.getSettlements({ limit: 1 });
+      const settlements = result.data.settlements ?? [];
+
+      if (settlements.length > 0) {
+        const settlement = settlements[0]!;
+
+        // Verify settlement has expected structure
+        expect(settlement.ticker).toBeDefined();
+        expect(typeof settlement.ticker).toBe("string");
+        expect(typeof settlement.revenue).toBe("number");
+      }
+      // If no settlements, test still passes - demo account may have none
     });
   });
 });

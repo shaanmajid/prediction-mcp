@@ -217,6 +217,138 @@ export const GetPositionsArgsSchema = z
   })
   .strict();
 
+// Schema for kalshi_list_orders
+export const KalshiListOrdersArgsSchema = z
+  .object({
+    ticker: z.string().optional().describe("Filter orders by market ticker."),
+    eventTicker: z
+      .string()
+      .optional()
+      .describe(
+        "Filter by event ticker. Multiple tickers can be comma-separated (max 10).",
+      ),
+    minTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter orders created after this Unix timestamp."),
+    maxTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter orders created before this Unix timestamp."),
+    status: z
+      .enum(["resting", "canceled", "executed"])
+      .optional()
+      .describe(
+        "Filter by order status: 'resting' (open), 'canceled', or 'executed' (filled).",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe("Maximum orders to return. Defaults to 100, max 200."),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Pagination cursor from previous response."),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      data.minTs === undefined ||
+      data.maxTs === undefined ||
+      data.maxTs > data.minTs,
+    { message: "maxTs must be greater than minTs" },
+  );
+
+// Schema for kalshi_get_order
+export const KalshiGetOrderArgsSchema = z
+  .object({
+    orderId: z.string().min(1).describe("The unique order ID to retrieve."),
+  })
+  .strict();
+
+// Schema for kalshi_get_fills
+export const KalshiGetFillsArgsSchema = z
+  .object({
+    ticker: z.string().optional().describe("Filter fills by market ticker."),
+    orderId: z.string().optional().describe("Filter fills by order ID."),
+    minTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter fills after this Unix timestamp."),
+    maxTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter fills before this Unix timestamp."),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe("Maximum fills to return. Defaults to 100, max 200."),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Pagination cursor from previous response."),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      data.minTs === undefined ||
+      data.maxTs === undefined ||
+      data.maxTs > data.minTs,
+    { message: "maxTs must be greater than minTs" },
+  );
+
+// Schema for kalshi_get_settlements
+export const KalshiGetSettlementsArgsSchema = z
+  .object({
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe("Maximum settlements to return. Defaults to 100, max 200."),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Pagination cursor from previous response."),
+    ticker: z
+      .string()
+      .optional()
+      .describe("Filter settlements by market ticker."),
+    eventTicker: z
+      .string()
+      .optional()
+      .describe("Filter settlements by event ticker."),
+    minTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter settlements after this Unix timestamp."),
+    maxTs: z
+      .number()
+      .int()
+      .optional()
+      .describe("Filter settlements before this Unix timestamp."),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      data.minTs === undefined ||
+      data.maxTs === undefined ||
+      data.maxTs > data.minTs,
+    { message: "maxTs must be greater than minTs" },
+  );
+
 // ============================================================
 // Polymarket Schemas
 // ============================================================
@@ -425,6 +557,12 @@ export type KalshiGetPriceHistoryArgs = z.infer<
 >;
 export type GetBalanceArgs = z.infer<typeof GetBalanceArgsSchema>;
 export type GetPositionsArgs = z.infer<typeof GetPositionsArgsSchema>;
+export type KalshiListOrdersArgs = z.infer<typeof KalshiListOrdersArgsSchema>;
+export type KalshiGetOrderArgs = z.infer<typeof KalshiGetOrderArgsSchema>;
+export type KalshiGetFillsArgs = z.infer<typeof KalshiGetFillsArgsSchema>;
+export type KalshiGetSettlementsArgs = z.infer<
+  typeof KalshiGetSettlementsArgsSchema
+>;
 
 /**
  * Type inference helpers - Polymarket

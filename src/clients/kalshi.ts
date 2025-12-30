@@ -7,6 +7,7 @@ import {
   EventsApi,
   type Market,
   MarketApi,
+  OrdersApi,
   PortfolioApi,
 } from "kalshi-typescript";
 import { logger } from "../logger.js";
@@ -73,6 +74,7 @@ export class KalshiClient {
   private eventsApi: EventsApi;
   private portfolioApi: PortfolioApi;
   private apiKeysApi: ApiKeysApi;
+  private ordersApi: OrdersApi;
 
   constructor(config: KalshiConfig) {
     const { basePath, shouldWarn, explicitBasePath } =
@@ -96,6 +98,7 @@ export class KalshiClient {
     this.eventsApi = new EventsApi(configuration);
     this.portfolioApi = new PortfolioApi(configuration);
     this.apiKeysApi = new ApiKeysApi(configuration);
+    this.ordersApi = new OrdersApi(configuration);
   }
 
   /**
@@ -357,5 +360,93 @@ export class KalshiClient {
    */
   async getApiKeys() {
     return backOff(() => this.apiKeysApi.getApiKeys(), RETRY_OPTIONS);
+  }
+
+  /**
+   * List orders for the authenticated user
+   * @param params - Optional filters (ticker, status, timestamps, etc.)
+   */
+  async listOrders(params?: {
+    ticker?: string;
+    eventTicker?: string;
+    minTs?: number;
+    maxTs?: number;
+    status?: "resting" | "canceled" | "executed";
+    limit?: number;
+    cursor?: string;
+  }) {
+    return backOff(
+      () =>
+        this.ordersApi.getOrders(
+          params?.ticker,
+          params?.eventTicker,
+          params?.minTs,
+          params?.maxTs,
+          params?.status,
+          params?.limit,
+          params?.cursor,
+        ),
+      RETRY_OPTIONS,
+    );
+  }
+
+  /**
+   * Get a specific order by ID
+   * @param orderId - The unique order ID
+   */
+  async getOrder(orderId: string) {
+    return backOff(() => this.ordersApi.getOrder(orderId), RETRY_OPTIONS);
+  }
+
+  /**
+   * Get trade execution history (fills) for the authenticated user
+   * @param params - Optional filters (ticker, orderId, timestamps, etc.)
+   */
+  async getFills(params?: {
+    ticker?: string;
+    orderId?: string;
+    minTs?: number;
+    maxTs?: number;
+    limit?: number;
+    cursor?: string;
+  }) {
+    return backOff(
+      () =>
+        this.portfolioApi.getFills(
+          params?.ticker,
+          params?.orderId,
+          params?.minTs,
+          params?.maxTs,
+          params?.limit,
+          params?.cursor,
+        ),
+      RETRY_OPTIONS,
+    );
+  }
+
+  /**
+   * Get settlement history for closed positions
+   * @param params - Optional filters (ticker, eventTicker, timestamps, etc.)
+   */
+  async getSettlements(params?: {
+    limit?: number;
+    cursor?: string;
+    ticker?: string;
+    eventTicker?: string;
+    minTs?: number;
+    maxTs?: number;
+  }) {
+    return backOff(
+      () =>
+        this.portfolioApi.getSettlements(
+          params?.limit,
+          params?.cursor,
+          params?.ticker,
+          params?.eventTicker,
+          params?.minTs,
+          params?.maxTs,
+        ),
+      RETRY_OPTIONS,
+    );
   }
 }

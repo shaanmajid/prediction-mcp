@@ -8,7 +8,11 @@ import {
   GetPositionsArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiGetFillsArgsSchema,
+  KalshiGetOrderArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
+  KalshiGetSettlementsArgsSchema,
+  KalshiListOrdersArgsSchema,
   ListMarketsArgsSchema,
   PolymarketCacheStatsSchema,
   PolymarketGetEventArgsSchema,
@@ -394,6 +398,320 @@ describe("Kalshi Schemas", () => {
     test("rejects unknown properties", () => {
       const result = GetPositionsArgsSchema.safeParse({ unknown: "prop" });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe("KalshiListOrdersArgsSchema", () => {
+    test("accepts empty object (all fields optional)", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid status enum values", () => {
+      for (const status of ["resting", "canceled", "executed"]) {
+        const result = KalshiListOrdersArgsSchema.safeParse({ status });
+        expect(result.success).toBe(true);
+      }
+    });
+
+    test("rejects invalid status value", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        status: "pending",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts limit within bounds (1-200)", () => {
+      expect(KalshiListOrdersArgsSchema.safeParse({ limit: 1 }).success).toBe(
+        true,
+      );
+      expect(KalshiListOrdersArgsSchema.safeParse({ limit: 100 }).success).toBe(
+        true,
+      );
+      expect(KalshiListOrdersArgsSchema.safeParse({ limit: 200 }).success).toBe(
+        true,
+      );
+    });
+
+    test("rejects limit below minimum", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({ limit: 0 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit above maximum", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({ limit: 201 });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts valid ticker and eventTicker filters", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        ticker: "KXTEST",
+        eventTicker: "EVENT1,EVENT2",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid timestamp filters", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        status: "resting",
+        unknownField: "value",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts when only minTs is provided", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        minTs: 1700000000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when only maxTs is provided", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when maxTs > minTs", () => {
+      const result = KalshiListOrdersArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects when maxTs <= minTs", () => {
+      const equalResult = KalshiListOrdersArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700000000,
+      });
+      expect(equalResult.success).toBe(false);
+
+      const lessThanResult = KalshiListOrdersArgsSchema.safeParse({
+        minTs: 1700100000,
+        maxTs: 1700000000,
+      });
+      expect(lessThanResult.success).toBe(false);
+    });
+  });
+
+  describe("KalshiGetOrderArgsSchema", () => {
+    test("accepts valid orderId string", () => {
+      const result = KalshiGetOrderArgsSchema.safeParse({
+        orderId: "abc123-order-id",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects empty orderId", () => {
+      const result = KalshiGetOrderArgsSchema.safeParse({ orderId: "" });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects missing orderId", () => {
+      const result = KalshiGetOrderArgsSchema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiGetOrderArgsSchema.safeParse({
+        orderId: "abc123",
+        extra: "field",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("KalshiGetFillsArgsSchema", () => {
+    test("accepts empty object (all fields optional)", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid ticker filter", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        ticker: "KXTEST",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid orderId filter", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        orderId: "order-123",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid timestamp filters", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts limit within bounds (1-200)", () => {
+      expect(KalshiGetFillsArgsSchema.safeParse({ limit: 1 }).success).toBe(
+        true,
+      );
+      expect(KalshiGetFillsArgsSchema.safeParse({ limit: 200 }).success).toBe(
+        true,
+      );
+    });
+
+    test("rejects limit below minimum", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({ limit: 0 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit above maximum", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({ limit: 201 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        ticker: "KXTEST",
+        unknownField: "value",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts when only minTs is provided", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        minTs: 1700000000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when only maxTs is provided", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when maxTs > minTs", () => {
+      const result = KalshiGetFillsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects when maxTs <= minTs", () => {
+      const equalResult = KalshiGetFillsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700000000,
+      });
+      expect(equalResult.success).toBe(false);
+
+      const lessThanResult = KalshiGetFillsArgsSchema.safeParse({
+        minTs: 1700100000,
+        maxTs: 1700000000,
+      });
+      expect(lessThanResult.success).toBe(false);
+    });
+  });
+
+  describe("KalshiGetSettlementsArgsSchema", () => {
+    test("accepts empty object (all fields optional)", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({});
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid ticker filter", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        ticker: "KXTEST",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid eventTicker filter", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        eventTicker: "EVENT123",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts valid timestamp filters", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts limit within bounds (1-200)", () => {
+      expect(
+        KalshiGetSettlementsArgsSchema.safeParse({ limit: 1 }).success,
+      ).toBe(true);
+      expect(
+        KalshiGetSettlementsArgsSchema.safeParse({ limit: 200 }).success,
+      ).toBe(true);
+    });
+
+    test("rejects limit below minimum", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({ limit: 0 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects limit above maximum", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({ limit: 201 });
+      expect(result.success).toBe(false);
+    });
+
+    test("rejects extra properties (strict mode)", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        ticker: "KXTEST",
+        unknownField: "value",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    test("accepts when only minTs is provided", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        minTs: 1700000000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when only maxTs is provided", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("accepts when maxTs > minTs", () => {
+      const result = KalshiGetSettlementsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700100000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    test("rejects when maxTs <= minTs", () => {
+      const equalResult = KalshiGetSettlementsArgsSchema.safeParse({
+        minTs: 1700000000,
+        maxTs: 1700000000,
+      });
+      expect(equalResult.success).toBe(false);
+
+      const lessThanResult = KalshiGetSettlementsArgsSchema.safeParse({
+        minTs: 1700100000,
+        maxTs: 1700000000,
+      });
+      expect(lessThanResult.success).toBe(false);
     });
   });
 });

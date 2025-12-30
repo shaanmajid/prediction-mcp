@@ -167,6 +167,98 @@ Get your open positions on Kalshi markets. Filter by ticker or event. Returns ma
 - `cursor` (string, optional)
     - Pagination cursor from previous response.
 
+## `kalshi_list_orders`
+
+> **Authentication:** Required (kalshi)
+
+List your orders on Kalshi. Filter by ticker, event, status, or time range. Returns order details including status, price, and fill information. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `ticker` (string, optional)
+    - Filter orders by market ticker.
+
+- `eventTicker` (string, optional)
+    - Filter by event ticker. Multiple tickers can be comma-separated (max 10).
+
+- `minTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter orders created after this Unix timestamp.
+
+- `maxTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter orders created before this Unix timestamp.
+
+- `status` (`"resting"` | `"canceled"` | `"executed"`, optional)
+    - Filter by order status: 'resting' (open), 'canceled', or 'executed' (filled).
+
+- `limit` (integer (min: 1, max: 200), optional)
+    - Maximum orders to return. Defaults to 100, max 200.
+
+- `cursor` (string, optional)
+    - Pagination cursor from previous response.
+
+## `kalshi_get_order`
+
+> **Authentication:** Required (kalshi)
+
+Get details about a specific order by ID. Returns order status, price, fills, and timestamps. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `orderId` (string (minLength: 1), required)
+    - The unique order ID to retrieve.
+
+## `kalshi_get_fills`
+
+> **Authentication:** Required (kalshi)
+
+Get your trade execution history (fills) on Kalshi. Filter by ticker, order ID, or time range. Returns trade details including price, count, and P&L. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `ticker` (string, optional)
+    - Filter fills by market ticker.
+
+- `orderId` (string, optional)
+    - Filter fills by order ID.
+
+- `minTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter fills after this Unix timestamp.
+
+- `maxTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter fills before this Unix timestamp.
+
+- `limit` (integer (min: 1, max: 200), optional)
+    - Maximum fills to return. Defaults to 100, max 200.
+
+- `cursor` (string, optional)
+    - Pagination cursor from previous response.
+
+## `kalshi_get_settlements`
+
+> **Authentication:** Required (kalshi)
+
+Get your settlement history for closed positions on Kalshi. Filter by ticker, event, or time range. Returns settlement revenue and market outcome data. Requires Kalshi authentication.
+
+**Parameters:**
+
+- `limit` (integer (min: 1, max: 200), optional)
+    - Maximum settlements to return. Defaults to 100, max 200.
+
+- `cursor` (string, optional)
+    - Pagination cursor from previous response.
+
+- `ticker` (string, optional)
+    - Filter settlements by market ticker.
+
+- `eventTicker` (string, optional)
+    - Filter settlements by event ticker.
+
+- `minTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter settlements after this Unix timestamp.
+
+- `maxTs` (integer (min: -9007199254740991, max: 9007199254740991), optional)
+    - Filter settlements before this Unix timestamp.
+
 ## Polymarket
 
 ## `polymarket_list_markets`
