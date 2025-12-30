@@ -148,7 +148,7 @@ No parameters.
 
 > **Authentication:** Required (kalshi)
 
-Get your current unsettled positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.
+Get your open positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.
 
 **Parameters:**
 

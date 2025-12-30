@@ -264,7 +264,7 @@ const ALL_TOOLS: ToolDefinition[] = [
   {
     name: "kalshi_get_positions",
     description:
-      "Get your current unsettled positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.",
+      "Get your open positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.",
     schema: GetPositionsArgsSchema,
     platform: "kalshi",
     requiresAuth: { platform: "kalshi" },

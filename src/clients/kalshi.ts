@@ -324,7 +324,7 @@ export class KalshiClient {
   }
 
   /**
-   * Get portfolio positions (returns only unsettled positions)
+   * Get portfolio positions
    * @param params - Optional filters (ticker, eventTicker, etc.)
    */
   async getPositions(params?: {
