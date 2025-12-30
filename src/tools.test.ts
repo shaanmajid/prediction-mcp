@@ -456,4 +456,82 @@ describe("Portfolio Tools", () => {
       expect(positionsTool).toBeDefined();
     });
   });
+
+  describe("kalshi_list_orders", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_list_orders).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_list_orders!;
+      expect(tool.name).toBe("kalshi_list_orders");
+      expect(tool.description).toContain("orders");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const ordersTool = tools.find((t) => t.name === "kalshi_list_orders");
+      expect(ordersTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_order", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_order).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_order!;
+      expect(tool.name).toBe("kalshi_get_order");
+      expect(tool.description).toContain("order");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const orderTool = tools.find((t) => t.name === "kalshi_get_order");
+      expect(orderTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_fills", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_fills).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_fills!;
+      expect(tool.name).toBe("kalshi_get_fills");
+      expect(tool.description).toContain("fill");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const fillsTool = tools.find((t) => t.name === "kalshi_get_fills");
+      expect(fillsTool).toBeDefined();
+    });
+  });
+
+  describe("kalshi_get_settlements", () => {
+    test("is registered in KALSHI_TOOLS", () => {
+      expect(KALSHI_TOOLS.kalshi_get_settlements).toBeDefined();
+    });
+
+    test("has correct name and description", () => {
+      const tool = KALSHI_TOOLS.kalshi_get_settlements!;
+      expect(tool.name).toBe("kalshi_get_settlements");
+      expect(tool.description).toContain("settlement");
+      expect(tool.description).toContain("Requires Kalshi authentication");
+    });
+
+    test("appears in getToolsList when authenticated", () => {
+      const tools = getToolsList(kalshiAuth);
+      const settlementsTool = tools.find(
+        (t) => t.name === "kalshi_get_settlements",
+      );
+      expect(settlementsTool).toBeDefined();
+    });
+  });
 });
