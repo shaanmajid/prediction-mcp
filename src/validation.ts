@@ -349,6 +349,101 @@ export const KalshiGetSettlementsArgsSchema = z
     { message: "maxTs must be greater than minTs" },
   );
 
+// Schema for kalshi_create_order
+export const KalshiCreateOrderArgsSchema = z
+  .object({
+    ticker: z
+      .string()
+      .min(1)
+      .describe("Market ticker symbol (e.g., 'KXPRESIDENT-2024')."),
+    action: z
+      .enum(["buy", "sell"])
+      .describe(
+        "Order action: 'buy' to purchase contracts, 'sell' to sell contracts.",
+      ),
+    side: z.enum(["yes", "no"]).describe("Market side: 'yes' or 'no' outcome."),
+    type: z
+      .enum(["limit", "market"])
+      .describe(
+        "Order type: 'limit' (specific price) or 'market' (best available price). Defaults to 'limit'.",
+      )
+      .optional(),
+    count: z.number().int().min(1).describe("Number of contracts to trade."),
+    yes_price: z
+      .number()
+      .int()
+      .min(1)
+      .max(99)
+      .optional()
+      .describe(
+        "Limit price in cents for yes side (1-99). Required for limit orders on yes side.",
+      ),
+    no_price: z
+      .number()
+      .int()
+      .min(1)
+      .max(99)
+      .optional()
+      .describe(
+        "Limit price in cents for no side (1-99). Required for limit orders on no side.",
+      ),
+    client_order_id: z
+      .string()
+      .optional()
+      .describe(
+        "Optional client-specified order ID for idempotency and tracking.",
+      ),
+    expiration_ts: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "Optional expiration timestamp in Unix seconds. Order will be canceled if not filled by this time.",
+      ),
+    sell_position_floor: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "Deprecated: Use reduce_only instead. Minimum position to maintain after sell. Only accepts value of 0.",
+      ),
+    buy_max_cost: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        "Maximum cost in cents for buy orders. When specified, order automatically uses Fill-or-Kill behavior.",
+      ),
+  })
+  .strict()
+  .refine(
+    (data) => {
+      if (data.type === "limit" || data.type === undefined) {
+        if (data.side === "yes" && !data.yes_price) {
+          return false;
+        }
+        if (data.side === "no" && !data.no_price) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message:
+        "Limit orders require yes_price for yes side or no_price for no side",
+    },
+  );
+
+// Schema for kalshi_cancel_order
+export const KalshiCancelOrderArgsSchema = z
+  .object({
+    orderId: z
+      .string()
+      .min(1)
+      .describe("The unique order ID to cancel. Found in order responses."),
+  })
+  .strict();
+
 // ============================================================
 // Polymarket Schemas
 // ============================================================
@@ -563,6 +658,8 @@ export type KalshiGetFillsArgs = z.infer<typeof KalshiGetFillsArgsSchema>;
 export type KalshiGetSettlementsArgs = z.infer<
   typeof KalshiGetSettlementsArgsSchema
 >;
+export type KalshiCreateOrderArgs = z.infer<typeof KalshiCreateOrderArgsSchema>;
+export type KalshiCancelOrderArgs = z.infer<typeof KalshiCancelOrderArgsSchema>;
 
 /**
  * Type inference helpers - Polymarket

@@ -15,6 +15,8 @@ import {
   GetPositionsArgsSchema,
   GetSeriesArgsSchema,
   GetTradesArgsSchema,
+  KalshiCancelOrderArgsSchema,
+  KalshiCreateOrderArgsSchema,
   KalshiGetFillsArgsSchema,
   KalshiGetOrderArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
@@ -355,6 +357,44 @@ const ALL_TOOLS: ToolDefinition[] = [
         minTs: params.minTs,
         maxTs: params.maxTs,
       });
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_create_order",
+    description:
+      "Create a new order on Kalshi. WARNING: This places a real trade with real money. Supports limit and market orders on yes/no sides. Returns order confirmation with ID and fill status. Requires Kalshi authentication.",
+    schema: KalshiCreateOrderArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiCreateOrderArgsSchema.parse(args);
+      const result = await ctx.kalshi.createOrder({
+        ticker: params.ticker,
+        action: params.action,
+        side: params.side,
+        type: params.type,
+        count: params.count,
+        yes_price: params.yes_price,
+        no_price: params.no_price,
+        client_order_id: params.client_order_id,
+        expiration_ts: params.expiration_ts,
+        sell_position_floor: params.sell_position_floor,
+        buy_max_cost: params.buy_max_cost,
+      });
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_cancel_order",
+    description:
+      "Cancel an existing order by ID. Only resting (open) orders can be canceled. Returns cancellation confirmation. Requires Kalshi authentication.",
+    schema: KalshiCancelOrderArgsSchema,
+    platform: "kalshi",
+    requiresAuth: { platform: "kalshi" },
+    handler: async (ctx, args) => {
+      const params = KalshiCancelOrderArgsSchema.parse(args);
+      const result = await ctx.kalshi.cancelOrder(params.orderId);
       return result.data;
     },
   },
