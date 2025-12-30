@@ -40,7 +40,10 @@ jobs:
       - name: Run tests
         run: bun run test
         env:
+          # Kalshi demo environment credentials for integration tests
           KALSHI_USE_DEMO: "true"
+          KALSHI_API_KEY: ${{ secrets.KALSHI_API_KEY_DEMO }}
+          KALSHI_PRIVATE_KEY_PEM: ${{ secrets.KALSHI_PRIVATE_KEY_PEM_DEMO }}
 
       - name: Build package
         run: bun run build
