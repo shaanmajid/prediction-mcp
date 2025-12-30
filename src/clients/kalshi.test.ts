@@ -159,29 +159,6 @@ describeWithCredentials("KalshiClient - Integration Tests", () => {
       expect(positions.length).toBeLessThanOrEqual(5);
     });
 
-    test("getPositions filters by settlementStatus", async () => {
-      // Request only settled positions
-      const settledResult = await client.getPositions({
-        settlementStatus: "settled",
-      });
-
-      expect(Array.isArray(settledResult.data.market_positions)).toBe(true);
-
-      // Request only unsettled positions
-      const unsettledResult = await client.getPositions({
-        settlementStatus: "unsettled",
-      });
-
-      expect(Array.isArray(unsettledResult.data.market_positions)).toBe(true);
-
-      // Request all positions
-      const allResult = await client.getPositions({
-        settlementStatus: "all",
-      });
-
-      expect(Array.isArray(allResult.data.market_positions)).toBe(true);
-    });
-
     test("getPositions returns position details when positions exist", async () => {
       const result = await client.getPositions({ limit: 1 });
       const positions = result.data.market_positions ?? [];

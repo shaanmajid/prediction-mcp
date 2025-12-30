@@ -5,7 +5,6 @@ import {
   Configuration,
   type EventData,
   EventsApi,
-  type GetPositionsSettlementStatusEnum,
   type Market,
   MarketApi,
   PortfolioApi,
@@ -325,13 +324,12 @@ export class KalshiClient {
   }
 
   /**
-   * Get portfolio positions
-   * @param params - Optional filters (ticker, eventTicker, settlementStatus, etc.)
+   * Get portfolio positions (returns only unsettled positions)
+   * @param params - Optional filters (ticker, eventTicker, etc.)
    */
   async getPositions(params?: {
     ticker?: string;
     eventTicker?: string;
-    settlementStatus?: GetPositionsSettlementStatusEnum;
     countFilter?: string;
     limit?: number;
     cursor?: string;
@@ -343,7 +341,6 @@ export class KalshiClient {
           params?.cursor,
           params?.limit,
           params?.countFilter,
-          params?.settlementStatus,
           params?.ticker,
           params?.eventTicker,
         ),

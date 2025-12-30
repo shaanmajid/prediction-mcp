@@ -148,7 +148,7 @@ No parameters.
 
 > **Authentication:** Required (kalshi)
 
-Get your current positions on Kalshi markets. Filter by ticker, event, or settlement status. Returns market positions with P&L and exposure data. Requires Kalshi authentication.
+Get your current unsettled positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.
 
 **Parameters:**
 
@@ -157,9 +157,6 @@ Get your current positions on Kalshi markets. Filter by ticker, event, or settle
 
 - `eventTicker` (string, optional)
     - Filter by event ticker. Multiple tickers can be comma-separated (max 10).
-
-- `settlementStatus` (`"all"` | `"unsettled"` | `"settled"`, optional)
-    - Filter by settlement status. Defaults to 'unsettled' if not specified.
 
 - `countFilter` (string, optional)
     - Restrict to positions with non-zero values. Accepts comma-separated values: 'position', 'total_traded'.
