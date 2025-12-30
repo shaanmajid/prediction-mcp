@@ -264,7 +264,7 @@ const ALL_TOOLS: ToolDefinition[] = [
   {
     name: "kalshi_get_positions",
     description:
-      "Get your current positions on Kalshi markets. Filter by ticker, event, or settlement status. Returns market positions with P&L and exposure data. Requires Kalshi authentication.",
+      "Get your open positions on Kalshi markets. Filter by ticker or event. Returns market positions with P&L and exposure data. Requires Kalshi authentication.",
     schema: GetPositionsArgsSchema,
     platform: "kalshi",
     requiresAuth: { platform: "kalshi" },
@@ -273,7 +273,6 @@ const ALL_TOOLS: ToolDefinition[] = [
       const result = await ctx.kalshi.getPositions({
         ticker: params.ticker,
         eventTicker: params.eventTicker,
-        settlementStatus: params.settlementStatus,
         countFilter: params.countFilter,
         limit: params.limit,
         cursor: params.cursor,

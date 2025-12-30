@@ -197,12 +197,6 @@ export const GetPositionsArgsSchema = z
       .describe(
         "Filter by event ticker. Multiple tickers can be comma-separated (max 10).",
       ),
-    settlementStatus: z
-      .enum(["all", "unsettled", "settled"])
-      .optional()
-      .describe(
-        "Filter by settlement status. Defaults to 'unsettled' if not specified.",
-      ),
     countFilter: z
       .string()
       .optional()

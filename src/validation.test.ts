@@ -381,17 +381,9 @@ describe("Kalshi Schemas", () => {
       const result = GetPositionsArgsSchema.safeParse({
         ticker: "KXTEST",
         eventTicker: "EVENT",
-        settlementStatus: "unsettled",
         limit: 50,
       });
       expect(result.success).toBe(true);
-    });
-
-    test("rejects invalid settlementStatus", () => {
-      const result = GetPositionsArgsSchema.safeParse({
-        settlementStatus: "invalid",
-      });
-      expect(result.success).toBe(false);
     });
 
     test("rejects limit over 200", () => {
