@@ -403,6 +403,61 @@ describe("Kalshi Tool Integration Tests", () => {
     expect(Array.isArray(result.candlesticks)).toBe(true);
   });
 
+  test("kalshi_list_orders returns orders array", async () => {
+    const tool = TOOLS.kalshi_list_orders!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      orders: unknown[];
+      cursor: string;
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.orders)).toBe(true);
+    expect(result.orders.length).toBeLessThanOrEqual(5);
+  });
+
+  test("kalshi_get_order returns order details", async () => {
+    // First get an order from the list
+    const listTool = TOOLS.kalshi_list_orders!;
+    const listResult = (await listTool.handler(ctx, { limit: 1 })) as {
+      orders: Array<{ order_id: string }>;
+    };
+
+    if (listResult.orders.length > 0) {
+      const orderId = listResult.orders[0]!.order_id;
+      const tool = TOOLS.kalshi_get_order!;
+      const result = (await tool.handler(ctx, { orderId })) as {
+        order: { order_id: string };
+      };
+
+      expect(result).toBeDefined();
+      expect(result.order).toBeDefined();
+      expect(result.order.order_id).toBe(orderId);
+    }
+    // If no orders, test still passes - account may have none
+  });
+
+  test("kalshi_get_fills returns fills array", async () => {
+    const tool = TOOLS.kalshi_get_fills!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      fills: unknown[];
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.fills)).toBe(true);
+    expect(result.fills.length).toBeLessThanOrEqual(5);
+  });
+
+  test("kalshi_get_settlements returns settlements array", async () => {
+    const tool = TOOLS.kalshi_get_settlements!;
+    const result = (await tool.handler(ctx, { limit: 5 })) as {
+      settlements: unknown[];
+    };
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result.settlements)).toBe(true);
+    expect(result.settlements.length).toBeLessThanOrEqual(5);
+  });
+
   // Search integration tests are in a separate file (search/integration.test.ts)
   // because they require cache population which takes ~7 seconds
 });
