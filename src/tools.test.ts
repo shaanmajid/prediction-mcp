@@ -577,6 +577,10 @@ describe("Kalshi Tool Integration Tests", () => {
         const orderId = createResult.order.order_id;
 
         // Step 3: Verify the order appears in list_orders
+        // Brief delay for eventual consistency - order creation is acknowledged
+        // before being visible in list queries
+        await new Promise((r) => setTimeout(r, 500));
+
         const listOrdersTool = TOOLS.kalshi_list_orders!;
         const listResult = (await listOrdersTool.handler(ctx, {
           status: "resting",
@@ -601,6 +605,9 @@ describe("Kalshi Tool Integration Tests", () => {
         expect(cancelResult.reduced_by).toBe(1);
 
         // Step 5: Verify the order no longer appears in resting orders
+        // Brief delay for eventual consistency
+        await new Promise((r) => setTimeout(r, 500));
+
         const listAfterCancel = (await listOrdersTool.handler(ctx, {
           status: "resting",
           limit: 100,
