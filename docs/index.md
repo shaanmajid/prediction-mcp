@@ -119,7 +119,7 @@ Decentralized prediction market on Polygon with deep liquidity on major events.
 | [`kalshi_get_fills`](reference/tools.md#kalshi_get_fills) | Get your trade execution history (fills) on Kalshi | Required |
 | [`kalshi_get_settlements`](reference/tools.md#kalshi_get_settlements) | Get your settlement history for closed positions on Kalshi | Required |
 | [`kalshi_create_order`](reference/tools.md#kalshi_create_order) | Create a new order on Kalshi | Required |
-| [`kalshi_cancel_order`](reference/tools.md#kalshi_cancel_order) | Cancel an existing order by ID | Required |
+| [`kalshi_cancel_order`](reference/tools.md#kalshi_cancel_order) | Cancel a resting order by reducing its remaining contract... | Required |
 
 ### Polymarket
 
