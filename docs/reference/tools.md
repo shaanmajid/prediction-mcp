@@ -304,7 +304,7 @@ Create a new order on Kalshi. WARNING: This places a real trade with real money.
 
 > **Authentication:** Required (kalshi)
 
-Cancel an existing order by ID. Only resting (open) orders can be canceled. Returns cancellation confirmation. Requires Kalshi authentication.
+Cancel a resting order by reducing its remaining contracts to zero. Partially filled orders retain their fill history. Returns the modified order with reduced_by count. Requires Kalshi authentication.
 
 **Parameters:**
 

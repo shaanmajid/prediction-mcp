@@ -388,7 +388,7 @@ const ALL_TOOLS: ToolDefinition[] = [
   {
     name: "kalshi_cancel_order",
     description:
-      "Cancel an existing order by ID. Only resting (open) orders can be canceled. Returns cancellation confirmation. Requires Kalshi authentication.",
+      "Cancel a resting order by reducing its remaining contracts to zero. Partially filled orders retain their fill history. Returns the modified order with reduced_by count. Requires Kalshi authentication.",
     schema: KalshiCancelOrderArgsSchema,
     platform: "kalshi",
     requiresAuth: { platform: "kalshi" },
