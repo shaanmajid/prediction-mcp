@@ -190,9 +190,12 @@ describeWithCredentials("KalshiClient - Integration Tests", () => {
 
     test("getPositions respects limit parameter", async () => {
       const result = await client.getPositions({ limit: 5 });
-      const positions = result.data.market_positions ?? [];
 
-      expect(positions.length).toBeLessThanOrEqual(5);
+      // Kalshi's limit applies to event_positions, not market_positions.
+      // Each event can contain multiple markets, so market_positions may
+      // exceed the limit while event_positions respects it.
+      const events = result.data.event_positions ?? [];
+      expect(events.length).toBeLessThanOrEqual(5);
     });
 
     test("getPositions returns position details when positions exist", async () => {
