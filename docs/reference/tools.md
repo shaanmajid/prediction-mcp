@@ -162,7 +162,7 @@ Get your open positions on Kalshi markets. Filter by ticker or event. Returns ma
     - Restrict to positions with non-zero values. Accepts comma-separated values: 'position', 'total_traded'.
 
 - `limit` (integer (min: 1, max: 200), optional)
-    - Maximum number of positions to return. Defaults to 100.
+    - Maximum number of events to return. Defaults to 100. Note: each event may contain multiple market positions.
 
 - `cursor` (string, optional)
     - Pagination cursor from previous response.

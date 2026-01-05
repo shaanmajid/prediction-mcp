@@ -209,7 +209,9 @@ export const GetPositionsArgsSchema = z
       .min(1)
       .max(200)
       .optional()
-      .describe("Maximum number of positions to return. Defaults to 100."),
+      .describe(
+        "Maximum number of events to return. Defaults to 100. Note: each event may contain multiple market positions.",
+      ),
     cursor: z
       .string()
       .optional()
