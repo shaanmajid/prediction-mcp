@@ -120,6 +120,30 @@ export interface PriceHistoryPoint {
 }
 
 /**
+ * Trade from CLOB API
+ */
+export interface PolymarketTrade {
+  id: string;
+  taker_order_id: string;
+  market: string;
+  asset_id: string;
+  side: "BUY" | "SELL";
+  size: string;
+  fee_rate_bps: string;
+  price: string;
+  status: string;
+  match_time: string;
+  last_update: string;
+  outcome: string;
+  bucket_index: number;
+  owner: string;
+  maker_address: string;
+  transaction_hash: string;
+  trader_side: string;
+  [key: string]: unknown;
+}
+
+/**
  * Parameters for listing markets
  */
 export interface ListMarketsParams {
@@ -156,6 +180,20 @@ export interface PriceHistoryParams {
   endTs?: number;
   /** Interval (e.g., "1d", "1w") - alternative to startTs/endTs */
   interval?: string;
+}
+
+/**
+ * Parameters for getting trades
+ */
+export interface GetTradesParams {
+  /** Token ID to filter trades by (optional - if omitted, returns recent trades across all markets) */
+  tokenId?: string;
+  /** Maximum number of trades to return */
+  limit?: number;
+  /** Pagination cursor for next page */
+  before?: string;
+  /** Pagination cursor for previous page */
+  after?: string;
 }
 
 /**
@@ -360,6 +398,44 @@ export class PolymarketClient {
       RETRY_OPTIONS,
     );
     return result.price;
+  }
+
+  /**
+   * Get recent trades for a token or across all markets
+   * @param params - Optional filters (tokenId, limit, pagination)
+   */
+  async getTrades(
+    params: GetTradesParams = {},
+  ): Promise<{ trades: PolymarketTrade[]; next_cursor?: string }> {
+    const queryParams = new URLSearchParams();
+
+    if (params.tokenId) {
+      queryParams.set("asset_id", params.tokenId);
+    }
+    if (params.limit !== undefined) {
+      queryParams.set("limit", String(params.limit));
+    }
+    if (params.before) {
+      queryParams.set("before", params.before);
+    }
+    if (params.after) {
+      queryParams.set("after", params.after);
+    }
+
+    const url = `${this.clobHost}/trades?${queryParams.toString()}`;
+    const response = await this.fetchWithRetry(url);
+    const data = (await response.json()) as
+      | PolymarketTrade[]
+      | { trades: PolymarketTrade[]; next_cursor?: string };
+
+    // Handle both array response and object with next_cursor
+    if (Array.isArray(data)) {
+      return { trades: data };
+    }
+    return {
+      trades: data.trades || [],
+      next_cursor: data.next_cursor,
+    };
   }
 
   // ============================================================

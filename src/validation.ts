@@ -600,6 +600,35 @@ export const PolymarketGetPriceHistoryArgsSchema = z
   })
   .strict();
 
+// Schema for polymarket_get_trades
+export const PolymarketGetTradesArgsSchema = z
+  .object({
+    token_id: z
+      .string()
+      .optional()
+      .describe(
+        "Outcome token ID from market's clobTokenIds field. If omitted, returns recent trades across all markets.",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(500)
+      .optional()
+      .describe(
+        "Maximum number of trades to return. Must be between 1 and 500. Defaults to 100.",
+      ),
+    before: z
+      .string()
+      .optional()
+      .describe("Pagination cursor to get trades before this point."),
+    after: z
+      .string()
+      .optional()
+      .describe("Pagination cursor to get trades after this point."),
+  })
+  .strict();
+
 // Schema for polymarket_search, polymarket_search_events, polymarket_search_markets
 export const PolymarketSearchQuerySchema = z
   .object({
@@ -689,6 +718,9 @@ export type PolymarketGetPriceArgs = z.infer<
 >;
 export type PolymarketGetPriceHistoryArgs = z.infer<
   typeof PolymarketGetPriceHistoryArgsSchema
+>;
+export type PolymarketGetTradesArgs = z.infer<
+  typeof PolymarketGetTradesArgsSchema
 >;
 export type PolymarketSearchQueryArgs = z.infer<
   typeof PolymarketSearchQuerySchema

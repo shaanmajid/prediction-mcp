@@ -29,6 +29,7 @@ import {
   PolymarketGetOrderbookArgsSchema,
   PolymarketGetPriceArgsSchema,
   PolymarketGetPriceHistoryArgsSchema,
+  PolymarketGetTradesArgsSchema,
   PolymarketListEventsArgsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketListTagsArgsSchema,
@@ -499,6 +500,23 @@ const ALL_TOOLS: ToolDefinition[] = [
         fidelity: params.fidelity,
         startTs: params.startTs,
         endTs: params.endTs,
+      });
+      return result;
+    },
+  },
+  {
+    name: "polymarket_get_trades",
+    description:
+      "Get recent trade history for a Polymarket outcome token. Returns executed trades with price, size, and timestamp. Can filter by token or get trades across all markets.",
+    schema: PolymarketGetTradesArgsSchema,
+    platform: "polymarket",
+    handler: async (ctx, args) => {
+      const params = PolymarketGetTradesArgsSchema.parse(args || {});
+      const result = await ctx.polymarket.getTrades({
+        tokenId: params.token_id,
+        limit: params.limit,
+        before: params.before,
+        after: params.after,
       });
       return result;
     },
