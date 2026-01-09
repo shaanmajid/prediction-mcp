@@ -29,6 +29,7 @@ import {
   PolymarketGetOrderbookArgsSchema,
   PolymarketGetPriceArgsSchema,
   PolymarketGetPriceHistoryArgsSchema,
+  PolymarketGetSpreadArgsSchema,
   PolymarketListEventsArgsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketListTagsArgsSchema,
@@ -500,6 +501,18 @@ const ALL_TOOLS: ToolDefinition[] = [
         startTs: params.startTs,
         endTs: params.endTs,
       });
+      return result;
+    },
+  },
+  {
+    name: "polymarket_get_spread",
+    description:
+      "Get bid-ask spread information for a Polymarket outcome token. Returns best bid, best ask, spread (absolute and percentage), and midpoint. Useful for assessing market liquidity and execution cost.",
+    schema: PolymarketGetSpreadArgsSchema,
+    platform: "polymarket",
+    handler: async (ctx, args) => {
+      const params = PolymarketGetSpreadArgsSchema.parse(args);
+      const result = await ctx.polymarket.getSpread(params.token_id);
       return result;
     },
   },

@@ -120,6 +120,22 @@ export interface PriceHistoryPoint {
 }
 
 /**
+ * Spread information for a token
+ */
+export interface SpreadInfo {
+  /** Best bid price */
+  bid: string;
+  /** Best ask price */
+  ask: string;
+  /** Spread (ask - bid) */
+  spread: string;
+  /** Spread as a percentage of midpoint */
+  spreadPercent: string;
+  /** Midpoint price */
+  midpoint: string;
+}
+
+/**
  * Parameters for listing markets
  */
 export interface ListMarketsParams {
@@ -360,6 +376,39 @@ export class PolymarketClient {
       RETRY_OPTIONS,
     );
     return result.price;
+  }
+
+  /**
+   * Get spread information for a token
+   * Returns bid, ask, spread (absolute and percent), and midpoint
+   */
+  async getSpread(tokenId: string): Promise<SpreadInfo> {
+    // Fetch orderbook to get best bid and ask
+    const orderbook = await this.getOrderBook(tokenId);
+
+    // Extract best bid and ask from orderbook
+    const bestBid =
+      orderbook.bids && orderbook.bids.length > 0
+        ? orderbook.bids[0]!.price
+        : "0";
+    const bestAsk =
+      orderbook.asks && orderbook.asks.length > 0
+        ? orderbook.asks[0]!.price
+        : "1";
+
+    const bidNum = Number.parseFloat(bestBid);
+    const askNum = Number.parseFloat(bestAsk);
+    const spread = askNum - bidNum;
+    const midpoint = (bidNum + askNum) / 2;
+    const spreadPercent = midpoint > 0 ? (spread / midpoint) * 100 : 0;
+
+    return {
+      bid: bestBid,
+      ask: bestAsk,
+      spread: spread.toFixed(4),
+      spreadPercent: spreadPercent.toFixed(2),
+      midpoint: midpoint.toFixed(4),
+    };
   }
 
   // ============================================================

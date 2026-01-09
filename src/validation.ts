@@ -600,6 +600,18 @@ export const PolymarketGetPriceHistoryArgsSchema = z
   })
   .strict();
 
+// Schema for polymarket_get_spread
+export const PolymarketGetSpreadArgsSchema = z
+  .object({
+    token_id: z
+      .string()
+      .min(1)
+      .describe(
+        "Outcome token ID from market's clobTokenIds field. Returns spread information for this token.",
+      ),
+  })
+  .strict();
+
 // Schema for polymarket_search, polymarket_search_events, polymarket_search_markets
 export const PolymarketSearchQuerySchema = z
   .object({
@@ -689,6 +701,9 @@ export type PolymarketGetPriceArgs = z.infer<
 >;
 export type PolymarketGetPriceHistoryArgs = z.infer<
   typeof PolymarketGetPriceHistoryArgsSchema
+>;
+export type PolymarketGetSpreadArgs = z.infer<
+  typeof PolymarketGetSpreadArgsSchema
 >;
 export type PolymarketSearchQueryArgs = z.infer<
   typeof PolymarketSearchQuerySchema
