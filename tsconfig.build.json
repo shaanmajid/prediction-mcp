@@ -8,6 +8,6 @@
     "noEmit": false,
     "rootDir": "."
   },
-  "include": ["index.ts"],
+  "include": ["index.ts", "src/cli/**/*.ts"],
   "exclude": ["**/*.test.ts", "scripts/**"]
 }

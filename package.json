@@ -30,12 +30,14 @@
     }
   },
   "bin": {
-    "prediction-mcp": "./dist/index.js"
+    "prediction-mcp": "./dist/index.js",
+    "pm": "./dist/cli/index.js"
   },
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "bun run clean && bun build ./index.ts --outdir dist --target node --format esm && tsc -p tsconfig.build.json",
+    "build": "bun run clean && bun build ./index.ts ./src/cli/index.ts --outdir dist --target node --format esm --splitting && tsc -p tsconfig.build.json",
+    "cli": "bun run src/cli/index.ts",
     "prepublishOnly": "bun run build",
     "release:patch": "bun run test && npm version patch && git push --follow-tags",
     "release:minor": "bun run test && npm version minor && git push --follow-tags",
