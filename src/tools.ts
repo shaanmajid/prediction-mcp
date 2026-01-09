@@ -29,6 +29,7 @@ import {
   PolymarketGetOrderbookArgsSchema,
   PolymarketGetPriceArgsSchema,
   PolymarketGetPriceHistoryArgsSchema,
+  PolymarketGetLastTradePriceArgsSchema,
   PolymarketListEventsArgsSchema,
   PolymarketListMarketsArgsSchema,
   PolymarketListTagsArgsSchema,
@@ -500,6 +501,18 @@ const ALL_TOOLS: ToolDefinition[] = [
         startTs: params.startTs,
         endTs: params.endTs,
       });
+      return result;
+    },
+  },
+  {
+    name: "polymarket_get_last_trade_price",
+    description:
+      "Get the last executed trade price for a Polymarket outcome token. Simpler than orderbook when you just need the most recent transaction price.",
+    schema: PolymarketGetLastTradePriceArgsSchema,
+    platform: "polymarket",
+    handler: async (ctx, args) => {
+      const params = PolymarketGetLastTradePriceArgsSchema.parse(args);
+      const result = await ctx.polymarket.getLastTradePrice(params.token_id);
       return result;
     },
   },

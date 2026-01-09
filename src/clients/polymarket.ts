@@ -120,6 +120,16 @@ export interface PriceHistoryPoint {
 }
 
 /**
+ * Last trade price information
+ */
+export interface LastTradePrice {
+  /** Last traded price */
+  price: string;
+  /** Token ID */
+  tokenId: string;
+}
+
+/**
  * Parameters for listing markets
  */
 export interface ListMarketsParams {
@@ -360,6 +370,21 @@ export class PolymarketClient {
       RETRY_OPTIONS,
     );
     return result.price;
+  }
+
+  /**
+   * Get the last traded price for a token
+   * Returns the most recent execution price from the CLOB
+   */
+  async getLastTradePrice(tokenId: string): Promise<LastTradePrice> {
+    const result = await backOff(
+      () => this.clobClient.getLastTradePrice(tokenId),
+      RETRY_OPTIONS,
+    );
+    return {
+      price: result.price,
+      tokenId,
+    };
   }
 
   // ============================================================
