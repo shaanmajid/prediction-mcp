@@ -113,6 +113,43 @@ export const GetEventArgsSchema = z
   })
   .strict();
 
+// Schema for kalshi_list_events
+export const KalshiListEventsArgsSchema = z
+  .object({
+    status: z
+      .enum(["open", "closed", "settled"])
+      .optional()
+      .describe(
+        "Filter events by status. Options: 'open' (currently trading), 'closed' (trading ended), 'settled' (resolved).",
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe(
+        "Maximum number of events to return per page. Must be between 1 and 200. Defaults to 100.",
+      ),
+    cursor: z
+      .string()
+      .optional()
+      .describe("Pagination cursor from previous response."),
+    seriesTicker: z
+      .string()
+      .optional()
+      .describe(
+        "Filter by series ticker (e.g., 'KXPRES'). Returns only events belonging to this series.",
+      ),
+    withNestedMarkets: z
+      .boolean()
+      .optional()
+      .describe(
+        "If true, include nested markets array within each event. Useful for getting events and their markets in one call.",
+      ),
+  })
+  .strict();
+
 // Schema for kalshi_search, kalshi_search_events, kalshi_search_markets
 export const SearchQuerySchema = z
   .object({
@@ -647,6 +684,7 @@ export type GetOrderbookArgs = z.infer<typeof GetOrderbookArgsSchema>;
 export type GetTradesArgs = z.infer<typeof GetTradesArgsSchema>;
 export type GetSeriesArgs = z.infer<typeof GetSeriesArgsSchema>;
 export type GetEventArgs = z.infer<typeof GetEventArgsSchema>;
+export type KalshiListEventsArgs = z.infer<typeof KalshiListEventsArgsSchema>;
 export type SearchQueryArgs = z.infer<typeof SearchQuerySchema>;
 export type CacheStatsArgs = z.infer<typeof CacheStatsSchema>;
 export type KalshiGetPriceHistoryArgs = z.infer<

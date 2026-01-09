@@ -21,6 +21,7 @@ import {
   KalshiGetOrderArgsSchema,
   KalshiGetPriceHistoryArgsSchema,
   KalshiGetSettlementsArgsSchema,
+  KalshiListEventsArgsSchema,
   KalshiListOrdersArgsSchema,
   ListMarketsArgsSchema,
   PolymarketCacheStatsSchema,
@@ -148,6 +149,24 @@ const ALL_TOOLS: ToolDefinition[] = [
     handler: async (ctx, args) => {
       const params = GetEventArgsSchema.parse(args);
       const result = await ctx.kalshi.getEvent(params.eventTicker);
+      return result.data;
+    },
+  },
+  {
+    name: "kalshi_list_events",
+    description:
+      "List events on Kalshi with optional filters. Events group related markets (e.g., 'Presidential Election 2024' contains multiple state/candidate markets). Use withNestedMarkets to fetch events and their markets in one call.",
+    schema: KalshiListEventsArgsSchema,
+    platform: "kalshi",
+    handler: async (ctx, args) => {
+      const params = KalshiListEventsArgsSchema.parse(args || {});
+      const result = await ctx.kalshi.listEvents({
+        status: params.status,
+        limit: params.limit,
+        cursor: params.cursor,
+        seriesTicker: params.seriesTicker,
+        withNestedMarkets: params.withNestedMarkets,
+      });
       return result.data;
     },
   },
